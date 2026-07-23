@@ -8,6 +8,7 @@ import {
   UsePipes,
 } from "@nestjs/common";
 import { ApiTags } from "@nestjs/swagger";
+import { Throttle } from "@nestjs/throttler";
 import {
   loginSchema,
   refreshTokenSchema,
@@ -32,13 +33,16 @@ export class AuthController {
   ) {}
 
   @Public()
+  @Throttle({ default: { limit: 5, ttl: 60_000 } })
   @Post("register")
   @UsePipes(new ZodValidationPipe(registerSchema))
   register(@Body() body: RegisterInput) {
     return this.authService.register(body);
   }
 
+  // Brute force koruması (Bölüm 20): global limitten daha sıkı bir sınır.
   @Public()
+  @Throttle({ default: { limit: 5, ttl: 60_000 } })
   @Post("login")
   @UsePipes(new ZodValidationPipe(loginSchema))
   login(@Body() body: LoginInput) {

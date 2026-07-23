@@ -115,6 +115,25 @@ o dokümana göre kodlanıyor. Yeni bir şey yapmadan önce bu dokümanı oku.
   doküman Bölüm 11'deki shadcn/ui, React Hook Form ve Recharts bu fazda
   entegre edilmedi — sade satır içi stiller ve düz `fetch` ile MVP
   kapsamında tutuldu; TanStack Query de eklenmedi.
+- **Faz 10** — Pilot ve mağaza: Güvenlik sertleştirmesi (`helmet`,
+  `/docs` Swagger yalnızca `NODE_ENV !== "production"` iken açık,
+  `/auth/login` ve `/auth/register` uçlarında global limitten daha sıkı
+  `@Throttle` — Bölüm 20 "brute force koruması"). KVKK Aydınlatma Metni
+  ve Kullanım Koşulları taslak metinleri (`apps/mobile/src/content/
+  legal.ts`) ve bunları gösteren ekranlar (`app/legal/kvkk`,
+  `app/legal/terms`); kayıt ekranındaki onay anahtarı artık bu
+  metinlere bağlı, tıklanabilir bağlantılarla açılıyor. Hesabımı Sil
+  ekranı (`app/account/delete`) — `DELETE /auth/me` ucu zaten Faz 1'de
+  vardı, mobil tarafta ilk kez bağlandı. `apps/mobile/app.json`a Play
+  Store hazırlığı için `versionCode`/`buildNumber` ve iOS izin metinleri
+  (kamera/galeri) eklendi. `docs/store-listing.md` (mağaza metni
+  taslağı) ve `docs/kapali-test-plani.md` (Bölüm 24 tabanlı manuel QA
+  kontrol listesi) eklendi. Faz 7-10 birleşik değişiklik seti üzerinde
+  bir güvenlik incelemesi yapıldı, yüksek güvenilirlikli bulgu
+  çıkmadı. **Kapsam notu:** KVKK/Kullanım Koşulları metinleri ve mağaza
+  listesi taslaktır — yayına alınmadan önce bir hukuk danışmanı ve
+  pazarlama ekibi tarafından incelenmelidir; gerçek kapalı test/cihaz
+  denemesi ve ekran görüntüleri bu ortamda üretilemedi.
 
 Tüm bunlar test edildi: `pnpm typecheck`, `pnpm lint`, `pnpm test` — hepsi
 yeşil. Devam ederken bu üç komutu bozmadan ilerle.
