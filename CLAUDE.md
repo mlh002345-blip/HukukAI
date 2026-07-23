@@ -49,6 +49,20 @@ o dokümana göre kodlanıyor. Yeni bir şey yapmadan önce bu dokümanı oku.
   henüz doğrulanmadı.** Mobilde Takvim ekranı (yaklaşan süreler,
   tamamlama/silme), süre hesaplama ekranı (üç süre aracı buraya
   bağlandı) ve Özel Süre ekleme ekranı.
+- **Faz 6** — Hesaplama motorları: `packages/calculation-engine` dolduruldu
+  (doküman Bölüm 17'deki 10 motor — yasal faiz, icra borcu, kira artışı,
+  vekâlet ücreti, harç ön hesabı, serbest meslek makbuzu, KDV, gelir
+  vergisi, SGK işveren maliyeti, infaz ön hesabı — hepsi saf fonksiyon,
+  `decimal.js` ile; İnfaz motoru dört zorunlu uyarıyı her çağrıda
+  değişmez döner). API'de `CalculationsModule` (10 uç + `GET
+  /calculations`, `GET /calculations/:id`, klasör/belge ilişkilendirme).
+  **Kapsam notu:** oranlar/dilimler bu fazda istekte doğrudan parametre
+  olarak verilir; RuleSet entegrasyonu (Faz 5'teki süre kuralları gibi)
+  ayrı bir doğrulama gerektirdiğinden sonraki bir iterasyona bırakıldı.
+  Mobilde 5 tekil-alanlı hesaplayıcı (kira artışı, harç, SMM, KDV, SGK)
+  genel bir form ekranına bağlandı; dinamik liste gerektiren 5 araç
+  (yasal faiz, icra borcu, vekâlet ücreti, gelir vergisi — kademeli
+  dilim/liste editörü gerektirir) henüz UI'a bağlanmadı.
 
 Tüm bunlar test edildi: `pnpm typecheck`, `pnpm lint`, `pnpm test` — hepsi
 yeşil. Devam ederken bu üç komutu bozmadan ilerle.
@@ -65,16 +79,16 @@ yeşil. Devam ederken bu üç komutu bozmadan ilerle.
 4. Mevzuat oran ve tarifeleri koda gömülmez; `RuleSet` tablosundan
    sürümlenerek okunur.
 5. `any` tipi yasak (ESLint kuralı zaten bunu zorluyor).
-6. Para hesaplamalarında JS `number` değil `decimal.js` kullanılacak
-   (Faz 6'da calculation-engine yazılırken).
+6. Para hesaplamalarında JS `number` değil `decimal.js` kullanılır
+   (bkz. `packages/calculation-engine`).
 7. Türkçe arayüz metni kullanılır.
 
 ## Sıradaki fazlar (öncelik sırasıyla)
 
-Doküman Bölüm 25'e göre:
-
-- **Faz 6 — Hesaplama motorları:** `packages/calculation-engine`'i
-  doldur, doküman Bölüm 17'deki 10 motoru saf fonksiyon olarak yaz.
+Doküman Bölüm 25'e göre: Faz 7 (Raporlama), Faz 8 (Paket ve ödeme),
+Faz 9 (Admin panel). Ayrıca Faz 6'dan kalan iş: yasal faiz/icra borcu/
+vekâlet ücreti/gelir vergisi için dinamik liste/dilim editörlü mobil
+form ekranları.
 
 ## Geliştirme komutları
 
