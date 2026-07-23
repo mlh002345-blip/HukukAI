@@ -42,7 +42,10 @@ function DocumentRow({
   onDelete: () => void;
 }) {
   return (
-    <View style={styles.docRow}>
+    <Pressable
+      style={styles.docRow}
+      onPress={() => router.push(`/document/${document.id}`)}
+    >
       <View style={styles.docInfo}>
         <Text style={styles.docName} numberOfLines={1}>
           {document.originalName}
@@ -55,7 +58,7 @@ function DocumentRow({
       <Pressable onPress={onDelete} hitSlop={8}>
         <Text style={styles.docDelete}>Sil</Text>
       </Pressable>
-    </View>
+    </Pressable>
   );
 }
 

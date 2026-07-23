@@ -2,6 +2,42 @@
 
 Bu proje [Keep a Changelog](https://keepachangelog.com/) formatını takip eder.
 
+## [Faz 4] — OCR ve Belge Analizi
+
+### Eklendi
+
+- `packages/ai-provider`:
+  - `AIProvider` arayüzü (belge sınıflandırma, yapılandırılmış veri
+    çıkarma, özetleme)
+  - `MockAIProvider` — anahtar kelime eşleştirme + desen tabanlı alan
+    çıkarma ile deterministik, test edilebilir varsayılan sağlayıcı
+    (`AI_PROVIDER=mock`)
+  - `AnthropicAIProvider` — Anthropic Messages API üzerinden üretim
+    sağlayıcısı (`AI_PROVIDER=anthropic`)
+  - `createAIProvider` factory — sağlayıcı ortam değişkeniyle
+    değiştirilebilir (Bölüm 29 madde 15)
+  - AI Router (`decideRoute`) — OCR güveni, sayfa sayısı, belge türü ve
+    kullanıcı paketine göre FAST/ACCURATE model seviyesi kararı
+  - Belge türünden araç önerisine deterministik eşleme
+    (`recommendToolSlugsForDocumentType`)
+- `apps/api`:
+  - `OcrModule` — yer tutucu `MockOcrProvider` (gerçek OCR motoru
+    entegrasyonuna kadar sabit düşük güven skoruyla her belgeyi
+    kullanıcı incelemesine yönlendirir), PDF sayfa sayısı tahmini
+  - `DocumentAnalysisModule` — BullMQ iş kuyruğu ile asenkron OCR→AI
+    boru hattı (`POST /documents/:id/analyze`, `GET /documents/:id/status`,
+    `GET /documents/:id/analysis`, `PATCH /documents/:id/extracted-data`,
+    `GET /documents/:id/recommended-actions`)
+  - OCR metninin AES-256-GCM ile şifrelenmesi (Bölüm 20 — Güvenlik ve
+    KVKK), `DOCUMENT_TEXT_ENCRYPTION_KEY` ortam değişkeni
+  - `StorageService.getObjectBuffer` (analiz için depodan indirme)
+- `apps/mobile`: Belge Detayı ekranı — analiz başlatma, işleniyor
+  durumu (canlı durum sorgusu), çıkarılan verileri düzenleyip onaylama,
+  özet/uyarılar ve önerilen araçlar listesi
+- Birim testleri: AI Router, Mock/Anthropic sağlayıcı factory, OCR
+  yer tutucusu, PDF sayfa sayısı, OCR metni şifreleme, Redis bağlantı
+  ayrıştırma, `DocumentAnalysisService` (uçtan uca pipeline senaryoları)
+
 ## [Faz 3] — Dosya Kasası
 
 ### Eklendi
