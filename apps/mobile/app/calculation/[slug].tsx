@@ -12,19 +12,113 @@ import {
 import { useLocalSearchParams } from "expo-router";
 import type { CalculationSummary } from "@hukukai/types";
 import { useSubmitCalculation } from "../../src/hooks/useCalculations";
-import { CALCULATOR_CONFIGS } from "../../src/lib/calculator-config";
+import {
+  CALCULATOR_CONFIGS,
+  type CalculatorConfig,
+  type CalculatorListFieldConfig,
+} from "../../src/lib/calculator-config";
+
+type ListValues = Record<string, string>[];
+type FormValues = Record<string, string | ListValues>;
+
+function buildInitialValues(config: CalculatorConfig): FormValues {
+  const values: FormValues = {};
+  for (const field of config.fields) {
+    values[field.key] =
+      field.kind === "list" ? [{ ...field.emptyItem }] : field.defaultValue ?? "";
+  }
+  return values;
+}
+
+function buildPayload(
+  config: CalculatorConfig,
+  values: FormValues,
+): Record<string, unknown> {
+  const payload: Record<string, unknown> = {};
+  for (const field of config.fields) {
+    if (field.kind === "list") {
+      const items = (values[field.key] as ListValues) ?? [];
+      payload[field.key] = items.map((item) => {
+        const converted: Record<string, unknown> = {};
+        for (const itemField of field.itemFields) {
+          const raw = (item[itemField.key] ?? "").trim();
+          if (itemField.kind === "integer") {
+            converted[itemField.key] = Number(raw);
+          } else if (itemField.kind === "nullableDecimal") {
+            converted[itemField.key] = raw === "" ? null : raw;
+          } else {
+            converted[itemField.key] = raw;
+          }
+        }
+        return converted;
+      });
+      continue;
+    }
+
+    const raw = (values[field.key] as string) ?? "";
+    if (field.optional && raw.trim() === "") continue;
+    payload[field.key] = raw.trim();
+  }
+  return payload;
+}
+
+function ListFieldEditor({
+  field,
+  items,
+  onChange,
+}: {
+  field: CalculatorListFieldConfig;
+  items: ListValues;
+  onChange: (items: ListValues) => void;
+}) {
+  return (
+    <View style={styles.field}>
+      <Text style={styles.label}>{field.label}</Text>
+      {items.map((item, index) => (
+        <View key={`${field.key}-${index}`} style={styles.listItem}>
+          {field.itemFields.map((itemField) => (
+            <View key={itemField.key} style={styles.listItemField}>
+              <Text style={styles.listItemLabel}>{itemField.label}</Text>
+              <TextInput
+                value={item[itemField.key] ?? ""}
+                onChangeText={(text) => {
+                  const next = [...items];
+                  next[index] = { ...next[index], [itemField.key]: text };
+                  onChange(next);
+                }}
+                style={styles.input}
+                placeholder={itemField.placeholder}
+                keyboardType={
+                  itemField.kind === "text" ? "default" : "decimal-pad"
+                }
+              />
+            </View>
+          ))}
+          {items.length > 1 ? (
+            <Pressable
+              onPress={() => onChange(items.filter((_, i) => i !== index))}
+            >
+              <Text style={styles.removeRowText}>Bu satırı kaldır</Text>
+            </Pressable>
+          ) : null}
+        </View>
+      ))}
+      <Pressable
+        style={styles.addRowButton}
+        onPress={() => onChange([...items, { ...field.emptyItem }])}
+      >
+        <Text style={styles.addRowButtonText}>{field.addButtonLabel}</Text>
+      </Pressable>
+    </View>
+  );
+}
 
 export default function CalculatorScreen() {
   const { slug } = useLocalSearchParams<{ slug: string }>();
   const config = CALCULATOR_CONFIGS[slug ?? ""];
 
-  const [values, setValues] = useState<Record<string, string>>(() =>
-    Object.fromEntries(
-      (config?.fields ?? []).map((field) => [
-        field.key,
-        field.defaultValue ?? "",
-      ]),
-    ),
+  const [values, setValues] = useState<FormValues>(() =>
+    config ? buildInitialValues(config) : {},
   );
   const [result, setResult] = useState<CalculationSummary | null>(null);
 
@@ -40,14 +134,18 @@ export default function CalculatorScreen() {
 
   const onCalculate = () => {
     const missingField = config.fields.find(
-      (field) => field.kind === "decimal" && !values[field.key]?.trim(),
+      (field) =>
+        field.kind === "decimal" &&
+        !field.optional &&
+        !(values[field.key] as string)?.trim(),
     );
     if (missingField) {
       Alert.alert("Eksik alan", `${missingField.label} alanı zorunludur.`);
       return;
     }
 
-    submitCalculation.mutate(values, {
+    const payload = buildPayload(config, values);
+    submitCalculation.mutate(payload, {
       onSuccess: setResult,
       onError: (error) =>
         Alert.alert(
@@ -64,48 +162,63 @@ export default function CalculatorScreen() {
     >
       <Text style={styles.title}>{config.title}</Text>
 
-      {config.fields.map((field) => (
-        <View key={field.key} style={styles.field}>
-          <Text style={styles.label}>{field.label}</Text>
-          {field.kind === "select" ? (
-            <View style={styles.optionRow}>
-              {(field.options ?? []).map((option) => (
-                <Pressable
-                  key={option.value}
-                  style={[
-                    styles.optionChip,
-                    values[field.key] === option.value &&
-                      styles.optionChipSelected,
-                  ]}
-                  onPress={() =>
-                    setValues((prev) => ({ ...prev, [field.key]: option.value }))
-                  }
-                >
-                  <Text
-                    style={[
-                      styles.optionChipText,
-                      values[field.key] === option.value &&
-                        styles.optionChipTextSelected,
-                    ]}
-                  >
-                    {option.label}
-                  </Text>
-                </Pressable>
-              ))}
-            </View>
-          ) : (
-            <TextInput
-              value={values[field.key] ?? ""}
-              onChangeText={(text) =>
-                setValues((prev) => ({ ...prev, [field.key]: text }))
+      {config.fields.map((field) => {
+        if (field.kind === "list") {
+          return (
+            <ListFieldEditor
+              key={field.key}
+              field={field}
+              items={(values[field.key] as ListValues) ?? []}
+              onChange={(items) =>
+                setValues((prev) => ({ ...prev, [field.key]: items }))
               }
-              style={styles.input}
-              placeholder={field.placeholder}
-              keyboardType="decimal-pad"
             />
-          )}
-        </View>
-      ))}
+          );
+        }
+
+        return (
+          <View key={field.key} style={styles.field}>
+            <Text style={styles.label}>{field.label}</Text>
+            {field.kind === "select" ? (
+              <View style={styles.optionRow}>
+                {(field.options ?? []).map((option) => (
+                  <Pressable
+                    key={option.value}
+                    style={[
+                      styles.optionChip,
+                      values[field.key] === option.value &&
+                        styles.optionChipSelected,
+                    ]}
+                    onPress={() =>
+                      setValues((prev) => ({ ...prev, [field.key]: option.value }))
+                    }
+                  >
+                    <Text
+                      style={[
+                        styles.optionChipText,
+                        values[field.key] === option.value &&
+                          styles.optionChipTextSelected,
+                      ]}
+                    >
+                      {option.label}
+                    </Text>
+                  </Pressable>
+                ))}
+              </View>
+            ) : (
+              <TextInput
+                value={(values[field.key] as string) ?? ""}
+                onChangeText={(text) =>
+                  setValues((prev) => ({ ...prev, [field.key]: text }))
+                }
+                style={styles.input}
+                placeholder={field.placeholder}
+                keyboardType="decimal-pad"
+              />
+            )}
+          </View>
+        );
+      })}
 
       <Pressable
         style={styles.primaryButton}
@@ -121,14 +234,21 @@ export default function CalculatorScreen() {
 
       {result ? (
         <View style={styles.resultBox}>
-          {config.resultFields.map((field) => (
-            <View key={field.key} style={styles.resultRow}>
-              <Text style={styles.resultLabel}>{field.label}</Text>
-              <Text style={styles.resultValue}>
-                {String(result.outputData[field.key] ?? "-")}
-              </Text>
-            </View>
-          ))}
+          {config.resultFields.map((field) => {
+            const rawValue = result.outputData[field.key];
+            const displayValue =
+              field.format === "boolean"
+                ? rawValue
+                  ? "Evet"
+                  : "Hayır"
+                : String(rawValue ?? "-");
+            return (
+              <View key={field.key} style={styles.resultRow}>
+                <Text style={styles.resultLabel}>{field.label}</Text>
+                <Text style={styles.resultValue}>{displayValue}</Text>
+              </View>
+            );
+          })}
         </View>
       ) : null}
     </ScrollView>
@@ -190,4 +310,24 @@ const styles = StyleSheet.create({
     textTransform: "uppercase",
   },
   resultValue: { fontSize: 18, fontWeight: "700", color: "#101828" },
+  listItem: {
+    borderWidth: 1,
+    borderColor: "#EAECF0",
+    borderRadius: 10,
+    padding: 12,
+    gap: 8,
+    marginTop: 8,
+  },
+  listItemField: { gap: 4 },
+  listItemLabel: { fontSize: 12, color: "#667085" },
+  removeRowText: { color: "#B42318", fontSize: 12, fontWeight: "600" },
+  addRowButton: {
+    borderWidth: 1,
+    borderColor: "#175CD3",
+    borderRadius: 10,
+    paddingVertical: 10,
+    alignItems: "center",
+    marginTop: 8,
+  },
+  addRowButtonText: { color: "#175CD3", fontWeight: "700", fontSize: 13 },
 });

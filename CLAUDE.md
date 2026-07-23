@@ -59,10 +59,13 @@ o dokümana göre kodlanıyor. Yeni bir şey yapmadan önce bu dokümanı oku.
   **Kapsam notu:** oranlar/dilimler bu fazda istekte doğrudan parametre
   olarak verilir; RuleSet entegrasyonu (Faz 5'teki süre kuralları gibi)
   ayrı bir doğrulama gerektirdiğinden sonraki bir iterasyona bırakıldı.
-  Mobilde 5 tekil-alanlı hesaplayıcı (kira artışı, harç, SMM, KDV, SGK)
-  genel bir form ekranına bağlandı; dinamik liste gerektiren 5 araç
-  (yasal faiz, icra borcu, vekâlet ücreti, gelir vergisi — kademeli
-  dilim/liste editörü gerektirir) henüz UI'a bağlanmadı.
+  Mobilde tüm hesaplama araçları genel, yapılandırma tabanlı bir forma
+  bağlandı — 5 tekil-alanlı (kira artışı, harç, SMM, KDV, SGK) ve 4
+  dinamik liste/dilim gerektiren araç (yasal faiz — çok dönemli, icra
+  borcu — dönem+masraf listesi, vekâlet ücreti/gelir vergisi — kademeli
+  dilim editörü, ekle/kaldır satır desteğiyle). İnfaz ön hesabı,
+  yüksek riskli alan olduğu için bilinçli olarak ayrı bir onay akışına
+  bırakıldı ve henüz UI'a bağlanmadı.
 
 Tüm bunlar test edildi: `pnpm typecheck`, `pnpm lint`, `pnpm test` — hepsi
 yeşil. Devam ederken bu üç komutu bozmadan ilerle.
@@ -86,9 +89,7 @@ yeşil. Devam ederken bu üç komutu bozmadan ilerle.
 ## Sıradaki fazlar (öncelik sırasıyla)
 
 Doküman Bölüm 25'e göre: Faz 7 (Raporlama), Faz 8 (Paket ve ödeme),
-Faz 9 (Admin panel). Ayrıca Faz 6'dan kalan iş: yasal faiz/icra borcu/
-vekâlet ücreti/gelir vergisi için dinamik liste/dilim editörlü mobil
-form ekranları.
+Faz 9 (Admin panel).
 
 ## Geliştirme komutları
 

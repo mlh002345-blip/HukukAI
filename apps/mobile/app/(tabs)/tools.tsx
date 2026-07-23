@@ -70,9 +70,9 @@ export default function ToolsScreen() {
       });
       return;
     }
-    // Dinamik liste gerektiren hesaplama araçları (yasal faiz, icra
-    // borcu, vekâlet ücreti, gelir vergisi) için form ekranı ileriki
-    // bir iterasyonda eklenecektir; bugün için araç bilgilendirilir.
+    // Süre/hesaplama motoruna bağlı olmayan araçlar (infaz ön hesabı —
+    // yüksek riskli alan, ayrı bir onay akışı gerektirir) için şimdilik
+    // bilgilendirme gösterilir.
     Alert.alert(tool.name, tool.shortDescription);
   };
 

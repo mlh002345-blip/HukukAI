@@ -3,18 +3,43 @@ export interface CalculatorFieldOption {
   value: string;
 }
 
-export interface CalculatorFieldConfig {
+export interface CalculatorSimpleFieldConfig {
   key: string;
   label: string;
   kind: "decimal" | "select";
   placeholder?: string;
   options?: CalculatorFieldOption[];
   defaultValue?: string;
+  optional?: boolean;
 }
+
+export interface CalculatorListItemFieldConfig {
+  key: string;
+  label: string;
+  /** decimal/integer/text: metin girilir, gönderilirken tipine çevrilir.
+   * nullableDecimal: boş bırakılırsa `null` gönderilir (ör. son dilimin
+   * üst sınırı olmadığında). */
+  kind: "decimal" | "integer" | "text" | "nullableDecimal";
+  placeholder?: string;
+}
+
+export interface CalculatorListFieldConfig {
+  key: string;
+  label: string;
+  kind: "list";
+  itemFields: CalculatorListItemFieldConfig[];
+  addButtonLabel: string;
+  emptyItem: Record<string, string>;
+}
+
+export type CalculatorFieldConfig =
+  | CalculatorSimpleFieldConfig
+  | CalculatorListFieldConfig;
 
 export interface CalculatorResultField {
   key: string;
   label: string;
+  format?: "boolean";
 }
 
 export interface CalculatorConfig {
@@ -24,14 +49,103 @@ export interface CalculatorConfig {
   resultFields: CalculatorResultField[];
 }
 
-/**
- * Faz 6 kapsam notu: yalnızca tekil (sabit) alanlı hesaplayıcılar burada
- * yapılandırılmıştır. Dinamik liste gerektiren araçlar (yasal faiz —
- * çok dönemli, icra borcu — masraf kalemleri, vekâlet ücreti/gelir
- * vergisi — kademeli dilimler) için ayrı, dilim/liste düzenleyicili bir
- * form ekranı ileriki bir iterasyonda eklenecektir.
- */
+const periodListField: CalculatorListFieldConfig = {
+  key: "periods",
+  label: "Faiz Dönemleri",
+  kind: "list",
+  addButtonLabel: "+ Dönem Ekle",
+  emptyItem: { annualRatePercent: "", days: "" },
+  itemFields: [
+    { key: "annualRatePercent", label: "Yıllık Oran (%)", kind: "decimal", placeholder: "9" },
+    { key: "days", label: "Gün Sayısı", kind: "integer", placeholder: "365" },
+  ],
+};
+
+const bracketListField: CalculatorListFieldConfig = {
+  key: "brackets",
+  label: "Kademeli Dilimler",
+  kind: "list",
+  addButtonLabel: "+ Dilim Ekle",
+  emptyItem: { upTo: "", ratePercent: "" },
+  itemFields: [
+    {
+      key: "upTo",
+      label: "Dilim Üst Sınırı (son dilimde boş bırakın)",
+      kind: "nullableDecimal",
+      placeholder: "100000",
+    },
+    { key: "ratePercent", label: "Oran (%)", kind: "decimal", placeholder: "10" },
+  ],
+};
+
 export const CALCULATOR_CONFIGS: Record<string, CalculatorConfig> = {
+  "yasal-faiz": {
+    title: "Yasal Faiz",
+    endpoint: "/calculations/interest",
+    fields: [
+      { key: "principal", label: "Anapara", kind: "decimal", placeholder: "10000" },
+      periodListField,
+    ],
+    resultFields: [
+      { key: "totalInterest", label: "Toplam Faiz" },
+      { key: "totalAmount", label: "Toplam Tutar" },
+    ],
+  },
+  "icra-borcu": {
+    title: "İcra Borcu",
+    endpoint: "/calculations/enforcement-debt",
+    fields: [
+      { key: "principal", label: "Anapara", kind: "decimal", placeholder: "10000" },
+      periodListField,
+      {
+        key: "expenses",
+        label: "İcra Masrafları",
+        kind: "list",
+        addButtonLabel: "+ Masraf Ekle",
+        emptyItem: { label: "", amount: "" },
+        itemFields: [
+          { key: "label", label: "Masraf Adı", kind: "text", placeholder: "Tebligat gideri" },
+          { key: "amount", label: "Tutar", kind: "decimal", placeholder: "50" },
+        ],
+      },
+    ],
+    resultFields: [
+      { key: "interestAmount", label: "İşlemiş Faiz" },
+      { key: "expensesTotal", label: "Masraf Toplamı" },
+      { key: "totalDebt", label: "Toplam Borç" },
+    ],
+  },
+  "vekalet-ucreti": {
+    title: "Vekâlet Ücreti",
+    endpoint: "/calculations/attorney-fee",
+    fields: [
+      { key: "disputeValue", label: "Dava Değeri", kind: "decimal", placeholder: "150000" },
+      {
+        key: "minimumFee",
+        label: "Asgari Ücret (tarifedeki maktu alt sınır)",
+        kind: "decimal",
+        placeholder: "5000",
+        optional: true,
+      },
+      bracketListField,
+    ],
+    resultFields: [
+      { key: "calculatedFee", label: "Hesaplanan Ücret" },
+      { key: "appliedMinimumFee", label: "Asgari Ücret Uygulandı mı?", format: "boolean" },
+    ],
+  },
+  "gelir-vergisi": {
+    title: "Gelir Vergisi",
+    endpoint: "/calculations/income-tax",
+    fields: [
+      { key: "taxableIncome", label: "Vergiye Tabi Gelir", kind: "decimal", placeholder: "150000" },
+      bracketListField,
+    ],
+    resultFields: [
+      { key: "totalTax", label: "Toplam Vergi" },
+      { key: "effectiveRatePercent", label: "Efektif Oran (%)" },
+    ],
+  },
   "kira-artisi": {
     title: "Kira Artışı",
     endpoint: "/calculations/rent-increase",

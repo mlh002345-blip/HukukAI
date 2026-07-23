@@ -30,10 +30,16 @@ Bu proje [Keep a Changelog](https://keepachangelog.com/) formatını takip eder.
   fazda istekte doğrudan parametre olarak verilir; RuleSet
   entegrasyonu (Faz 5'teki süre kuralları gibi) sonraki bir
   iterasyona bırakıldı.
-- `apps/mobile`: 5 tekil-alanlı hesaplayıcı (kira artışı, harç ön
-  hesabı, serbest meslek makbuzu, KDV, SGK işveren maliyeti) genel,
-  yapılandırma tabanlı bir form ekranına bağlandı; Araçlar ekranından
-  doğrudan erişilebilir.
+- `apps/mobile`: Genel, yapılandırma tabanlı hesaplayıcı ekranı
+  (`app/calculation/[slug]`) tüm 9 hesaplama aracına bağlandı:
+  - 5 tekil-alanlı araç (kira artışı, harç ön hesabı, serbest meslek
+    makbuzu, KDV, SGK işveren maliyeti)
+  - 4 dinamik liste/dilim gerektiren araç (yasal faiz — çok dönemli
+    faiz listesi, icra borcu — dönem + masraf kalemi listesi, vekâlet
+    ücreti/gelir vergisi — kademeli dilim editörü), ekle/kaldır satır
+    desteğiyle
+  - İnfaz ön hesabı, yüksek riskli alan olduğu için bilinçli olarak bu
+    genel forma dahil edilmedi; ayrı bir onay akışı gerektirir.
 - 39 yeni birim testi (`calculation-engine` 33 — yuvarlama/kayan nokta
   doğruluğu, dilim sınırları, infaz oranı/mahsup/artık yıl senaryoları
   dahil — + `CalculationsService` 6).
