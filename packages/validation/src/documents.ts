@@ -46,3 +46,8 @@ export const listDocumentsQuerySchema = z.object({
   folderId: z.string().min(1).optional(),
 });
 export type ListDocumentsQuery = z.infer<typeof listDocumentsQuerySchema>;
+
+export const updateExtractedDataSchema = z.object({
+  data: z.record(z.unknown()),
+});
+export type UpdateExtractedDataInput = z.infer<typeof updateExtractedDataSchema>;

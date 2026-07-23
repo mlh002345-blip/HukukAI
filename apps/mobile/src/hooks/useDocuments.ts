@@ -21,6 +21,16 @@ export function useDocuments(folderId: string | undefined) {
   });
 }
 
+export function useDocument(id: string | undefined) {
+  const token = useAuthStore((state) => state.accessToken);
+  return useQuery({
+    queryKey: ["documents", id],
+    queryFn: () =>
+      apiRequest<DocumentSummary>(`/documents/${id}`, { accessToken: token }),
+    enabled: !!token && !!id,
+  });
+}
+
 export interface PickedFile {
   uri: string;
   name: string;

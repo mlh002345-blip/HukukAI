@@ -26,6 +26,14 @@ o dokümana göre kodlanıyor. Yeni bir şey yapmadan önce bu dokümanı oku.
   virüs tarama yer tutucusu), `StorageModule` (S3/MinIO). Mobilde
   Dosyalarım, Yeni/Düzenle Klasör, Klasör Detayı (belge yükleme/listeleme/
   silme) ekranları.
+- **Faz 4** — OCR ve belge analizi: `packages/ai-provider` dolduruldu
+  (AIProvider arayüzü, deterministik `MockAIProvider`, üretim için
+  `AnthropicAIProvider`, sağlayıcı-agnostik factory, AI Router —
+  `decideRoute` — ve belge türünden araç önerisi eşlemesi). API'de
+  `OcrModule` (yer tutucu `MockOcrProvider`) ve `DocumentAnalysisModule`
+  (BullMQ ile asenkron OCR→AI boru hattı, OCR metninin AES-256-GCM ile
+  şifrelenmesi). Mobilde Belge Detayı ekranı: analiz başlatma, işleniyor
+  durumu, çıkarılan verileri düzenleme, özet ve önerilen araçlar.
 
 Tüm bunlar test edildi: `pnpm typecheck`, `pnpm lint`, `pnpm test` — hepsi
 yeşil. Devam ederken bu üç komutu bozmadan ilerle.
@@ -50,9 +58,6 @@ yeşil. Devam ederken bu üç komutu bozmadan ilerle.
 
 Doküman Bölüm 25'e göre:
 
-- **Faz 4 — OCR ve belge analizi:** `packages/ai-provider` paketini
-  doldur (şu an placeholder), `AITask` tipini kullan, BullMQ job queue,
-  `DocumentAnalysis` modeli zaten şemada var.
 - **Faz 5 — Süre motoru:** `packages/rule-engine` ve
   `packages/deadline-engine` paketlerini doldur (şu an placeholder),
   `Holiday` ve `RuleSet` modelleri zaten şemada var.

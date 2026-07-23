@@ -1,9 +1,8 @@
 /**
- * AI Sağlayıcı Soyutlaması — Faz 4 kapsamında doldurulacaktır.
- * Bkz. Bölüm 15 (AI Router) ve Bölüm 29 madde 15: "AI sağlayıcısı
- * değiştirilebilir olmalıdır." Bu paket, belge sınıflandırma, alan
- * çıkarma, özet, sade dil açıklaması ve niyet sınıflandırma
- * görevlerini soyutlayan sağlayıcı-agnostik bir arayüz sunacaktır.
+ * AI Sağlayıcı Soyutlaması (Bölüm 15 — AI Router, Bölüm 29 madde 15:
+ * "AI sağlayıcısı değiştirilebilir olmalıdır"). Belge sınıflandırma,
+ * alan çıkarma ve özetleme görevlerini soyutlayan sağlayıcı-agnostik
+ * bir arayüz sunar.
  */
 export type AITask =
   | "DOCUMENT_CLASSIFICATION"
@@ -13,4 +12,9 @@ export type AITask =
   | "INTENT_CLASSIFICATION"
   | "QUALITY_REVIEW";
 
-export const AI_PROVIDER_PLACEHOLDER = true;
+export * from "./types";
+export * from "./router";
+export * from "./tool-recommendations";
+export * from "./factory";
+export * from "./providers/mock-ai-provider";
+export * from "./providers/anthropic-ai-provider";

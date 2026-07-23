@@ -1,13 +1,19 @@
 import { Injectable } from "@nestjs/common";
-import type { ConfigService } from "@nestjs/config";
+// Değer olarak import edilir: Nest'in constructor tabanlı DI çözümlemesi
+// design:paramtypes metadata'sına ihtiyaç duyar; `import type` bunu Object'e
+// düşürüp servis çözümlemesini bozar.
+// eslint-disable-next-line @typescript-eslint/consistent-type-imports
+import { ConfigService } from "@nestjs/config";
 import {
   DeleteObjectCommand,
+  GetObjectCommand,
   HeadObjectCommand,
   PutObjectCommand,
   S3Client,
 } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import type { ApiEnv } from "@hukukai/config";
+import type { Readable } from "node:stream";
 
 export const UPLOAD_URL_TTL_SECONDS = 300;
 
@@ -77,5 +83,17 @@ export class StorageService {
     await this.client.send(
       new DeleteObjectCommand({ Bucket: this.bucket, Key: key }),
     );
+  }
+
+  async getObjectBuffer(key: string): Promise<Buffer> {
+    const result = await this.client.send(
+      new GetObjectCommand({ Bucket: this.bucket, Key: key }),
+    );
+    const stream = result.Body as Readable;
+    const chunks: Buffer[] = [];
+    for await (const chunk of stream) {
+      chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
+    }
+    return Buffer.concat(chunks);
   }
 }
