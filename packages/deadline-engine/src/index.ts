@@ -1,6 +1,7 @@
 /**
- * Süre Motoru — Faz 5 kapsamında doldurulacaktır.
- * Bkz. Doküman Bölüm 16: JSON tabanlı, sürümlenebilir kural motoru;
- * resmi tatil / hafta sonu düzeltmeleri; DeadlineOutput tipi.
+ * Süre Motoru (Bölüm 16). Resmi tatil/hafta sonu düzeltmeli, tarihe
+ * duyarlı (saat dilimi bağımsız) süre hesaplaması yapan saf fonksiyonlar.
  */
-export const DEADLINE_ENGINE_PLACEHOLDER = true;
+export * from "./types";
+export * from "./calculate-deadline";
+export * from "./date-utils";

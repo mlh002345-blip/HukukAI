@@ -72,6 +72,12 @@ importers:
       '@hukukai/config':
         specifier: workspace:*
         version: link:../../packages/config
+      '@hukukai/deadline-engine':
+        specifier: workspace:*
+        version: link:../../packages/deadline-engine
+      '@hukukai/rule-engine':
+        specifier: workspace:*
+        version: link:../../packages/rule-engine
       '@hukukai/search-engine':
         specifier: workspace:*
         version: link:../../packages/search-engine
@@ -336,6 +342,10 @@ importers:
         version: 5.9.3
 
   packages/deadline-engine:
+    dependencies:
+      '@hukukai/rule-engine':
+        specifier: workspace:*
+        version: link:../rule-engine
     devDependencies:
       '@hukukai/eslint-config':
         specifier: workspace:*
@@ -346,6 +356,9 @@ importers:
       typescript:
         specifier: ^5.6.3
         version: 5.9.3
+      vitest:
+        specifier: ^2.1.2
+        version: 2.1.9(@types/node@22.20.1)(terser@5.49.0)
 
   packages/eslint-config:
     dependencies:
@@ -373,6 +386,9 @@ importers:
       typescript:
         specifier: ^5.6.3
         version: 5.9.3
+      vitest:
+        specifier: ^2.1.2
+        version: 2.1.9(@types/node@22.20.1)(terser@5.49.0)
 
   packages/search-engine:
     dependencies:

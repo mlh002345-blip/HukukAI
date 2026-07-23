@@ -1,7 +1,9 @@
 /**
- * Kural Motoru — Faz 5 kapsamında doldurulacaktır.
- * RuleSet modelini yorumlayan, sürüm ve geçerlilik tarihine göre
- * doğru kuralı seçen çekirdek motor. Bkz. Bölüm 16 ve Bölüm 29
- * madde 14: "Kural motoru ürünün temel fikrî varlığıdır."
+ * Kural Motoru (Bölüm 16, Bölüm 29 madde 14: "Kural motoru ürünün temel
+ * fikrî varlığıdır"). `RuleSet` modelini yorumlayan, sürüm ve geçerlilik
+ * tarihine göre doğru kuralı seçen çekirdek motor.
  */
-export const RULE_ENGINE_PLACEHOLDER = true;
+export * from "./types";
+export * from "./select-rule-version";
+export * from "./evaluate-conditions";
+export * from "./find-applicable-rule";

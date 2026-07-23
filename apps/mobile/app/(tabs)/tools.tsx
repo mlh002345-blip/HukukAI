@@ -6,6 +6,7 @@ import {
   Text,
   View,
 } from "react-native";
+import { router } from "expo-router";
 import {
   CategoryChip,
   EmptyState,
@@ -19,6 +20,17 @@ import {
   useToolSearch,
   useTools,
 } from "../../src/hooks/useTools";
+
+/**
+ * Süre motoru (Faz 5) tarafından desteklenen araçlar; bunlar için
+ * "Süreyi Hesapla" ekranına doğrudan yönlendirilir. Diğer araçlar
+ * (hesaplama motorları) Faz 6'da bağlanacaktır.
+ */
+const DEADLINE_TOOL_RULE_KEYS: Record<string, string> = {
+  "icra-itiraz-suresi": "TR_ENFORCEMENT_PAYMENT_ORDER_OBJECTION",
+  "trafik-cezasi-itiraz-suresi": "TR_TRAFFIC_FINE_OBJECTION",
+  "trafik-cezasi-indirimli-odeme-suresi": "TR_TRAFFIC_FINE_DISCOUNTED_PAYMENT",
+};
 
 export default function ToolsScreen() {
   const [query, setQuery] = useState("");
@@ -42,8 +54,16 @@ export default function ToolsScreen() {
     : filteredTools;
 
   const onToolPress = (tool: ToolDefinition) => {
-    // Faz 5-6'da ilgili CalculatorForm/DeadlineCalculator ekranına
-    // yönlendirilecektir; bugün için araç rotası bilgilendirilir.
+    const ruleKey = DEADLINE_TOOL_RULE_KEYS[tool.slug];
+    if (ruleKey) {
+      router.push({
+        pathname: "/deadline/calculate",
+        params: { ruleKey, title: tool.name },
+      });
+      return;
+    }
+    // Faz 6'da ilgili hesaplama motoru ekranına yönlendirilecektir;
+    // bugün için araç rotası bilgilendirilir.
     Alert.alert(tool.name, tool.shortDescription);
   };
 
