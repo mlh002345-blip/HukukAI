@@ -14,6 +14,7 @@
     "assetBundlePatterns": ["**/*"],
     "android": {
       "package": "com.hukukai.app",
+      "versionCode": 1,
       "permissions": [
         "CAMERA",
         "READ_EXTERNAL_STORAGE",
@@ -23,7 +24,12 @@
     },
     "ios": {
       "bundleIdentifier": "com.hukukai.app",
-      "supportsTablet": false
+      "buildNumber": "1",
+      "supportsTablet": false,
+      "infoPlist": {
+        "NSCameraUsageDescription": "Belgelerinizi taramak ve analiz için yüklemek amacıyla kameraya erişim gereklidir.",
+        "NSPhotoLibraryUsageDescription": "Belgelerinizi galeriden seçip analiz için yüklemek amacıyla fotoğraf kitaplığına erişim gereklidir."
+      }
     },
     "plugins": [
       "expo-router",

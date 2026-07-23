@@ -15,9 +15,7 @@ import { router, useLocalSearchParams } from "expo-router";
 import { registerSchema, type RegisterInput } from "@hukukai/validation";
 import type { UserRole } from "@hukukai/types";
 import { useRegister } from "../../src/hooks/useAuth";
-
-const TERMS_VERSION = "1.0.0";
-const KVKK_VERSION = "1.0.0";
+import { LEGAL_TEXT_VERSION } from "../../src/content/legal";
 
 export default function RegisterScreen() {
   const params = useLocalSearchParams<{ role?: string }>();
@@ -55,8 +53,8 @@ export default function RegisterScreen() {
     registerMutation.mutate(
       {
         ...values,
-        acceptedTermsVersion: TERMS_VERSION,
-        acceptedKvkkVersion: KVKK_VERSION,
+        acceptedTermsVersion: LEGAL_TEXT_VERSION,
+        acceptedKvkkVersion: LEGAL_TEXT_VERSION,
       },
       { onSuccess: () => router.replace("/(tabs)") },
     );
@@ -135,8 +133,14 @@ export default function RegisterScreen() {
       <View style={styles.termsRow}>
         <Switch value={termsAccepted} onValueChange={setTermsAccepted} />
         <Text style={styles.termsText}>
-          Kullanım Koşulları'nı ve KVKK Aydınlatma Metni'ni okudum, kabul
-          ediyorum.
+          <Text onPress={() => router.push("/legal/terms")} style={styles.termsLink}>
+            Kullanım Koşulları
+          </Text>
+          'nı ve{" "}
+          <Text onPress={() => router.push("/legal/kvkk")} style={styles.termsLink}>
+            KVKK Aydınlatma Metni
+          </Text>
+          'ni okudum, kabul ediyorum.
         </Text>
       </View>
 
@@ -211,6 +215,11 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: "#475467",
     lineHeight: 17,
+  },
+  termsLink: {
+    color: "#175CD3",
+    fontWeight: "600",
+    textDecorationLine: "underline",
   },
   submitButton: {
     backgroundColor: "#175CD3",

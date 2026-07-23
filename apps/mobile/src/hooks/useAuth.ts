@@ -30,3 +30,16 @@ export function useRegister() {
     onSuccess: (data) => setSession(data),
   });
 }
+
+export function useDeleteAccount() {
+  const accessToken = useAuthStore((state) => state.accessToken);
+  const signOut = useAuthStore((state) => state.signOut);
+  return useMutation({
+    mutationFn: () =>
+      apiRequest<{ success: boolean }>("/auth/me", {
+        method: "DELETE",
+        accessToken,
+      }),
+    onSuccess: () => signOut(),
+  });
+}

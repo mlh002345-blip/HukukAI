@@ -2,6 +2,32 @@
 
 Bu proje [Keep a Changelog](https://keepachangelog.com/) formatını takip eder.
 
+## [Faz 10] — Pilot ve Mağaza
+
+### Eklendi
+
+- Güvenlik sertleştirmesi (Bölüm 20): `helmet` eklendi, `/docs`
+  (Swagger) yalnızca `NODE_ENV !== "production"` iken açılır,
+  `/auth/login` ve `/auth/register` uçlarında global rate limitten
+  daha sıkı `@Throttle` (brute force koruması)
+- KVKK Aydınlatma Metni ve Kullanım Koşulları taslak metinleri
+  (`apps/mobile/src/content/legal.ts`) ve bunları gösteren ekranlar
+  (`app/legal/kvkk`, `app/legal/terms`); kayıt ekranındaki onay
+  metni artık bu ekranlara tıklanabilir bağlantılarla bağlı
+- Hesabımı Sil ekranı (`app/account/delete`) — mevcut
+  `DELETE /auth/me` ucunu ilk kez mobil arayüze bağlar
+- `apps/mobile/app.json`: Play Store/App Store hazırlığı —
+  `versionCode`/`buildNumber`, iOS kamera/galeri izin açıklamaları
+- `docs/store-listing.md` (mağaza listesi taslağı) ve
+  `docs/kapali-test-plani.md` (Bölüm 24 tabanlı manuel QA kontrol
+  listesi) eklendi
+- Faz 7-10 birleşik değişiklik seti üzerinde güvenlik incelemesi
+  yapıldı — yüksek güvenilirlikli bulgu çıkmadı
+- **Kapsam notu:** KVKK/Kullanım Koşulları metinleri ve mağaza listesi
+  taslaktır, yayına alınmadan önce hukuk/pazarlama incelemesi gerekir;
+  gerçek kapalı test, cihaz denemesi ve ekran görüntüleri bu ortamda
+  üretilemedi
+
 ## [Faz 9] — Admin Panel
 
 ### Eklendi

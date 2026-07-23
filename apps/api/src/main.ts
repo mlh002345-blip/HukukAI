@@ -3,6 +3,7 @@ import { NestFactory } from "@nestjs/core";
 import { ConfigService } from "@nestjs/config";
 import { ValidationPipe } from "@nestjs/common";
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
+import helmet from "helmet";
 import type { ApiEnv } from "@hukukai/config";
 import { API_PREFIX } from "@hukukai/config";
 import { AppModule } from "./app.module";
@@ -13,7 +14,9 @@ async function bootstrap() {
   });
 
   const configService = app.get(ConfigService<ApiEnv, true>);
+  const nodeEnv = configService.get("NODE_ENV", { infer: true });
 
+  app.use(helmet());
   app.setGlobalPrefix(API_PREFIX.replace(/^\//, ""));
   app.useGlobalPipes(
     new ValidationPipe({ whitelist: true, transform: true }),
@@ -25,23 +28,29 @@ async function bootstrap() {
     credentials: true,
   });
 
-  const swaggerConfig = new DocumentBuilder()
-    .setTitle("HukukAI API")
-    .setDescription(
-      "AI destekli hukuki/mali profesyonel asistan — REST API dokümantasyonu",
-    )
-    .setVersion("0.1.0")
-    .addBearerAuth()
-    .build();
-  const swaggerDocument = SwaggerModule.createDocument(app, swaggerConfig);
-  SwaggerModule.setup("docs", app, swaggerDocument);
+  // Swagger, API şemasını dışarı sızdırmamak için üretimde açılmaz
+  // (Bölüm 20 — Güvenlik ve KVKK).
+  if (nodeEnv !== "production") {
+    const swaggerConfig = new DocumentBuilder()
+      .setTitle("HukukAI API")
+      .setDescription(
+        "AI destekli hukuki/mali profesyonel asistan — REST API dokümantasyonu",
+      )
+      .setVersion("0.1.0")
+      .addBearerAuth()
+      .build();
+    const swaggerDocument = SwaggerModule.createDocument(app, swaggerConfig);
+    SwaggerModule.setup("docs", app, swaggerDocument);
+  }
 
   const port = configService.get("PORT", { infer: true });
   await app.listen(port);
   // eslint-disable-next-line no-console
   console.log(`HukukAI API http://localhost:${port}${API_PREFIX} adresinde çalışıyor`);
-  // eslint-disable-next-line no-console
-  console.log(`Swagger dokümantasyonu: http://localhost:${port}/docs`);
+  if (nodeEnv !== "production") {
+    // eslint-disable-next-line no-console
+    console.log(`Swagger dokümantasyonu: http://localhost:${port}/docs`);
+  }
 }
 
 bootstrap();

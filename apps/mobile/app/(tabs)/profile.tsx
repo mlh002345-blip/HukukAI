@@ -65,10 +65,22 @@ export default function ProfileScreen() {
           <MenuRow label="Bildirim Tercihleri" />
           <MenuRow label="Güvenlik Ayarları" />
           <MenuRow label="Abonelik" onPress={() => router.push("/billing")} />
-          <MenuRow label="Kullanım Koşulları" />
-          <MenuRow label="KVKK Aydınlatma Metni" />
+          <MenuRow label="Kullanım Koşulları" onPress={() => router.push("/legal/terms")} />
+          <MenuRow
+            label="KVKK Aydınlatma Metni"
+            onPress={() => router.push("/legal/kvkk")}
+          />
         </View>
       )}
+
+      {!isGuest ? (
+        <Pressable
+          style={styles.deleteAccountButton}
+          onPress={() => router.push("/account/delete")}
+        >
+          <Text style={styles.deleteAccountText}>Hesabımı Sil</Text>
+        </Pressable>
+      ) : null}
 
       <Pressable style={styles.signOutButton} onPress={handleSignOut}>
         <Text style={styles.signOutText}>
@@ -141,6 +153,8 @@ const styles = StyleSheet.create({
   },
   menuRowText: { fontSize: 14, color: "#101828" },
   menuRowChevron: { fontSize: 16, color: "#98A2B3" },
+  deleteAccountButton: { alignItems: "center", paddingVertical: 8 },
+  deleteAccountText: { color: "#B42318", fontSize: 12, fontWeight: "500" },
   signOutButton: {
     borderWidth: 1,
     borderColor: "#FDA29B",
