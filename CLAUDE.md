@@ -34,6 +34,21 @@ o dokümana göre kodlanıyor. Yeni bir şey yapmadan önce bu dokümanı oku.
   (BullMQ ile asenkron OCR→AI boru hattı, OCR metninin AES-256-GCM ile
   şifrelenmesi). Mobilde Belge Detayı ekranı: analiz başlatma, işleniyor
   durumu, çıkarılan verileri düzenleme, özet ve önerilen araçlar.
+- **Faz 5** — Süre motoru: `packages/rule-engine` dolduruldu (RuleSet'i
+  tarihe göre yorumlayan `selectRuleVersion`/`evaluateConditions`/
+  `findApplicableRule` — kural her zaman OLAY tarihine göre seçilir,
+  hesaplama tarihine göre değil). `packages/deadline-engine` dolduruldu
+  (`calculateDeadline` — saat dilimi bağımsız takvim/iş günü sayımı,
+  ay/yıl birimlerinde HMK m.92/2 uyumlu gün sabitleme, hafta sonu/resmi
+  tatil uzatması). API'de `RulesModule` + `DeadlinesModule`
+  (`/deadlines/calculate`, CRUD, `/upcoming`, `/:id/complete`), kural
+  bazlı veya kullanıcı tanımlı (CUSTOM) süre, kayıt sırasında otomatik
+  hatırlatıcı (Notification) planlama. Başlangıç `RuleSet`/`Holiday`
+  seed verisi eklendi — **her kural "üretime alınmadan önce
+  doğrulanmalı" uyarısıyla işaretli, gerçek/güncel mevzuat kaynağı
+  henüz doğrulanmadı.** Mobilde Takvim ekranı (yaklaşan süreler,
+  tamamlama/silme), süre hesaplama ekranı (üç süre aracı buraya
+  bağlandı) ve Özel Süre ekleme ekranı.
 
 Tüm bunlar test edildi: `pnpm typecheck`, `pnpm lint`, `pnpm test` — hepsi
 yeşil. Devam ederken bu üç komutu bozmadan ilerle.
@@ -58,9 +73,6 @@ yeşil. Devam ederken bu üç komutu bozmadan ilerle.
 
 Doküman Bölüm 25'e göre:
 
-- **Faz 5 — Süre motoru:** `packages/rule-engine` ve
-  `packages/deadline-engine` paketlerini doldur (şu an placeholder),
-  `Holiday` ve `RuleSet` modelleri zaten şemada var.
 - **Faz 6 — Hesaplama motorları:** `packages/calculation-engine`'i
   doldur, doküman Bölüm 17'deki 10 motoru saf fonksiyon olarak yaz.
 

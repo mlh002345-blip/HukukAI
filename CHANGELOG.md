@@ -2,6 +2,48 @@
 
 Bu proje [Keep a Changelog](https://keepachangelog.com/) formatını takip eder.
 
+## [Faz 5] — Süre Motoru
+
+### Eklendi
+
+- `packages/rule-engine`:
+  - `selectRuleVersion` — bir kuralın, verilen tarihte (olay tarihi;
+    hesaplamanın yapıldığı gün değil) yürürlükte olan sürümünü seçer.
+    Aynı olay için 2024'te ve 2026'da farklı mevzuat sürümü uygulanabilir.
+  - `evaluateConditions` — EQUALS/NOT_EQUALS/IN/GTE/LTE operatörleriyle
+    koşul değerlendirme
+  - `findApplicableRule` — belge türü gibi olgulardan (facts) otomatik
+    kural eşleştirme (ileride belge analizinden otomatik yönlendirme
+    için kullanılabilir)
+- `packages/deadline-engine`:
+  - Saat dilimi bağımsız (UTC) tarih aritmetiği
+  - `calculateDeadline` — takvim günü/iş günü sayımı, ay/yıl birimlerinde
+    HMK m.92/2 uyumlu "ayın son günü" sabitlemesi, hafta sonu/resmi tatil
+    uzatması (`appliedAdjustments`), kalan gün ve süre durumu
+- `apps/api`:
+  - `RulesModule` — `RuleSet`/`Holiday` tablolarını okuyup kural
+    motorunun beklediği biçime çeviren katman
+  - `DeadlinesModule` — `POST /deadlines/calculate` (kalıcı kayıt
+    oluşturmadan hesaplama), `POST/GET/GET:id/PATCH/DELETE /deadlines`,
+    `GET /deadlines/upcoming`, `POST /deadlines/:id/complete`
+  - Kural bazlı (RULE) veya kullanıcı tanımlı (CUSTOM) süre oluşturma
+  - Süre kaydedildiğinde otomatik hatırlatıcı (`Notification`) planlama
+    (7/3/1/0 gün önce — `NOTIFICATION_OFFSETS_DAYS`)
+  - Başlangıç `RuleSet` verisi (icra/trafik cezası itiraz ve indirimli
+    ödeme/istinaf/temyiz/vergi dava açma/SGK itiraz süreleri) ve sabit
+    tarihli resmi tatiller seed edildi. **Bu değerler geliştirme
+    amaçlıdır; her kuralın `warnings` alanında "üretime alınmadan önce
+    doğrulanmalı" uyarısı bulunur (Bölüm 16).**
+- `apps/mobile`:
+  - Takvim ekranı — yaklaşan süreler, kalan gün rozeti, tamamlama/silme
+  - Süre hesaplama ekranı — son gün/kalan gün/dayanak/uyarıları gösterir,
+    "Hatırlatıcı Ekle" ile kalıcı kayda dönüştürür; Araçlar ekranındaki
+    üç süre aracı (icra itiraz, trafik cezası itiraz/indirimli ödeme)
+    buraya bağlandı
+  - Özel Süre ekleme ekranı (kural motoru olmadan, doğrudan tarih girişi)
+- 35 yeni birim testi (`rule-engine` 14, `deadline-engine` 21) +
+  `RulesService`/`DeadlinesService` servis testleri
+
 ## [Faz 4] — OCR ve Belge Analizi
 
 ### Eklendi
