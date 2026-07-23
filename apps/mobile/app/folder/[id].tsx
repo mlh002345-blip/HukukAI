@@ -1,0 +1,241 @@
+import { useState } from "react";
+import {
+  ActivityIndicator,
+  Alert,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
+import { router, useLocalSearchParams } from "expo-router";
+import * as DocumentPicker from "expo-document-picker";
+import { EmptyState } from "@hukukai/ui";
+import { UPLOAD_LIMITS } from "@hukukai/config";
+import type { DocumentSummary } from "@hukukai/types";
+import { useDeleteFolder, useFolder } from "../../src/hooks/useFolders";
+import {
+  useDeleteDocument,
+  useDocuments,
+  useUploadDocument,
+} from "../../src/hooks/useDocuments";
+
+const DOCUMENT_STATUS_LABELS: Record<DocumentSummary["status"], string> = {
+  UPLOADED: "Yüklendi",
+  OCR_PROCESSING: "OCR işleniyor",
+  AI_PROCESSING: "Analiz ediliyor",
+  REVIEW_REQUIRED: "İnceleme gerekli",
+  COMPLETED: "Tamamlandı",
+  FAILED: "Başarısız",
+};
+
+function formatFileSize(sizeBytes: number): string {
+  if (sizeBytes < 1024 * 1024) return `${Math.round(sizeBytes / 1024)} KB`;
+  return `${(sizeBytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+function DocumentRow({
+  document,
+  onDelete,
+}: {
+  document: DocumentSummary;
+  onDelete: () => void;
+}) {
+  return (
+    <View style={styles.docRow}>
+      <View style={styles.docInfo}>
+        <Text style={styles.docName} numberOfLines={1}>
+          {document.originalName}
+        </Text>
+        <Text style={styles.docMeta}>
+          {formatFileSize(document.sizeBytes)} ·{" "}
+          {DOCUMENT_STATUS_LABELS[document.status]}
+        </Text>
+      </View>
+      <Pressable onPress={onDelete} hitSlop={8}>
+        <Text style={styles.docDelete}>Sil</Text>
+      </Pressable>
+    </View>
+  );
+}
+
+export default function FolderDetailScreen() {
+  const { id } = useLocalSearchParams<{ id: string }>();
+  const [uploadError, setUploadError] = useState<string | null>(null);
+
+  const folderQuery = useFolder(id);
+  const documentsQuery = useDocuments(id);
+  const uploadDocument = useUploadDocument(id);
+  const deleteDocument = useDeleteDocument();
+  const deleteFolder = useDeleteFolder();
+
+  const folder = folderQuery.data;
+  const documents = documentsQuery.data ?? [];
+
+  const onPickFile = async () => {
+    setUploadError(null);
+    const result = await DocumentPicker.getDocumentAsync({
+      type: [...UPLOAD_LIMITS.allowedMimeTypes],
+      copyToCacheDirectory: true,
+    });
+    if (result.canceled || result.assets.length === 0) return;
+
+    const asset = result.assets[0];
+    if (!asset) return;
+    if (
+      asset.size !== undefined &&
+      asset.size !== null &&
+      asset.size > UPLOAD_LIMITS.maxFileSizeBytes
+    ) {
+      setUploadError("Dosya boyutu izin verilen azami boyutu aşıyor.");
+      return;
+    }
+
+    uploadDocument.mutate(
+      {
+        uri: asset.uri,
+        name: asset.name,
+        mimeType: asset.mimeType ?? "application/octet-stream",
+      },
+      {
+        onError: (error) =>
+          setUploadError(
+            error instanceof Error ? error.message : "Yükleme başarısız oldu.",
+          ),
+      },
+    );
+  };
+
+  const onDeleteFolder = () => {
+    if (!id) return;
+    Alert.alert(
+      "Klasörü sil",
+      "Bu klasörü silmek istediğinize emin misiniz?",
+      [
+        { text: "Vazgeç", style: "cancel" },
+        {
+          text: "Sil",
+          style: "destructive",
+          onPress: () =>
+            deleteFolder.mutate(id, {
+              onSuccess: () => router.replace("/(tabs)/folders"),
+            }),
+        },
+      ],
+    );
+  };
+
+  if (folderQuery.isLoading || !folder) {
+    return (
+      <View style={styles.centered}>
+        <ActivityIndicator />
+      </View>
+    );
+  }
+
+  return (
+    <ScrollView
+      style={styles.container}
+      contentContainerStyle={styles.content}
+    >
+      <View style={styles.headerRow}>
+        <Text style={styles.title}>{folder.title}</Text>
+        <Pressable onPress={() => router.push(`/folder/${folder.id}/edit`)}>
+          <Text style={styles.editLink}>Düzenle</Text>
+        </Pressable>
+      </View>
+
+      {folder.clientName ? (
+        <Text style={styles.meta}>{folder.clientName}</Text>
+      ) : null}
+      {folder.referenceNumber ? (
+        <Text style={styles.meta}>Referans: {folder.referenceNumber}</Text>
+      ) : null}
+      {folder.notes ? <Text style={styles.notes}>{folder.notes}</Text> : null}
+
+      <View style={styles.sectionHeader}>
+        <Text style={styles.sectionTitle}>Belgeler</Text>
+        <Pressable
+          style={styles.uploadButton}
+          onPress={onPickFile}
+          disabled={uploadDocument.isPending}
+        >
+          {uploadDocument.isPending ? (
+            <ActivityIndicator color="#FFFFFF" size="small" />
+          ) : (
+            <Text style={styles.uploadButtonText}>+ Belge Yükle</Text>
+          )}
+        </Pressable>
+      </View>
+
+      {uploadError ? <Text style={styles.errorText}>{uploadError}</Text> : null}
+
+      {documents.length === 0 && !documentsQuery.isLoading ? (
+        <EmptyState
+          title="Bu klasörde belge yok"
+          description="PDF, JPEG, PNG veya HEIC belge yükleyebilirsiniz."
+        />
+      ) : null}
+
+      <View style={styles.docList}>
+        {documents.map((document) => (
+          <DocumentRow
+            key={document.id}
+            document={document}
+            onDelete={() => deleteDocument.mutate(document.id)}
+          />
+        ))}
+      </View>
+
+      <Pressable style={styles.deleteFolderButton} onPress={onDeleteFolder}>
+        <Text style={styles.deleteFolderText}>Klasörü Sil</Text>
+      </Pressable>
+    </ScrollView>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: { flex: 1, backgroundColor: "#FFFFFF" },
+  content: { padding: 20, paddingTop: 60, gap: 12, paddingBottom: 48 },
+  centered: { flex: 1, alignItems: "center", justifyContent: "center" },
+  headerRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  title: { fontSize: 22, fontWeight: "700", color: "#101828", flexShrink: 1 },
+  editLink: { color: "#175CD3", fontWeight: "600", fontSize: 13 },
+  meta: { fontSize: 14, color: "#475467" },
+  notes: { fontSize: 13, color: "#667085", marginTop: 4 },
+  sectionHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginTop: 16,
+  },
+  sectionTitle: { fontSize: 16, fontWeight: "700", color: "#101828" },
+  uploadButton: {
+    backgroundColor: "#175CD3",
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+  },
+  uploadButtonText: { color: "#FFFFFF", fontWeight: "600", fontSize: 13 },
+  errorText: { color: "#B42318", fontSize: 12 },
+  docList: { gap: 8 },
+  docRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    borderWidth: 1,
+    borderColor: "#EAECF0",
+    borderRadius: 10,
+    padding: 12,
+  },
+  docInfo: { flex: 1, gap: 2, marginRight: 8 },
+  docName: { fontSize: 14, fontWeight: "600", color: "#101828" },
+  docMeta: { fontSize: 12, color: "#667085" },
+  docDelete: { color: "#B42318", fontWeight: "600", fontSize: 13 },
+  deleteFolderButton: { alignItems: "center", marginTop: 24 },
+  deleteFolderText: { color: "#B42318", fontWeight: "600", fontSize: 13 },
+});

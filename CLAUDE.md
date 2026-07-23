@@ -20,6 +20,12 @@ o dokümana göre kodlanıyor. Yeni bir şey yapmadan önce bu dokümanı oku.
 - **Faz 2** — `packages/search-engine`: Türkçe-duyarlı deterministik arama
   motoru + 14 araçlık MVP kataloğu, rol bazlı sıralama (hiçbir aracı
   gizlemez), Ana Sayfa + Araçlar ekranları
+- **Faz 3** — Dosya kasası: `FoldersModule` (klasör CRUD, soft delete),
+  `DocumentsModule` (presigned upload-url/complete-upload akışı, MIME/
+  uzantı/boyut doğrulama, SHA-256 checksum ile mükerrer belge tespiti,
+  virüs tarama yer tutucusu), `StorageModule` (S3/MinIO). Mobilde
+  Dosyalarım, Yeni/Düzenle Klasör, Klasör Detayı (belge yükleme/listeleme/
+  silme) ekranları.
 
 Tüm bunlar test edildi: `pnpm typecheck`, `pnpm lint`, `pnpm test` — hepsi
 yeşil. Devam ederken bu üç komutu bozmadan ilerle.
@@ -44,11 +50,6 @@ yeşil. Devam ederken bu üç komutu bozmadan ilerle.
 
 Doküman Bölüm 25'e göre:
 
-- **Faz 3 — Dosya kasası:** Klasör CRUD, belge yükleme (S3/MinIO
-  presigned URL), belge listeleme/silme, dosya doğrulama (MIME, boyut,
-  virüs taraması placeholder). `packages/config`'teki `UPLOAD_LIMITS`
-  sabitlerini kullan. Prisma modelleri (`CaseFolder`, `Document`) zaten
-  şemada mevcut, sadece NestJS modülü ve mobil ekranlar eksik.
 - **Faz 4 — OCR ve belge analizi:** `packages/ai-provider` paketini
   doldur (şu an placeholder), `AITask` tipini kullan, BullMQ job queue,
   `DocumentAnalysis` modeli zaten şemada var.

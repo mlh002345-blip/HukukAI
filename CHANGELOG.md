@@ -2,6 +2,32 @@
 
 Bu proje [Keep a Changelog](https://keepachangelog.com/) formatını takip eder.
 
+## [Faz 3] — Dosya Kasası
+
+### Eklendi
+
+- `apps/api`: `FoldersModule` (`POST/GET/GET:id/PATCH/DELETE /folders`,
+  kullanıcı bazlı sahiplik kontrolü, soft delete)
+- `apps/api`: `DocumentsModule`
+  - `POST /documents/upload-url` + `POST /documents/complete-upload`
+    (S3/MinIO presigned URL akışı)
+  - Dosya doğrulama: izin verilen MIME türleri, uzantı/MIME uyumu, azami
+    boyut (`packages/config` → `UPLOAD_LIMITS`)
+  - SHA-256 checksum ile mükerrer belge tespiti (`@@unique([userId, checksum])`)
+  - Virüs tarama yer tutucusu (EICAR test imzası reddi; gerçek motor
+    Faz 4+'ta)
+  - `GET /documents`, `GET /documents/:id`, `DELETE /documents/:id`
+    (soft delete + depodan silme)
+- `apps/api`: `StorageModule` — `@aws-sdk/client-s3` tabanlı presigned
+  URL üretimi, `HeadObject`, `DeleteObject`
+- `packages/types`, `packages/validation`: Folder/Document şemaları ve
+  tipleri (`createFolderSchema`, `requestUploadUrlSchema`, vb.)
+- `apps/mobile`: Dosyalarım sekmesi (klasör listesi), Yeni Klasör,
+  Klasör Düzenle, Klasör Detayı (belge listeleme/yükleme/silme) ekranları
+  — `expo-document-picker` + `expo-crypto` (istemci taraflı SHA-256)
+- Birim testleri: dosya doğrulama, checksum/anahtar üretimi, virüs
+  tarama yer tutucusu, `FoldersService`/`DocumentsService`
+
 ## [Faz 0-2] — Monorepo, Auth, Araç Kataloğu ve Evrensel Arama
 
 ### Eklendi
