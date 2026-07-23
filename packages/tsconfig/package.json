@@ -1,0 +1,11 @@
+{
+  "name": "@hukukai/tsconfig",
+  "version": "0.1.0",
+  "private": true,
+  "files": [
+    "base.json",
+    "nestjs.json",
+    "react-native.json",
+    "nextjs.json"
+  ]
+}

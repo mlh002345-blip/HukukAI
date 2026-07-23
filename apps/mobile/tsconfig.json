@@ -1,0 +1,10 @@
+{
+  "extends": "@hukukai/tsconfig/react-native.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"]
+    }
+  },
+  "include": ["app", "src", "*.d.ts"]
+}

@@ -1,0 +1,356 @@
+// Bkz. Doküman Bölüm 13 — Veritabanı Modeli
+// Migration dosyaları geriye dönük değiştirilmez (Bölüm 27).
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  CITIZEN
+  LAWYER
+  ACCOUNTANT
+  ADMIN
+}
+
+enum SubscriptionPlan {
+  FREE
+  INDIVIDUAL
+  PRO
+  OFFICE
+  ENTERPRISE
+}
+
+enum DocumentStatus {
+  UPLOADED
+  OCR_PROCESSING
+  AI_PROCESSING
+  REVIEW_REQUIRED
+  COMPLETED
+  FAILED
+}
+
+enum FolderType {
+  LEGAL
+  ENFORCEMENT
+  TAX
+  SGK
+  RENT
+  EXECUTION
+  TRAFFIC_FINE
+  OTHER
+}
+
+enum DeadlineStatus {
+  ACTIVE
+  COMPLETED
+  EXPIRED
+  CANCELLED
+}
+
+enum CalculationStatus {
+  DRAFT
+  COMPLETED
+  INVALIDATED
+}
+
+model User {
+  id                   String    @id @default(cuid())
+  email                String    @unique
+  passwordHash         String
+  fullName             String
+  phone                String?
+  role                 UserRole
+  subscriptionPlan     SubscriptionPlan @default(FREE)
+  emailVerifiedAt      DateTime?
+  isActive             Boolean   @default(true)
+  acceptedTermsVersion String?
+  acceptedKvkkVersion  String?
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+  deletedAt            DateTime?
+
+  refreshTokens      RefreshToken[]
+  folders            CaseFolder[]
+  documents          Document[]
+  calculations       Calculation[]
+  deadlines          Deadline[]
+  generatedDocuments GeneratedDocument[]
+  notifications      Notification[]
+  auditLogs          AuditLog[]
+  favorites          UserFavoriteTool[]
+
+  @@map("users")
+}
+
+model ToolDefinition {
+  id                   String   @id
+  slug                 String   @unique
+  name                 String
+  shortDescription     String
+  categories           Json
+  audiences            Json
+  keywords             Json
+  synonyms             Json
+  icon                 String
+  route                String
+  isActive             Boolean  @default(true)
+  isBeta               Boolean  @default(false)
+  requiresSubscription Boolean  @default(false)
+  rolePriorities       Json
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  favorites UserFavoriteTool[]
+
+  @@map("tool_definitions")
+}
+
+model UserFavoriteTool {
+  userId    String
+  toolId    String
+  createdAt DateTime @default(now())
+
+  user User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tool ToolDefinition  @relation(fields: [toolId], references: [id], onDelete: Cascade)
+
+  @@id([userId, toolId])
+  @@map("user_favorite_tools")
+}
+
+model RefreshToken {
+  id        String    @id @default(cuid())
+  userId    String
+  tokenHash String    @unique
+  expiresAt DateTime
+  revokedAt DateTime?
+  createdAt DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+  @@map("refresh_tokens")
+}
+
+model CaseFolder {
+  id              String     @id @default(cuid())
+  userId          String
+  title           String
+  folderType      FolderType
+  clientName      String?
+  referenceNumber String?
+  notes           String?
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+  deletedAt       DateTime?
+
+  user               User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  documents          Document[]
+  calculations       Calculation[]
+  deadlines          Deadline[]
+  generatedDocuments GeneratedDocument[]
+
+  @@index([userId, createdAt])
+  @@index([userId, folderType])
+  @@map("case_folders")
+}
+
+model Document {
+  id               String         @id @default(cuid())
+  userId           String
+  folderId         String?
+  originalName     String
+  storageKey       String
+  mimeType         String
+  sizeBytes        Int
+  checksum         String
+  pageCount        Int?
+  documentType     String?
+  status           DocumentStatus @default(UPLOADED)
+  ocrTextEncrypted String?
+  errorCode        String?
+  errorMessage     String?
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+  deletedAt        DateTime?
+
+  user         User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  folder       CaseFolder?        @relation(fields: [folderId], references: [id], onDelete: SetNull)
+  analyses     DocumentAnalysis[]
+  calculations Calculation[]
+  deadlines    Deadline[]
+
+  @@index([userId, createdAt])
+  @@index([folderId])
+  @@index([status])
+  @@unique([userId, checksum])
+  @@map("documents")
+}
+
+model DocumentAnalysis {
+  id               String   @id @default(cuid())
+  documentId       String
+  schemaVersion    String
+  provider         String
+  model            String
+  promptVersion    String
+  extractedData    Json
+  summary          String?
+  warnings         Json
+  recommendedTools Json
+  confidenceScore  Decimal? @db.Decimal(5, 4)
+  requiresReview   Boolean  @default(false)
+  inputTokens      Int?
+  outputTokens     Int?
+  estimatedCostUsd Decimal? @db.Decimal(12, 6)
+  createdAt        DateTime @default(now())
+
+  document Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  @@index([documentId, createdAt])
+  @@map("document_analyses")
+}
+
+model Calculation {
+  id              String            @id @default(cuid())
+  userId          String
+  folderId        String?
+  documentId      String?
+  calculationType String
+  engineVersion   String
+  ruleSetVersion  String
+  inputData       Json
+  outputData      Json
+  status          CalculationStatus @default(COMPLETED)
+  createdAt       DateTime          @default(now())
+  invalidatedAt   DateTime?
+
+  user     User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  folder   CaseFolder? @relation(fields: [folderId], references: [id], onDelete: SetNull)
+  document Document?   @relation(fields: [documentId], references: [id], onDelete: SetNull)
+
+  @@index([userId, createdAt])
+  @@index([folderId])
+  @@index([calculationType])
+  @@map("calculations")
+}
+
+model Deadline {
+  id                String         @id @default(cuid())
+  userId            String
+  folderId          String?
+  documentId        String?
+  title             String
+  ruleId            String
+  ruleVersion       String
+  startEvent        String
+  startDate         DateTime
+  calculatedEndDate DateTime
+  adjustedEndDate   DateTime
+  status            DeadlineStatus @default(ACTIVE)
+  legalBasis        Json
+  warnings          Json
+  completedAt       DateTime?
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  folder        CaseFolder?    @relation(fields: [folderId], references: [id], onDelete: SetNull)
+  document      Document?      @relation(fields: [documentId], references: [id], onDelete: SetNull)
+  notifications Notification[]
+
+  @@index([userId, adjustedEndDate])
+  @@index([status, adjustedEndDate])
+  @@map("deadlines")
+}
+
+model Notification {
+  id          String    @id @default(cuid())
+  userId      String
+  deadlineId  String?
+  title       String
+  body        String
+  scheduledAt DateTime
+  sentAt      DateTime?
+  failedAt    DateTime?
+  providerId  String?
+  createdAt   DateTime  @default(now())
+
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  deadline Deadline? @relation(fields: [deadlineId], references: [id], onDelete: Cascade)
+
+  @@index([scheduledAt, sentAt])
+  @@index([userId, scheduledAt])
+  @@map("notifications")
+}
+
+model GeneratedDocument {
+  id              String   @id @default(cuid())
+  userId          String
+  folderId        String?
+  documentType    String
+  templateVersion String
+  inputData       Json
+  storageKey      String?
+  createdAt       DateTime @default(now())
+
+  user   User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  folder CaseFolder? @relation(fields: [folderId], references: [id], onDelete: SetNull)
+
+  @@index([userId, createdAt])
+  @@map("generated_documents")
+}
+
+model RuleSet {
+  id          String    @id @default(cuid())
+  module      String
+  ruleKey     String
+  version     String
+  validFrom   DateTime
+  validTo     DateTime?
+  ruleData    Json
+  legalBasis  Json
+  sourceUrl   String?
+  sourceHash  String?
+  isPublished Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+  publishedAt DateTime?
+
+  @@unique([ruleKey, version])
+  @@index([module, isPublished])
+  @@index([validFrom, validTo])
+  @@map("rule_sets")
+}
+
+model Holiday {
+  id        String   @id @default(cuid())
+  date      DateTime @unique
+  name      String
+  isHalfDay Boolean  @default(false)
+  source    String?
+
+  @@map("holidays")
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  userId     String?
+  action     String
+  entityType String
+  entityId   String?
+  metadata   Json?
+  ipHash     String?
+  userAgent  String?
+  createdAt  DateTime @default(now())
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId, createdAt])
+  @@index([entityType, entityId])
+  @@map("audit_logs")
+}
