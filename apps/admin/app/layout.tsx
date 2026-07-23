@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { AdminAuthProvider } from "../src/context/admin-auth-context";
 
 export const metadata: Metadata = {
   title: "HukukAI Admin",
@@ -13,7 +14,7 @@ export default function RootLayout({
   return (
     <html lang="tr">
       <body style={{ margin: 0, fontFamily: "system-ui, sans-serif" }}>
-        {children}
+        <AdminAuthProvider>{children}</AdminAuthProvider>
       </body>
     </html>
   );

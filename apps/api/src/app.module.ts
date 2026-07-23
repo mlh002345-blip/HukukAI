@@ -18,7 +18,9 @@ import { DeadlinesModule } from "./modules/deadlines/deadlines.module";
 import { CalculationsModule } from "./modules/calculations/calculations.module";
 import { ReportsModule } from "./modules/reports/reports.module";
 import { BillingModule } from "./modules/billing/billing.module";
+import { AdminModule } from "./modules/admin/admin.module";
 import { JwtAuthGuard } from "./common/guards/jwt-auth.guard";
+import { RolesGuard } from "./common/guards/roles.guard";
 import { parseRedisConnection } from "./queue/redis-connection";
 
 @Module({
@@ -55,10 +57,12 @@ import { parseRedisConnection } from "./queue/redis-connection";
     CalculationsModule,
     ReportsModule,
     BillingModule,
+    AdminModule,
   ],
   providers: [
     { provide: APP_GUARD, useClass: ThrottlerGuard },
     { provide: APP_GUARD, useClass: JwtAuthGuard },
+    { provide: APP_GUARD, useClass: RolesGuard },
   ],
 })
 export class AppModule {}
