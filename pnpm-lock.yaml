@@ -69,6 +69,9 @@ importers:
       '@hukukai/ai-provider':
         specifier: workspace:*
         version: link:../../packages/ai-provider
+      '@hukukai/calculation-engine':
+        specifier: workspace:*
+        version: link:../../packages/calculation-engine
       '@hukukai/config':
         specifier: workspace:*
         version: link:../../packages/config
