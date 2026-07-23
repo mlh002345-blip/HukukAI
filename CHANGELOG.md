@@ -2,6 +2,42 @@
 
 Bu proje [Keep a Changelog](https://keepachangelog.com/) formatını takip eder.
 
+## [Faz 9] — Admin Panel
+
+### Eklendi
+
+- `apps/api`: `AdminModule` — tüm uçlar `RolesGuard`/`@Roles("ADMIN")`
+  ile sınırlı (global `APP_GUARD` zincirine eklendi; tüketici
+  uygulamasındaki "rol bir erişim duvarı değildir" kuralından ayrıdır,
+  o kural yalnızca araç görünürlüğü için geçerlidir):
+  - `GET /admin/dashboard` — toplam/aktif kullanıcı, başarısız belge
+    analizi, yayınlanmamış kural seti, bu ayki AI maliyeti
+  - `GET/POST /admin/users`, `GET /admin/users/:id`,
+    `POST /admin/users/:id/{freeze,unfreeze}` — `User.isActive`
+    üzerinden; dondurulan kullanıcı mevcut JWT stratejisiyle anında
+    reddedilir
+  - `GET /admin/document-errors` — `FAILED` durumundaki belgeler
+  - `GET/POST /admin/rule-sets`, `POST /admin/rule-sets/:id/publish` —
+    yeni sürümler taslak (`isPublished: false`) oluşturulur, ayrı bir
+    yayınlama adımı gerektirir
+  - `GET/POST/DELETE /admin/holidays`
+  - `GET /admin/ai-usage` — sağlayıcı/model bazında analiz sayısı,
+    token ve tahmini maliyet toplamı
+  - `GET /admin/audit-logs` — `AuditModule`/`AuditLogService` ile
+    önceden hiç yazılmayan `AuditLog` tablosu artık her admin eyleminde
+    (`USER_FROZEN`, `RULE_SET_PUBLISHED`, `HOLIDAY_CREATED` vb.) doldurulur
+- `apps/admin` (Next.js, önceden yalnızca iskelet) dolduruldu:
+  - E-posta/parola girişi (`ADMIN` rolü dışındakiler reddedilir),
+    `localStorage` tabanlı erişim jetonu, `RequireAdmin` sayfa koruması
+  - Panel, Kullanıcılar + Kullanıcı Detayı (dondur/aktifleştir), Belge
+    Hataları, Kural Setleri (taslak oluşturma + yayınlama), Resmi
+    Tatiller (ekle/sil), AI Maliyeti, Audit Log sayfaları
+  - **Kapsam notu:** Bölüm 11'deki shadcn/ui, React Hook Form,
+    Recharts ve TanStack Query bu fazda entegre edilmedi; MVP kapsamında
+    sade satır içi stiller ve düz `fetch` kullanıldı
+- 13 yeni birim testi (`RolesGuard` 3, `AuditLogService` 2,
+  `AdminService` 8)
+
 ## [Faz 8] — Paket ve Ödeme
 
 ### Eklendi

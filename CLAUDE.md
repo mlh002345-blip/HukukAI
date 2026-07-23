@@ -98,6 +98,23 @@ o dokümana göre kodlanıyor. Yeni bir şey yapmadan önce bu dokümanı oku.
   altyapısı entegre edilmedi — `MockPaymentProvider` her isteği
   başarılı sayar; üretime alınmadan önce gerçek bir sağlayıcıyla
   değiştirilmelidir.**
+- **Faz 9** — Admin panel: API'de `AdminModule` (`ADMIN` rolüyle
+  sınırlı — global `RolesGuard`/`@Roles()`), `AuditModule`
+  (`AuditLogService.record`/`findAll` — önceden hiç yazılmayan
+  `AuditLog` tablosu artık admin eylemlerinde doldurulur). Uçlar:
+  `GET/POST /admin/users`, `POST /admin/users/:id/{freeze,unfreeze}`
+  (`User.isActive` üzerinden, mevcut JWT stratejisi otomatik reddeder),
+  `GET /admin/document-errors`, `GET/POST /admin/rule-sets`,
+  `POST /admin/rule-sets/:id/publish`, `GET/POST/DELETE /admin/holidays`,
+  `GET /admin/ai-usage` (sağlayıcı/model bazında token/maliyet toplamı),
+  `GET /admin/audit-logs`, `GET /admin/dashboard`. `apps/admin`
+  (Next.js) dolduruldu: e-posta/parola girişi (rol `ADMIN` değilse
+  reddedilir), Panel/Kullanıcılar/Kullanıcı Detayı (dondur/aktifleştir)/
+  Belge Hataları/Kural Setleri (taslak oluşturma + yayınlama)/Resmi
+  Tatiller (ekle/sil)/AI Maliyeti/Audit Log sayfaları. **Kapsam notu:**
+  doküman Bölüm 11'deki shadcn/ui, React Hook Form ve Recharts bu fazda
+  entegre edilmedi — sade satır içi stiller ve düz `fetch` ile MVP
+  kapsamında tutuldu; TanStack Query de eklenmedi.
 
 Tüm bunlar test edildi: `pnpm typecheck`, `pnpm lint`, `pnpm test` — hepsi
 yeşil. Devam ederken bu üç komutu bozmadan ilerle.
