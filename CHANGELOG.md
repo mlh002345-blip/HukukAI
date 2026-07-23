@@ -2,6 +2,38 @@
 
 Bu proje [Keep a Changelog](https://keepachangelog.com/) formatını takip eder.
 
+## [Faz 7] — Raporlama
+
+### Eklendi
+
+- `apps/api`: `ReportsModule` — belge analizi, hesaplama ve süre
+  sonuçlarından tek bir ortak rapor içerik modeliyle (Bölüm 22:
+  rapor başlığı, oluşturma tarihi, girdi/çıktı verileri, hesap
+  adımları, kural sürümü, mevzuat dayanağı, uyarılar, sorumluluk
+  açıklaması, benzersiz rapor numarası `HKA-{yıl}-{kod}`) PDF rapor
+  üretir (`pdfkit`, native bağımlılık yok):
+  - `POST /reports/document-analysis`, `/calculation`, `/deadline`,
+    `/traffic-fine` (süre raporuna yönlenir), `/self-employment-receipt`
+    (hesaplama raporuna yönlenir) — doküman Bölüm 18'deki tüm MVP rapor
+    adları, 3 ortak veri şekli (Document+DocumentAnalysis, Calculation,
+    Deadline) üzerinden karşılanır
+  - `GET /reports` (kullanıcının raporları), `GET /reports/:id/download-url`
+    (5 dakikalık presigned S3/MinIO indirme URL'si)
+  - **FREE plan raporları filigranlıdır** ("HukukAI — Ücretsiz Sürüm"),
+    Bireysel/Pro filigransızdır (Bölüm 23)
+  - `StorageService`e `putObjectBuffer`/`createDownloadUrl` eklendi
+- `packages/types` / `packages/validation`: `ReportType`,
+  `GeneratedReportSummary`, `ReportDownloadUrlResponse` ve rapor
+  oluşturma istekleri için zod şemaları
+- `apps/mobile`: `useReports` hook seti (rapor oluşturma/listeleme/
+  indirme), Raporlarım ekranı (`app/reports`, presigned URL'yi
+  `Linking.openURL` ile açar), Profil ekranındaki "Raporlarım" menü
+  satırı artık çalışıyor; Belge Detayı, Hesaplama sonucu ve Süre
+  hesaplama (kaydedilen hatırlatıcı) ekranlarına "Rapor Oluştur"
+  eylemi eklendi
+- 20 yeni birim testi (`report-content`, 3 şablon oluşturucu, PDF
+  render, `ReportsService`)
+
 ## [Faz 6] — Hesaplama Motorları
 
 ### Eklendi

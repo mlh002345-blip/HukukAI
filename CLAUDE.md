@@ -67,6 +67,17 @@ o dokümana göre kodlanıyor. Yeni bir şey yapmadan önce bu dokümanı oku.
   yüksek riskli alan olduğu için bilinçli olarak ayrı bir onay akışına
   bırakıldı ve henüz UI'a bağlanmadı.
 
+- **Faz 7** — Raporlama: `ReportsModule` (belge analizi, hesaplama ve
+  süre sonuçlarından ortak rapor içerik modeliyle — Bölüm 22 — PDF
+  üretimi, `pdfkit` ile; `POST /reports/{document-analysis,calculation,
+  deadline,traffic-fine,self-employment-receipt}`, `GET /reports`,
+  `GET /reports/:id/download-url`). Doküman Bölüm 18'deki tüm MVP rapor
+  adları 3 ortak veri şekli üzerinden karşılanır. **FREE plan raporları
+  filigranlıdır, Bireysel/Pro filigransızdır** (Bölüm 23).
+  `StorageService`e `putObjectBuffer`/`createDownloadUrl` eklendi.
+  Mobilde Raporlarım ekranı, `useReports` hook seti ve Belge Detayı/
+  Hesaplama/Süre hesaplama ekranlarına "Rapor Oluştur" eylemi eklendi.
+
 Tüm bunlar test edildi: `pnpm typecheck`, `pnpm lint`, `pnpm test` — hepsi
 yeşil. Devam ederken bu üç komutu bozmadan ilerle.
 

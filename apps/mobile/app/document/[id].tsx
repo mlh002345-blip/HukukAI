@@ -9,7 +9,7 @@ import {
   TextInput,
   View,
 } from "react-native";
-import { useLocalSearchParams } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import type { DocumentStatus } from "@hukukai/types";
 import { useDocument } from "../../src/hooks/useDocuments";
 import {
@@ -19,6 +19,7 @@ import {
   useRecommendedActions,
   useUpdateExtractedData,
 } from "../../src/hooks/useDocumentAnalysis";
+import { useGenerateDocumentAnalysisReport } from "../../src/hooks/useReports";
 
 const STATUS_LABELS: Record<DocumentStatus, string> = {
   UPLOADED: "Yüklendi",
@@ -120,6 +121,7 @@ export default function DocumentDetailScreen() {
     id,
     status === "COMPLETED",
   );
+  const generateReport = useGenerateDocumentAnalysisReport();
 
   if (documentQuery.isLoading || !documentQuery.data) {
     return (
@@ -234,6 +236,35 @@ export default function DocumentDetailScreen() {
         </>
       ) : null}
 
+      {status === "COMPLETED" && id ? (
+        <Pressable
+          style={styles.secondaryButton}
+          disabled={generateReport.isPending}
+          onPress={() =>
+            generateReport.mutate(id, {
+              onSuccess: () => {
+                Alert.alert(
+                  "Rapor oluşturuldu",
+                  "Raporu Raporlarım ekranından indirebilirsiniz.",
+                  [{ text: "Tamam", onPress: () => router.push("/reports") }],
+                );
+              },
+              onError: (error) =>
+                Alert.alert(
+                  "Hata",
+                  error instanceof Error ? error.message : "Rapor oluşturulamadı.",
+                ),
+            })
+          }
+        >
+          {generateReport.isPending ? (
+            <ActivityIndicator color="#175CD3" />
+          ) : (
+            <Text style={styles.secondaryButtonText}>Rapor Oluştur</Text>
+          )}
+        </Pressable>
+      ) : null}
+
       {status === "COMPLETED" &&
       recommendedActionsQuery.data &&
       recommendedActionsQuery.data.length > 0 ? (
@@ -276,6 +307,14 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   primaryButtonText: { color: "#FFFFFF", fontWeight: "700", fontSize: 14 },
+  secondaryButton: {
+    borderWidth: 1,
+    borderColor: "#175CD3",
+    borderRadius: 12,
+    paddingVertical: 13,
+    alignItems: "center",
+  },
+  secondaryButtonText: { color: "#175CD3", fontWeight: "700", fontSize: 14 },
   processingBox: { alignItems: "center", gap: 8, paddingVertical: 16 },
   mutedText: { fontSize: 13, color: "#667085" },
   errorText: { fontSize: 13, color: "#B42318" },

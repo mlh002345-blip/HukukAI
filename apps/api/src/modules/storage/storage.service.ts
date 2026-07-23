@@ -16,6 +16,7 @@ import type { ApiEnv } from "@hukukai/config";
 import type { Readable } from "node:stream";
 
 export const UPLOAD_URL_TTL_SECONDS = 300;
+export const DOWNLOAD_URL_TTL_SECONDS = 300;
 
 export interface StoredObjectInfo {
   sizeBytes: number;
@@ -95,5 +96,27 @@ export class StorageService {
       chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
     }
     return Buffer.concat(chunks);
+  }
+
+  async putObjectBuffer(
+    key: string,
+    buffer: Buffer,
+    contentType: string,
+  ): Promise<void> {
+    await this.client.send(
+      new PutObjectCommand({
+        Bucket: this.bucket,
+        Key: key,
+        Body: buffer,
+        ContentType: contentType,
+      }),
+    );
+  }
+
+  async createDownloadUrl(key: string): Promise<string> {
+    const command = new GetObjectCommand({ Bucket: this.bucket, Key: key });
+    return getSignedUrl(this.client, command, {
+      expiresIn: DOWNLOAD_URL_TTL_SECONDS,
+    });
   }
 }
