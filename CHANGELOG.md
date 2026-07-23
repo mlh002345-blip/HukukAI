@@ -2,6 +2,48 @@
 
 Bu proje [Keep a Changelog](https://keepachangelog.com/) formatını takip eder.
 
+## [Faz 6] — Hesaplama Motorları
+
+### Eklendi
+
+- `packages/calculation-engine`: Bölüm 17'deki 10 zorunlu motor, hepsi
+  saf fonksiyon ve `decimal.js` tabanlı (JS `number` kullanılmaz,
+  hiçbir mevzuat oranı koda gömülü değildir):
+  - Yasal faiz (çok dönemli, farklı oranlı basit faiz)
+  - İcra borcu (anapara + faiz + masraf kalemleri)
+  - Kira artışı (TBK m.344)
+  - Vekâlet ücreti (kademeli tarife + asgari ücret tavanı)
+  - Harç ön hesabı (nispi + maktu)
+  - Serbest meslek makbuzu (stopaj + KDV ayrımı)
+  - KDV (fiyata ekleme / fiyattan ayrıştırma)
+  - Gelir vergisi (kademeli dilim + efektif oran)
+  - SGK işveren maliyeti
+  - İnfaz ön hesabı — dört zorunlu uyarıyı (ön hesap, suç tarihi/türü,
+    tekerrür/mahsup, yetkili makam) her çağrıda değişmez döner
+  - Gelir vergisi ve vekâlet ücreti arasında paylaşılan ortak kademeli
+    tarife çekirdeği (`calculateTieredAmount`)
+- `apps/api`: `CalculationsModule` — 10 hesaplama ucu (`POST
+  /calculations/{interest,enforcement-debt,rent-increase,attorney-fee,
+  court-fee,self-employment-receipt,income-tax,vat,sgk,
+  execution-preview}`), `GET /calculations`, `GET /calculations/:id`,
+  klasör/belge ile ilişkilendirme. **Kapsam notu:** oranlar/dilimler bu
+  fazda istekte doğrudan parametre olarak verilir; RuleSet
+  entegrasyonu (Faz 5'teki süre kuralları gibi) sonraki bir
+  iterasyona bırakıldı.
+- `apps/mobile`: Genel, yapılandırma tabanlı hesaplayıcı ekranı
+  (`app/calculation/[slug]`) tüm 9 hesaplama aracına bağlandı:
+  - 5 tekil-alanlı araç (kira artışı, harç ön hesabı, serbest meslek
+    makbuzu, KDV, SGK işveren maliyeti)
+  - 4 dinamik liste/dilim gerektiren araç (yasal faiz — çok dönemli
+    faiz listesi, icra borcu — dönem + masraf kalemi listesi, vekâlet
+    ücreti/gelir vergisi — kademeli dilim editörü), ekle/kaldır satır
+    desteğiyle
+  - İnfaz ön hesabı, yüksek riskli alan olduğu için bilinçli olarak bu
+    genel forma dahil edilmedi; ayrı bir onay akışı gerektirir.
+- 39 yeni birim testi (`calculation-engine` 33 — yuvarlama/kayan nokta
+  doğruluğu, dilim sınırları, infaz oranı/mahsup/artık yıl senaryoları
+  dahil — + `CalculationsService` 6).
+
 ## [Faz 5] — Süre Motoru
 
 ### Eklendi

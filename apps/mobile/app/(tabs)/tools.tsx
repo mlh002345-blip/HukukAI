@@ -20,6 +20,7 @@ import {
   useToolSearch,
   useTools,
 } from "../../src/hooks/useTools";
+import { CALCULATOR_CONFIGS } from "../../src/lib/calculator-config";
 
 /**
  * Süre motoru (Faz 5) tarafından desteklenen araçlar; bunlar için
@@ -62,8 +63,16 @@ export default function ToolsScreen() {
       });
       return;
     }
-    // Faz 6'da ilgili hesaplama motoru ekranına yönlendirilecektir;
-    // bugün için araç rotası bilgilendirilir.
+    if (CALCULATOR_CONFIGS[tool.slug]) {
+      router.push({
+        pathname: "/calculation/[slug]",
+        params: { slug: tool.slug },
+      });
+      return;
+    }
+    // Süre/hesaplama motoruna bağlı olmayan araçlar (infaz ön hesabı —
+    // yüksek riskli alan, ayrı bir onay akışı gerektirir) için şimdilik
+    // bilgilendirme gösterilir.
     Alert.alert(tool.name, tool.shortDescription);
   };
 
