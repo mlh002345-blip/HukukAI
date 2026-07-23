@@ -10,11 +10,12 @@ import {
   View,
 } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
-import type { DeadlineCalculationResponse } from "@hukukai/types";
+import type { DeadlineCalculationResponse, DeadlineSummary } from "@hukukai/types";
 import {
   useCalculateDeadline,
   useCreateDeadline,
 } from "../../src/hooks/useDeadlines";
+import { useGenerateDeadlineReport } from "../../src/hooks/useReports";
 import { parseTurkishDate } from "../../src/lib/turkish-date";
 
 export default function CalculateDeadlineScreen() {
@@ -25,9 +26,11 @@ export default function CalculateDeadlineScreen() {
   const [dateText, setDateText] = useState("");
   const [dateError, setDateError] = useState<string | null>(null);
   const [result, setResult] = useState<DeadlineCalculationResponse | null>(null);
+  const [savedDeadline, setSavedDeadline] = useState<DeadlineSummary | null>(null);
 
   const calculateDeadline = useCalculateDeadline();
   const createDeadline = useCreateDeadline();
+  const generateReport = useGenerateDeadlineReport();
 
   const onCalculate = () => {
     const isoDate = parseTurkishDate(dateText);
@@ -61,9 +64,10 @@ export default function CalculateDeadlineScreen() {
         title,
       },
       {
-        onSuccess: () => {
+        onSuccess: (deadline) => {
+          setSavedDeadline(deadline);
           Alert.alert("Kaydedildi", "Hatırlatıcı takviminize eklendi.", [
-            { text: "Tamam", onPress: () => router.replace("/(tabs)/calendar") },
+            { text: "Tamam" },
           ]);
         },
         onError: (error) =>
@@ -73,6 +77,22 @@ export default function CalculateDeadlineScreen() {
           ),
       },
     );
+  };
+
+  const onGenerateReport = () => {
+    if (!savedDeadline) return;
+    generateReport.mutate(savedDeadline.id, {
+      onSuccess: () => {
+        Alert.alert("Rapor oluşturuldu", "Raporu Raporlarım ekranından indirebilirsiniz.", [
+          { text: "Tamam", onPress: () => router.push("/reports") },
+        ]);
+      },
+      onError: (error) =>
+        Alert.alert(
+          "Hata",
+          error instanceof Error ? error.message : "Rapor oluşturulamadı.",
+        ),
+    });
   };
 
   return (
@@ -163,6 +183,20 @@ export default function CalculateDeadlineScreen() {
               <Text style={styles.secondaryButtonText}>Hatırlatıcı Ekle</Text>
             )}
           </Pressable>
+
+          {savedDeadline ? (
+            <Pressable
+              style={styles.secondaryButton}
+              onPress={onGenerateReport}
+              disabled={generateReport.isPending}
+            >
+              {generateReport.isPending ? (
+                <ActivityIndicator color="#175CD3" />
+              ) : (
+                <Text style={styles.secondaryButtonText}>Rapor Oluştur</Text>
+              )}
+            </Pressable>
+          ) : null}
         </View>
       ) : null}
     </ScrollView>

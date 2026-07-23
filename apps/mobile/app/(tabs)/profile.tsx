@@ -61,6 +61,7 @@ export default function ProfileScreen() {
         </Pressable>
       ) : (
         <View style={styles.menuList}>
+          <MenuRow label="Raporlarım" onPress={() => router.push("/reports")} />
           <MenuRow label="Bildirim Tercihleri" />
           <MenuRow label="Güvenlik Ayarları" />
           <MenuRow label="Abonelik" />
@@ -78,9 +79,9 @@ export default function ProfileScreen() {
   );
 }
 
-function MenuRow({ label }: { label: string }) {
+function MenuRow({ label, onPress }: { label: string; onPress?: () => void }) {
   return (
-    <Pressable style={styles.menuRow}>
+    <Pressable style={styles.menuRow} onPress={onPress}>
       <Text style={styles.menuRowText}>{label}</Text>
       <Text style={styles.menuRowChevron}>›</Text>
     </Pressable>

@@ -9,9 +9,10 @@ import {
   TextInput,
   View,
 } from "react-native";
-import { useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams, router } from "expo-router";
 import type { CalculationSummary } from "@hukukai/types";
 import { useSubmitCalculation } from "../../src/hooks/useCalculations";
+import { useGenerateCalculationReport } from "../../src/hooks/useReports";
 import {
   CALCULATOR_CONFIGS,
   type CalculatorConfig,
@@ -123,6 +124,7 @@ export default function CalculatorScreen() {
   const [result, setResult] = useState<CalculationSummary | null>(null);
 
   const submitCalculation = useSubmitCalculation(config?.endpoint ?? "");
+  const generateReport = useGenerateCalculationReport();
 
   if (!config) {
     return (
@@ -249,6 +251,31 @@ export default function CalculatorScreen() {
               </View>
             );
           })}
+
+          <Pressable
+            style={styles.secondaryButton}
+            disabled={generateReport.isPending}
+            onPress={() =>
+              generateReport.mutate(result.id, {
+                onSuccess: () => {
+                  Alert.alert("Rapor oluşturuldu", "Raporu Raporlarım ekranından indirebilirsiniz.", [
+                    { text: "Tamam", onPress: () => router.push("/reports") },
+                  ]);
+                },
+                onError: (error) =>
+                  Alert.alert(
+                    "Hata",
+                    error instanceof Error ? error.message : "Rapor oluşturulamadı.",
+                  ),
+              })
+            }
+          >
+            {generateReport.isPending ? (
+              <ActivityIndicator color="#175CD3" />
+            ) : (
+              <Text style={styles.secondaryButtonText}>Rapor Oluştur</Text>
+            )}
+          </Pressable>
         </View>
       ) : null}
     </ScrollView>
@@ -303,6 +330,15 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   resultRow: { gap: 2 },
+  secondaryButton: {
+    borderWidth: 1,
+    borderColor: "#175CD3",
+    borderRadius: 12,
+    paddingVertical: 13,
+    alignItems: "center",
+    marginTop: 12,
+  },
+  secondaryButtonText: { color: "#175CD3", fontWeight: "700", fontSize: 14 },
   resultLabel: {
     fontSize: 12,
     fontWeight: "700",
