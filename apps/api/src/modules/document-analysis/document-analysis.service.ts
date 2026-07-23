@@ -29,6 +29,8 @@ import type { UpdateExtractedDataInput } from "@hukukai/validation";
 import { PrismaService } from "../../prisma/prisma.service";
 // eslint-disable-next-line @typescript-eslint/consistent-type-imports
 import { StorageService } from "../storage/storage.service";
+// eslint-disable-next-line @typescript-eslint/consistent-type-imports
+import { BillingService } from "../billing/billing.service";
 import type { OcrProvider } from "../ocr/ocr-provider";
 import { OCR_PROVIDER } from "../ocr/ocr-provider";
 import { AI_PROVIDER_TOKEN, DOCUMENT_ANALYSIS_QUEUE } from "./ai-provider.token";
@@ -72,6 +74,7 @@ export class DocumentAnalysisService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly storage: StorageService,
+    private readonly billingService: BillingService,
     @Inject(OCR_PROVIDER) private readonly ocrProvider: OcrProvider,
     @Inject(AI_PROVIDER_TOKEN) private readonly aiProvider: AIProvider,
     private readonly configService: ConfigService<ApiEnv, true>,
@@ -83,6 +86,7 @@ export class DocumentAnalysisService {
     if (!ANALYZABLE_STATUSES.has(document.status)) {
       throw new ConflictException("Belge zaten işleniyor.");
     }
+    await this.billingService.reserveAnalysisQuota(userId);
 
     await this.prisma.document.update({
       where: { id: documentId },
@@ -106,6 +110,10 @@ export class DocumentAnalysisService {
         mimeType: document.mimeType,
         originalName: document.originalName,
       });
+      this.billingService.assertPageLimit(
+        document.user.subscriptionPlan,
+        ocrResult.pageCount,
+      );
 
       await this.prisma.document.update({
         where: { id: documentId },

@@ -2,6 +2,39 @@
 
 Bu proje [Keep a Changelog](https://keepachangelog.com/) formatını takip eder.
 
+## [Faz 8] — Paket ve Ödeme
+
+### Eklendi
+
+- `packages/billing`: Bölüm 23'teki paket limitleri/fiyatları
+  (`PLAN_LIMITS`, `ONE_TIME_CREDIT_PACK` — FREE: ayda 2 analiz/10
+  sayfa/3 aktif süre/filigranlı rapor, Bireysel: 20/25/25/filigransız,
+  Pro: 100/50/sınırsız/filigransız, Tek seferlik: 5 analiz kredisi),
+  saf `evaluateAnalysisQuota`/`evaluatePageLimit`/
+  `evaluateActiveDeadlineLimit` fonksiyonları, `@hukukai/ai-provider`
+  deseniyle birebir aynı `PaymentProvider` soyutlaması + deterministik
+  `MockPaymentProvider` (gerçek bir ödeme altyapısı entegre edilmedi)
+- `apps/api`: `BillingModule`
+  - `GET /billing/usage` — mevcut plan, aylık analiz kullanımı, sayfa/
+    aktif süre sınırı, tek seferlik kredi bakiyesi, filigran durumu
+  - `GET /billing/plans`, `POST /billing/subscribe`,
+    `POST /billing/one-time-credits`
+  - `DocumentAnalysisService.enqueueAnalysis` her analiz öncesi
+    kotayı/krediyi rezerve eder; `runPipeline` OCR sayfa sayısı
+    belirlenince paket sayfa sınırını denetler
+  - `DeadlinesService.create` her yeni süre öncesi aktif süre sınırını
+    denetler
+  - Sınır aşımlarında `ForbiddenException` (403) fırlatılır
+  - Yeni Prisma modelleri: `UsageCounter` (dönem bazlı sayaç),
+    `PaymentTransaction` (abonelik/kredi işlem kaydı),
+    `User.oneTimeCreditsRemaining`
+- `apps/mobile`: Kullanım ve Paket ekranı (`app/billing`), `useBilling`
+  hook seti, Profildeki "Abonelik" menü satırı; belge analizi ve süre
+  kaydetme akışlarında 403 hatası "Paketi Yükselt" eylemiyle bu ekrana
+  yönlendirir
+- 26 yeni birim testi (`billing` paketi 13, `BillingService` 12 +
+  `DeadlinesService`/`DocumentAnalysisService` kota senaryoları)
+
 ## [Faz 7] — Raporlama
 
 ### Eklendi

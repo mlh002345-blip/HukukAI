@@ -64,7 +64,7 @@ export default function ProfileScreen() {
           <MenuRow label="Raporlarım" onPress={() => router.push("/reports")} />
           <MenuRow label="Bildirim Tercihleri" />
           <MenuRow label="Güvenlik Ayarları" />
-          <MenuRow label="Abonelik" />
+          <MenuRow label="Abonelik" onPress={() => router.push("/billing")} />
           <MenuRow label="Kullanım Koşulları" />
           <MenuRow label="KVKK Aydınlatma Metni" />
         </View>

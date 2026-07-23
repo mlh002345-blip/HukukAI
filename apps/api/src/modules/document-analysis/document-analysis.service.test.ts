@@ -24,6 +24,13 @@ function createStorageMock() {
   return { getObjectBuffer: vi.fn() };
 }
 
+function createBillingServiceMock() {
+  return {
+    reserveAnalysisQuota: vi.fn().mockResolvedValue(undefined),
+    assertPageLimit: vi.fn(),
+  };
+}
+
 function createOcrProviderMock() {
   return { recognize: vi.fn() };
 }
@@ -49,6 +56,7 @@ function createQueueMock() {
 function buildService() {
   const prisma = createPrismaMock();
   const storage = createStorageMock();
+  const billingService = createBillingServiceMock();
   const ocrProvider = createOcrProviderMock();
   const aiProvider = createAiProviderMock();
   const configService = createConfigServiceMock();
@@ -56,26 +64,48 @@ function buildService() {
   const service = new DocumentAnalysisService(
     prisma as never,
     storage as never,
+    billingService as never,
     ocrProvider as never,
     aiProvider as never,
     configService as never,
     queue as never,
   );
-  return { service, prisma, storage, ocrProvider, aiProvider, configService, queue };
+  return {
+    service,
+    prisma,
+    storage,
+    billingService,
+    ocrProvider,
+    aiProvider,
+    configService,
+    queue,
+  };
 }
 
 describe("DocumentAnalysisService.enqueueAnalysis", () => {
   it("belge UPLOADED durumundayken işi kuyruğa ekler", async () => {
-    const { service, prisma, queue } = buildService();
+    const { service, prisma, queue, billingService } = buildService();
     prisma.document.findFirst.mockResolvedValue({ id: "doc-1", status: "UPLOADED" });
 
     const result = await service.enqueueAnalysis("user-1", "doc-1");
 
     expect(result.status).toBe("OCR_PROCESSING");
+    expect(billingService.reserveAnalysisQuota).toHaveBeenCalledWith("user-1");
     expect(prisma.document.update).toHaveBeenCalledWith(
       expect.objectContaining({ data: expect.objectContaining({ status: "OCR_PROCESSING" }) }),
     );
     expect(queue.add).toHaveBeenCalledWith("analyze", { documentId: "doc-1" });
+  });
+
+  it("kota/kredi tükendiyse ForbiddenException fırlatır ve kuyruğa eklemez", async () => {
+    const { service, prisma, queue, billingService } = buildService();
+    prisma.document.findFirst.mockResolvedValue({ id: "doc-1", status: "UPLOADED" });
+    billingService.reserveAnalysisQuota.mockRejectedValue(
+      new Error("Bu ay için belge analizi kotanız doldu."),
+    );
+
+    await expect(service.enqueueAnalysis("user-1", "doc-1")).rejects.toThrow();
+    expect(queue.add).not.toHaveBeenCalled();
   });
 
   it("belge işlenirken tekrar analiz isteğini reddeder", async () => {
@@ -164,6 +194,33 @@ describe("DocumentAnalysisService.runPipeline", () => {
     const updateCalls = prisma.document.update.mock.calls;
     const finalUpdate = updateCalls.at(-1)?.[0] as { data: Record<string, unknown> };
     expect(finalUpdate.data.status).toBe("REVIEW_REQUIRED");
+  });
+
+  it("sayfa sınırı aşıldıysa belgeyi FAILED yapar", async () => {
+    const { service, prisma, storage, ocrProvider, billingService } = buildService();
+    prisma.document.findUniqueOrThrow.mockResolvedValue({
+      id: "doc-1",
+      storageKey: "documents/user-1/x.pdf",
+      mimeType: "application/pdf",
+      originalName: "kira.pdf",
+      user: { subscriptionPlan: "FREE" },
+    });
+    storage.getObjectBuffer.mockResolvedValue(Buffer.from("içerik"));
+    ocrProvider.recognize.mockResolvedValue({
+      text: "metin",
+      confidence: 0.9,
+      pageCount: 20,
+    });
+    billingService.assertPageLimit.mockImplementation(() => {
+      throw new Error("Bu belge paketinizin sayfa sınırını aşıyor.");
+    });
+
+    await expect(service.runPipeline("doc-1")).rejects.toThrow();
+    expect(prisma.document.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({ status: "FAILED" }),
+      }),
+    );
   });
 
   it("hata durumunda belgeyi FAILED yapar ve hatayı yeniden fırlatır", async () => {

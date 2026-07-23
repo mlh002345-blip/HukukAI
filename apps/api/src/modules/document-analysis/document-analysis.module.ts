@@ -5,6 +5,7 @@ import { createAIProvider } from "@hukukai/ai-provider";
 import type { ApiEnv } from "@hukukai/config";
 import { StorageModule } from "../storage/storage.module";
 import { OcrModule } from "../ocr/ocr.module";
+import { BillingModule } from "../billing/billing.module";
 import { DocumentAnalysisController } from "./document-analysis.controller";
 import { DocumentAnalysisService } from "./document-analysis.service";
 import { DocumentAnalysisProcessor } from "./document-analysis.processor";
@@ -14,6 +15,7 @@ import { AI_PROVIDER_TOKEN, DOCUMENT_ANALYSIS_QUEUE } from "./ai-provider.token"
   imports: [
     StorageModule,
     OcrModule,
+    BillingModule,
     BullModule.registerQueue({ name: DOCUMENT_ANALYSIS_QUEUE }),
   ],
   controllers: [DocumentAnalysisController],

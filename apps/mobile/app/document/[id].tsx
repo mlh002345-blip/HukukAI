@@ -11,6 +11,7 @@ import {
 } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
 import type { DocumentStatus } from "@hukukai/types";
+import { ApiError } from "../../src/lib/api-client";
 import { useDocument } from "../../src/hooks/useDocuments";
 import {
   useAnalyzeDocument,
@@ -29,6 +30,17 @@ const STATUS_LABELS: Record<DocumentStatus, string> = {
   COMPLETED: "Tamamlandı",
   FAILED: "Analiz başarısız",
 };
+
+function showQuotaAwareError(error: unknown, fallbackMessage: string): void {
+  if (error instanceof ApiError && error.status === 403) {
+    Alert.alert("Paket sınırı", error.message, [
+      { text: "Vazgeç", style: "cancel" },
+      { text: "Paketi Yükselt", onPress: () => router.push("/billing") },
+    ]);
+    return;
+  }
+  Alert.alert("Hata", error instanceof Error ? error.message : fallbackMessage);
+}
 
 const ANALYZABLE_STATUSES = new Set<DocumentStatus>([
   "UPLOADED",
@@ -150,13 +162,7 @@ export default function DocumentDetailScreen() {
           style={styles.primaryButton}
           onPress={() =>
             analyzeDocument.mutate(undefined, {
-              onError: (error) =>
-                Alert.alert(
-                  "Hata",
-                  error instanceof Error
-                    ? error.message
-                    : "Analiz başlatılamadı.",
-                ),
+              onError: (error) => showQuotaAwareError(error, "Analiz başlatılamadı."),
             })
           }
           disabled={analyzeDocument.isPending}

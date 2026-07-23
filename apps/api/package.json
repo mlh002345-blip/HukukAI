@@ -24,6 +24,7 @@
     "@hukukai/rule-engine": "workspace:*",
     "@hukukai/deadline-engine": "workspace:*",
     "@hukukai/calculation-engine": "workspace:*",
+    "@hukukai/billing": "workspace:*",
     "@aws-sdk/client-s3": "^3.658.1",
     "@aws-sdk/s3-request-presigner": "^3.658.1",
     "@nestjs/common": "^10.4.4",

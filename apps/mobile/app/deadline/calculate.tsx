@@ -16,7 +16,19 @@ import {
   useCreateDeadline,
 } from "../../src/hooks/useDeadlines";
 import { useGenerateDeadlineReport } from "../../src/hooks/useReports";
+import { ApiError } from "../../src/lib/api-client";
 import { parseTurkishDate } from "../../src/lib/turkish-date";
+
+function showQuotaAwareError(error: unknown, fallbackMessage: string): void {
+  if (error instanceof ApiError && error.status === 403) {
+    Alert.alert("Paket sınırı", error.message, [
+      { text: "Vazgeç", style: "cancel" },
+      { text: "Paketi Yükselt", onPress: () => router.push("/billing") },
+    ]);
+    return;
+  }
+  Alert.alert("Hata", error instanceof Error ? error.message : fallbackMessage);
+}
 
 export default function CalculateDeadlineScreen() {
   const { ruleKey, title } = useLocalSearchParams<{
@@ -70,11 +82,7 @@ export default function CalculateDeadlineScreen() {
             { text: "Tamam" },
           ]);
         },
-        onError: (error) =>
-          Alert.alert(
-            "Hata",
-            error instanceof Error ? error.message : "Kaydedilemedi.",
-          ),
+        onError: (error) => showQuotaAwareError(error, "Kaydedilemedi."),
       },
     );
   };

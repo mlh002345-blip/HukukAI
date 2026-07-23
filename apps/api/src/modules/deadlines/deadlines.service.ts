@@ -18,6 +18,8 @@ import type {
 import { PrismaService } from "../../prisma/prisma.service";
 // eslint-disable-next-line @typescript-eslint/consistent-type-imports
 import { RulesService } from "../rules/rules.service";
+// eslint-disable-next-line @typescript-eslint/consistent-type-imports
+import { BillingService } from "../billing/billing.service";
 
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
 
@@ -68,6 +70,7 @@ export class DeadlinesService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly rulesService: RulesService,
+    private readonly billingService: BillingService,
   ) {}
 
   async calculate(
@@ -102,6 +105,7 @@ export class DeadlinesService {
     if (input.documentId) {
       await this.assertDocumentOwnership(userId, input.documentId);
     }
+    await this.billingService.assertActiveDeadlineLimit(userId);
 
     if (input.mode === "CUSTOM") {
       const dueDate = new Date(`${input.dueDate}T00:00:00.000Z`);
