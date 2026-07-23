@@ -69,6 +69,9 @@ importers:
       '@hukukai/ai-provider':
         specifier: workspace:*
         version: link:../../packages/ai-provider
+      '@hukukai/billing':
+        specifier: workspace:*
+        version: link:../../packages/billing
       '@hukukai/calculation-engine':
         specifier: workspace:*
         version: link:../../packages/calculation-engine
@@ -305,6 +308,28 @@ importers:
       '@hukukai/types':
         specifier: workspace:*
         version: link:../types
+    devDependencies:
+      '@hukukai/eslint-config':
+        specifier: workspace:*
+        version: link:../eslint-config
+      '@hukukai/tsconfig':
+        specifier: workspace:*
+        version: link:../tsconfig
+      typescript:
+        specifier: ^5.6.3
+        version: 5.9.3
+      vitest:
+        specifier: ^2.1.2
+        version: 2.1.9(@types/node@22.20.1)(terser@5.49.0)
+
+  packages/billing:
+    dependencies:
+      '@hukukai/types':
+        specifier: workspace:*
+        version: link:../types
+      decimal.js:
+        specifier: ^10.4.3
+        version: 10.6.0
     devDependencies:
       '@hukukai/eslint-config':
         specifier: workspace:*

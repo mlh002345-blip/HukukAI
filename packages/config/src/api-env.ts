@@ -31,6 +31,9 @@ export const apiEnvSchema = z.object({
   AI_API_KEY: z.string().optional(),
   AI_MODEL: z.string().optional(),
 
+  // Ödeme sağlayıcısı değiştirilebilir olmalıdır (Faz 8 — Bölüm 23)
+  PAYMENT_PROVIDER: z.enum(["mock"]).default("mock"),
+
   // OCR metninin şifrelenmesi (Bölüm 20 — Güvenlik ve KVKK)
   DOCUMENT_TEXT_ENCRYPTION_KEY: z.string().min(32),
 

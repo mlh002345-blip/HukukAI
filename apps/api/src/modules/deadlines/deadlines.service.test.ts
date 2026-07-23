@@ -25,6 +25,12 @@ function createRulesServiceMock() {
   };
 }
 
+function createBillingServiceMock() {
+  return {
+    assertActiveDeadlineLimit: vi.fn().mockResolvedValue(undefined),
+  };
+}
+
 const sampleRule = {
   ruleKey: "TR_TRAFFIC_FINE_OBJECTION",
   version: "1.0.0",
@@ -45,8 +51,13 @@ const sampleRule = {
 function buildService() {
   const prisma = createPrismaMock();
   const rulesService = createRulesServiceMock();
-  const service = new DeadlinesService(prisma as never, rulesService as never);
-  return { service, prisma, rulesService };
+  const billingService = createBillingServiceMock();
+  const service = new DeadlinesService(
+    prisma as never,
+    rulesService as never,
+    billingService as never,
+  );
+  return { service, prisma, rulesService, billingService };
 }
 
 describe("DeadlinesService.calculate", () => {
@@ -135,6 +146,22 @@ describe("DeadlinesService.create", () => {
 
     expect(result.ruleId).toBe("CUSTOM");
     expect(rulesService.getRuleValidOn).not.toHaveBeenCalled();
+  });
+
+  it("aktif süre sınırı aşıldıysa reddeder ve kayıt oluşturmaz", async () => {
+    const { service, prisma, billingService } = buildService();
+    billingService.assertActiveDeadlineLimit.mockRejectedValue(
+      new Error("Aktif süre sınırınıza ulaştınız."),
+    );
+
+    await expect(
+      service.create("user-1", {
+        mode: "CUSTOM",
+        title: "Özel hatırlatıcı",
+        dueDate: "2026-03-01",
+      }),
+    ).rejects.toThrow();
+    expect(prisma.deadline.create).not.toHaveBeenCalled();
   });
 
   it("başkasına ait klasöre eklemeye çalışınca NotFoundException fırlatır", async () => {

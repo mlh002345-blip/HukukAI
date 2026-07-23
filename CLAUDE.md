@@ -77,6 +77,27 @@ o dokümana göre kodlanıyor. Yeni bir şey yapmadan önce bu dokümanı oku.
   `StorageService`e `putObjectBuffer`/`createDownloadUrl` eklendi.
   Mobilde Raporlarım ekranı, `useReports` hook seti ve Belge Detayı/
   Hesaplama/Süre hesaplama ekranlarına "Rapor Oluştur" eylemi eklendi.
+- **Faz 8** — Paket ve ödeme: `packages/billing` dolduruldu (Bölüm 23
+  paket limitleri/fiyatları — `PLAN_LIMITS`, `ONE_TIME_CREDIT_PACK` —
+  saf `evaluateAnalysisQuota`/`evaluatePageLimit`/`evaluateActiveDeadlineLimit`
+  fonksiyonları, `AIProvider` deseniyle birebir aynı `PaymentProvider`
+  soyutlaması ve deterministik `MockPaymentProvider`). API'de
+  `BillingModule` (`GET /billing/usage`, `GET /billing/plans`,
+  `POST /billing/subscribe`, `POST /billing/one-time-credits`);
+  `DocumentAnalysisService` her analiz başlatmadan önce aylık kotayı/
+  tek seferlik krediyi rezerve eder ve OCR sayfa sayısı belirlendiğinde
+  paket sayfa sınırını denetler, `DeadlinesService.create` her yeni süre
+  öncesi aktif süre sınırını denetler — ikisi de aşım durumunda
+  `ForbiddenException` (403) fırlatır. Yeni Prisma modelleri:
+  `UsageCounter` (aylık dönem bazlı sayaç), `PaymentTransaction`
+  (abonelik/kredi işlem kaydı), `User.oneTimeCreditsRemaining`.
+  Mobilde Kullanım ve Paket ekranı (`app/billing`), `useBilling` hook
+  seti, Profildeki "Abonelik" menü satırı artık çalışıyor; belge analizi
+  ve süre kaydetme akışlarında 403 (paket sınırı) hatası "Paketi
+  Yükselt" eylemiyle bu ekrana yönlendirir. **Gerçek bir ödeme
+  altyapısı entegre edilmedi — `MockPaymentProvider` her isteği
+  başarılı sayar; üretime alınmadan önce gerçek bir sağlayıcıyla
+  değiştirilmelidir.**
 
 Tüm bunlar test edildi: `pnpm typecheck`, `pnpm lint`, `pnpm test` — hepsi
 yeşil. Devam ederken bu üç komutu bozmadan ilerle.

@@ -17,6 +17,7 @@ import { RulesModule } from "./modules/rules/rules.module";
 import { DeadlinesModule } from "./modules/deadlines/deadlines.module";
 import { CalculationsModule } from "./modules/calculations/calculations.module";
 import { ReportsModule } from "./modules/reports/reports.module";
+import { BillingModule } from "./modules/billing/billing.module";
 import { JwtAuthGuard } from "./common/guards/jwt-auth.guard";
 import { parseRedisConnection } from "./queue/redis-connection";
 
@@ -53,6 +54,7 @@ import { parseRedisConnection } from "./queue/redis-connection";
     DeadlinesModule,
     CalculationsModule,
     ReportsModule,
+    BillingModule,
   ],
   providers: [
     { provide: APP_GUARD, useClass: ThrottlerGuard },
