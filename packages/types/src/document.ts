@@ -38,3 +38,29 @@ export interface UploadUrlResponse {
   storageKey: string;
   expiresInSeconds: number;
 }
+
+export interface DocumentStatusResponse {
+  status: DocumentStatus;
+  errorCode: string | null;
+  errorMessage: string | null;
+}
+
+export interface DocumentAnalysisSummary {
+  id: string;
+  documentId: string;
+  provider: string;
+  model: string;
+  extractedData: Record<string, unknown>;
+  summary: string | null;
+  warnings: string[];
+  recommendedTools: string[];
+  confidenceScore: number | null;
+  requiresReview: boolean;
+  createdAt: string;
+}
+
+export interface RecommendedAction {
+  toolSlug: string;
+  toolName: string;
+  route: string;
+}
