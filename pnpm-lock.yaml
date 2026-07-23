@@ -311,6 +311,13 @@ importers:
         version: 2.1.9(@types/node@22.20.1)(terser@5.49.0)
 
   packages/calculation-engine:
+    dependencies:
+      '@hukukai/deadline-engine':
+        specifier: workspace:*
+        version: link:../deadline-engine
+      decimal.js:
+        specifier: ^10.4.3
+        version: 10.6.0
     devDependencies:
       '@hukukai/eslint-config':
         specifier: workspace:*
@@ -321,6 +328,9 @@ importers:
       typescript:
         specifier: ^5.6.3
         version: 5.9.3
+      vitest:
+        specifier: ^2.1.2
+        version: 2.1.9(@types/node@22.20.1)(terser@5.49.0)
 
   packages/config:
     dependencies:
@@ -3497,6 +3507,9 @@ packages:
   decamelize@1.2.0:
     resolution: {integrity: sha512-z2S+W9X73hAUUki+N+9Za2lBlun89zigOyGrsax+KUQ6wKW4ZoWpEYBkGhQjwAjjDCkWxhY0VKEhk8wzY7F5cA==}
     engines: {node: '>=0.10.0'}
+
+  decimal.js@10.6.0:
+    resolution: {integrity: sha512-YpgQiITW3JXGntzdUmyUR1V812Hn8T1YVXhCu+wO3OpS4eU9l4YdD3qjyiKdV6mvV29zapkMeD390UVEf2lkUg==}
 
   decode-uri-component@0.2.2:
     resolution: {integrity: sha512-FqUYQ+8o158GyGTrMFJms9qh3CqTKvAqgqsTnkLI8sKu0028orqBhxNMFkFen0zGyg6epACD32pjVk58ngIErQ==}
@@ -10630,6 +10643,8 @@ snapshots:
       ms: 2.1.3
 
   decamelize@1.2.0: {}
+
+  decimal.js@10.6.0: {}
 
   decode-uri-component@0.2.2: {}
 
