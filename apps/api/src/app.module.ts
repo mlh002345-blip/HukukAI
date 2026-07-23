@@ -13,6 +13,8 @@ import { SearchModule } from "./modules/search/search.module";
 import { FoldersModule } from "./modules/folders/folders.module";
 import { DocumentsModule } from "./modules/documents/documents.module";
 import { DocumentAnalysisModule } from "./modules/document-analysis/document-analysis.module";
+import { RulesModule } from "./modules/rules/rules.module";
+import { DeadlinesModule } from "./modules/deadlines/deadlines.module";
 import { JwtAuthGuard } from "./common/guards/jwt-auth.guard";
 import { parseRedisConnection } from "./queue/redis-connection";
 
@@ -45,6 +47,8 @@ import { parseRedisConnection } from "./queue/redis-connection";
     FoldersModule,
     DocumentsModule,
     DocumentAnalysisModule,
+    RulesModule,
+    DeadlinesModule,
   ],
   providers: [
     { provide: APP_GUARD, useClass: ThrottlerGuard },

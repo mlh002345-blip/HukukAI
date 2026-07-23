@@ -7,11 +7,16 @@
   "types": "./src/index.ts",
   "scripts": {
     "typecheck": "tsc --noEmit",
-    "lint": "eslint . --ext .ts"
+    "lint": "eslint . --ext .ts",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@hukukai/rule-engine": "workspace:*"
   },
   "devDependencies": {
     "@hukukai/tsconfig": "workspace:*",
     "@hukukai/eslint-config": "workspace:*",
-    "typescript": "^5.6.3"
+    "typescript": "^5.6.3",
+    "vitest": "^2.1.2"
   }
 }
