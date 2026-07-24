@@ -189,10 +189,26 @@ yeşil. Devam ederken bu üç komutu bozmadan ilerle.
    (bkz. `packages/calculation-engine`).
 7. Türkçe arayüz metni kullanılır.
 
-## Sıradaki fazlar (öncelik sırasıyla)
+## Sıradaki fazlar
 
-Doküman Bölüm 25'e göre: Faz 7 (Raporlama), Faz 8 (Paket ve ödeme),
-Faz 9 (Admin panel).
+Doküman Bölüm 25'teki tüm numaralı fazlar (Faz 0-10) tamamlandı.
+"Sonraki profesyonel ürün fazı" (araç değer kaybı, trafik kazası
+tazminatı, eksper raporu analizi, poliçe teminat analizi) kullanıcı
+tarafından kapsam dışı bırakıldı — bu yönde bir geliştirme yapılmayacak.
+
+Kalan iş, MVP'yi üretime hazırlayan altyapı/entegrasyon parçalarıdır
+(gerçek ödeme sağlayıcısı, Sentry, E2E test altyapısı, Prisma migration
+seti vb.) — bkz. bu dosyadaki ilgili "Kapsam notu" uyarıları.
+
+## CI
+
+`.github/workflows/ci.yml` — her push/PR'da `pnpm install --frozen-lockfile`,
+Prisma client üretimi, `pnpm typecheck && pnpm lint && pnpm test` çalışır.
+`format:check` bilinçli olarak dahil edilmedi: mevcut kod tabanında
+(bu CI kurulmadan önce yazılmış ~112 dosyada) Prettier'ın hiç
+uygulanmamış olduğu formatlama farkları var; bunları toplu olarak
+düzeltmek ayrı, ilgisiz bir değişiklik olacağından bu işe dahil
+edilmedi.
 
 ## Geliştirme komutları
 
