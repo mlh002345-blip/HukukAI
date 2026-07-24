@@ -2,6 +2,25 @@
 
 Bu proje [Keep a Changelog](https://keepachangelog.com/) formatını takip eder.
 
+## [Görsel Tasarım — Stitch Entegrasyonu, 10. Parça — Bildirim Yönetimi]
+
+### Eklendi
+
+- API'de ilk kez `GET /notifications` ucu eklendi
+  (`NotificationsService.findAllForUser`); `@hukukai/types`e
+  `NotificationSummary` eklendi
+- Mobilde `useNotifications` hook'u ve `app/notifications/index.tsx`:
+  - **Bildirimler** sekmesi gerçek süre hatırlatıcısı geçmişini
+    (Gönderildi/İletilemedi/Bekliyor rozeti ile) listeler
+  - **Ayarlar** sekmesi gerçek push kayıt akışını ve sabit 7/3/1/0
+    gün hatırlatıcı zamanlamasını salt bilgi amaçlı gösterir
+- Profil menüsündeki daha önce ölü olan "Bildirim Tercihleri" satırı
+  artık bu ekrana bağlı
+- **Kapsam notu:** Stitch tasarımındaki e-posta bildirimi anahtarı ve
+  özelleştirilebilir uyarı aralığı seçenekleri, backend'de karşılığı
+  olmadığından (sahte kontrol olmasın diye) eklenmedi; geri kalan ~17
+  yeni ekran hâlâ eklenmedi
+
 ## [Görsel Tasarım — Stitch Entegrasyonu, 9. Parça — Yardım Merkezi]
 
 ### Eklendi

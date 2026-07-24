@@ -1,4 +1,4 @@
-import { Body, Controller, Post, UsePipes } from "@nestjs/common";
+import { Body, Controller, Get, Post, UsePipes } from "@nestjs/common";
 import { ApiTags } from "@nestjs/swagger";
 import {
   registerPushTokenSchema,
@@ -14,6 +14,11 @@ import { NotificationsService } from "./notifications.service";
 @Controller("notifications")
 export class NotificationsController {
   constructor(private readonly notificationsService: NotificationsService) {}
+
+  @Get()
+  findAll(@CurrentUser() user: AuthenticatedUser) {
+    return this.notificationsService.findAllForUser(user.id);
+  }
 
   @Post("push-token")
   @UsePipes(new ZodValidationPipe(registerPushTokenSchema))

@@ -34,6 +34,19 @@ export class NotificationsService {
   }
 
   /**
+   * Kullanıcının bildirimlerini (gönderilmiş veya henüz zamanı
+   * gelmemiş) en yeniden eskiye sıralı döner — Bildirim Yönetimi
+   * ekranındaki geçmiş listesi için kullanılır.
+   */
+  async findAllForUser(userId: string) {
+    return this.prisma.notification.findMany({
+      where: { userId },
+      orderBy: { scheduledAt: "desc" },
+      take: 100,
+    });
+  }
+
+  /**
    * Zamanı gelmiş ve henüz gönderilmemiş bildirimleri Expo üzerinden
    * teslim eder. `NotificationsDeliveryProcessor` tarafından her
    * dakika (BullMQ tekrarlayan işi) çağrılır.
