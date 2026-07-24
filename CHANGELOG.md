@@ -2,6 +2,26 @@
 
 Bu proje [Keep a Changelog](https://keepachangelog.com/) formatını takip eder.
 
+## [Görsel Tasarım — Stitch Entegrasyonu, 14. Parça — Panel (Dashboard), tasarım paketi tamamlandı]
+
+### Eklendi
+
+- **Panel** ekranı eklendi (`app/dashboard.tsx`) — tasarımdaki avukat
+  dashboard'unun yalnızca gerçek veriye dayanan kısmı:
+  - Hızlı Erişim (Belge Yükle/Süre Hesapla/Hatırlatıcı/Tüm Araçlar)
+  - Gerçek yaklaşan sürelerden Kritik Süreler (aciliyet
+    renklendirmesiyle)
+  - Gerçek `OCR_PROCESSING`/`AI_PROCESSING` durumundaki belgelerden
+    Aktif Analizler
+- Profil menüsüne "Panel" satırı eklendi (herkese açık, rol erişim
+  duvarı yok)
+- **Kapsam dışı:** tasarımdaki "Madde Uygunluk Denetimi", "Emsal
+  Karar Taraması", "Risk Tespit Edildi" gibi karşılığı olmayan/risk
+  skorlamaya dayanan öğeler eklenmedi
+
+Bu parçayla Stitch tasarım paketindeki tüm ekranlar ya uygulandı ya
+da bilinçli olarak kapsam dışı bırakıldı (bkz. CLAUDE.md).
+
 ## [Görsel Tasarım — Stitch Entegrasyonu, 13. Parça — Gelişmiş Filtreleme]
 
 ### Eklendi

@@ -306,11 +306,22 @@ o dokümana göre kodlanıyor. Yeni bir şey yapmadan önce bu dokümanı oku.
   bölümü, yukarıdaki risk skorlama kapsam dışı bırakma kararıyla
   tutarlı olarak eklenmedi): Belge Türü çoklu seçim çipleri (9 gerçek
   `DocumentType` değeri) ve Tarih Aralığı (GG.AA.YYYY) filtresi,
-  filtre düğmesinde aktif filtre sayısı rozeti. **Kapsam notu:** geri
-  kalan yeni ekranlar (avukat dashboard'u vb.) henüz eklenmedi; bu,
-  birden fazla oturuma yayılacak devam eden bir iştir. Bu ortamda Expo
-  web/Metro pnpm monorepo'da bir bundling sorunu yüzünden canlı ekran
-  görüntüsü alınamadı; doğrulama yalnızca typecheck/lint/test ile
+  filtre düğmesinde aktif filtre sayısı rozeti. Ardından **Panel**
+  (`app/dashboard.tsx`) eklendi — tasarımdaki avukat dashboard'unun
+  yalnızca gerçek veriye dayanan kısmı: Hızlı Erişim (Belge Yükle/Süre
+  Hesapla/Hatırlatıcı/Tüm Araçlar), gerçek yaklaşan sürelerden Kritik
+  Süreler (aciliyet renklendirmesiyle) ve gerçek `OCR_PROCESSING`/
+  `AI_PROCESSING` durumundaki belgelerden Aktif Analizler. Tasarımdaki
+  "Madde Uygunluk Denetimi", "Emsal Karar Taraması", "Risk Tespit
+  Edildi" gibi karşılığı olmayan/risk skorlamaya dayanan öğeler
+  bilinçli olarak eklenmedi. Profil menüsüne "Panel" satırı eklendi
+  (role erişim duvarı olmadığından herkese açık). **Kapsam notu:**
+  Stitch paketindeki tüm ekranlar artık ya uygulanmış ya da bilinçli
+  olarak kapsam dışı bırakılmış durumda; kalan olası genişletmeler
+  (emsal karar arama, e-tebligat entegrasyonu vb.) yeni ürün
+  kararları gerektirir. Bu ortamda Expo web/Metro pnpm monorepo'da bir
+  bundling sorunu yüzünden canlı ekran görüntüsü alınamadı; doğrulama
+  yalnızca typecheck/lint/test ile
   yapıldı.
 
 Tüm bunlar test edildi: `pnpm typecheck`, `pnpm lint`, `pnpm test` — hepsi
