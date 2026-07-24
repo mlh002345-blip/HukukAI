@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -7,6 +8,7 @@ import {
   Text,
   View,
 } from "react-native";
+import { Icon, useTheme, type Theme } from "@hukukai/ui";
 import type { SubscriptionPlan } from "@hukukai/types";
 import {
   usePlans,
@@ -28,6 +30,8 @@ function formatLimit(value: number | null): string {
 }
 
 export default function BillingScreen() {
+  const theme = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
   const usageQuery = useUsage();
   const plansQuery = usePlans();
   const subscribe = useSubscribe();
@@ -36,7 +40,7 @@ export default function BillingScreen() {
   if (usageQuery.isLoading || plansQuery.isLoading) {
     return (
       <View style={styles.centered}>
-        <ActivityIndicator />
+        <ActivityIndicator color={theme.colors.primary} />
       </View>
     );
   }
@@ -67,7 +71,10 @@ export default function BillingScreen() {
 
       {usage ? (
         <View style={styles.usageCard}>
-          <Text style={styles.usageCardPlan}>{PLAN_LABELS[usage.plan]} Paket</Text>
+          <View style={styles.usageCardHeader}>
+            <Icon name="workspace_premium" size={20} color={theme.colors.primary} />
+            <Text style={styles.usageCardPlan}>{PLAN_LABELS[usage.plan]} Paket</Text>
+          </View>
           <View style={styles.usageRow}>
             <Text style={styles.usageLabel}>Bu ay belge analizi</Text>
             <Text style={styles.usageValue}>
@@ -102,7 +109,12 @@ export default function BillingScreen() {
         return (
           <View key={entry.plan} style={styles.planCard}>
             <View style={styles.planCardHeader}>
-              <Text style={styles.planName}>{PLAN_LABELS[entry.plan]}</Text>
+              <View style={styles.planNameRow}>
+                <Text style={styles.planName}>{PLAN_LABELS[entry.plan]}</Text>
+                {isCurrent ? (
+                  <Icon name="verified_user" filled size={16} color={theme.colors.success} />
+                ) : null}
+              </View>
               <Text style={styles.planPrice}>
                 {Number(entry.monthlyPriceTRY) === 0
                   ? "Ücretsiz"
@@ -125,7 +137,7 @@ export default function BillingScreen() {
               onPress={() => onSubscribe(entry.plan)}
             >
               {subscribe.isPending ? (
-                <ActivityIndicator color="#175CD3" />
+                <ActivityIndicator color={theme.colors.primary} />
               ) : (
                 <Text style={styles.planButtonText}>
                   {isCurrent ? "Mevcut Paketiniz" : "Bu Pakete Geç"}
@@ -149,54 +161,125 @@ export default function BillingScreen() {
             onPress={onPurchaseCredits}
           >
             {purchaseCredits.isPending ? (
-              <ActivityIndicator color="#175CD3" />
+              <ActivityIndicator color={theme.colors.primary} />
             ) : (
               <Text style={styles.planButtonText}>Satın Al</Text>
             )}
           </Pressable>
         </View>
       ) : null}
+
+      <View style={styles.trustBanner}>
+        <Icon name="security" size={16} color={theme.colors.onSurfaceVariant} />
+        <Text style={styles.trustBannerText}>256-bit SSL güvenli ödeme altyapısı</Text>
+      </View>
     </ScrollView>
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#FFFFFF" },
-  centered: { flex: 1, alignItems: "center", justifyContent: "center" },
-  content: { padding: 20, paddingTop: 60, gap: 14, paddingBottom: 48 },
-  title: { fontSize: 22, fontWeight: "700", color: "#101828" },
-  sectionTitle: { fontSize: 16, fontWeight: "700", color: "#101828", marginTop: 8 },
-  usageCard: {
-    backgroundColor: "#F8FAFC",
-    borderRadius: 16,
-    padding: 16,
-    gap: 8,
-    borderWidth: 1,
-    borderColor: "#EAECF0",
-  },
-  usageCardPlan: { fontSize: 16, fontWeight: "700", color: "#175CD3" },
-  usageRow: { flexDirection: "row", justifyContent: "space-between" },
-  usageLabel: { fontSize: 13, color: "#667085" },
-  usageValue: { fontSize: 13, fontWeight: "600", color: "#101828" },
-  planCard: {
-    borderWidth: 1,
-    borderColor: "#EAECF0",
-    borderRadius: 14,
-    padding: 16,
-    gap: 4,
-  },
-  planCardHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
-  planName: { fontSize: 15, fontWeight: "700", color: "#101828" },
-  planPrice: { fontSize: 14, fontWeight: "700", color: "#175CD3" },
-  planDetail: { fontSize: 13, color: "#344054" },
-  planButton: {
-    borderWidth: 1,
-    borderColor: "#175CD3",
-    borderRadius: 12,
-    paddingVertical: 12,
-    alignItems: "center",
-    marginTop: 10,
-  },
-  planButtonDisabled: { borderColor: "#D0D5DD" },
-  planButtonText: { color: "#175CD3", fontWeight: "700", fontSize: 14 },
-});
+function createStyles(theme: Theme) {
+  return StyleSheet.create({
+    container: { flex: 1, backgroundColor: theme.colors.background },
+    centered: { flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: theme.colors.background },
+    content: {
+      padding: theme.spacing.containerPadding,
+      paddingTop: 56,
+      gap: 14,
+      paddingBottom: 48,
+    },
+    title: {
+      fontFamily: theme.typography.headlineMd.fontFamily,
+      fontSize: 22,
+      fontWeight: "700",
+      color: theme.colors.onBackground,
+    },
+    sectionTitle: {
+      fontFamily: theme.typography.headlineSm.fontFamily,
+      fontSize: 16,
+      fontWeight: "700",
+      color: theme.colors.onBackground,
+      marginTop: 8,
+    },
+    usageCard: {
+      backgroundColor: theme.colors.surfaceContainerLowest,
+      borderRadius: theme.radii.xl,
+      padding: 16,
+      gap: 8,
+      borderWidth: 1,
+      borderColor: theme.colors.outlineVariant,
+    },
+    usageCardHeader: { flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 4 },
+    usageCardPlan: {
+      fontFamily: theme.typography.headlineSm.fontFamily,
+      fontSize: 16,
+      fontWeight: "700",
+      color: theme.colors.primary,
+    },
+    usageRow: { flexDirection: "row", justifyContent: "space-between" },
+    usageLabel: {
+      fontFamily: theme.typography.bodyMd.fontFamily,
+      fontSize: 13,
+      color: theme.colors.onSurfaceVariant,
+    },
+    usageValue: {
+      fontFamily: theme.typography.bodySmMedium.fontFamily,
+      fontSize: 13,
+      fontWeight: "600",
+      color: theme.colors.onSurface,
+    },
+    planCard: {
+      borderWidth: 1,
+      borderColor: theme.colors.outlineVariant,
+      backgroundColor: theme.colors.surfaceContainerLowest,
+      borderRadius: theme.radii.xl,
+      padding: 16,
+      gap: 4,
+    },
+    planCardHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
+    planNameRow: { flexDirection: "row", alignItems: "center", gap: 6 },
+    planName: {
+      fontFamily: theme.typography.headlineSm.fontFamily,
+      fontSize: 15,
+      fontWeight: "700",
+      color: theme.colors.onSurface,
+    },
+    planPrice: {
+      fontFamily: theme.typography.bodySmMedium.fontFamily,
+      fontSize: 14,
+      fontWeight: "700",
+      color: theme.colors.primary,
+    },
+    planDetail: {
+      fontFamily: theme.typography.bodyMd.fontFamily,
+      fontSize: 13,
+      color: theme.colors.onSurfaceVariant,
+    },
+    planButton: {
+      borderWidth: 1,
+      borderColor: theme.colors.primary,
+      borderRadius: theme.radii.xl,
+      paddingVertical: 12,
+      alignItems: "center",
+      marginTop: 10,
+    },
+    planButtonDisabled: { borderColor: theme.colors.outlineVariant },
+    planButtonText: {
+      color: theme.colors.primary,
+      fontFamily: theme.typography.bodySmMedium.fontFamily,
+      fontWeight: "700",
+      fontSize: 14,
+    },
+    trustBanner: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "center",
+      gap: 6,
+      marginTop: 4,
+    },
+    trustBannerText: {
+      fontFamily: theme.typography.labelMd.fontFamily,
+      fontSize: 11,
+      color: theme.colors.onSurfaceVariant,
+    },
+  });
+}
