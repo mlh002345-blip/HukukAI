@@ -2,6 +2,18 @@
 
 Bu proje [Keep a Changelog](https://keepachangelog.com/) formatını takip eder.
 
+## [Görsel Tasarım — Stitch Entegrasyonu, 13. Parça — Gelişmiş Filtreleme]
+
+### Eklendi
+
+- **Gelişmiş Filtreleme** paneli Tüm Belgeler ekranına entegre edildi
+  (`app/documents/index.tsx`): Belge Türü çoklu seçim çipleri (9
+  gerçek `DocumentType` değeri) ve Tarih Aralığı (GG.AA.YYYY) filtresi
+- Filtre düğmesinde aktif filtre sayısını gösteren rozet
+- **Kapsam dışı:** tasarımdaki "Öncelik/Risk Seviyesi" filtre bölümü,
+  risk skorlamanın bu iterasyonda kapsam dışı bırakılması kararıyla
+  tutarlı olarak eklenmedi
+
 ## [Görsel Tasarım — Stitch Entegrasyonu, 12. Parça — Tüm Belgeler]
 
 ### Eklendi
