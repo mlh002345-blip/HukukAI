@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -10,11 +10,9 @@ import {
   View,
 } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
+import { Icon, useTheme, type Theme } from "@hukukai/ui";
 import type { DeadlineCalculationResponse, DeadlineSummary } from "@hukukai/types";
-import {
-  useCalculateDeadline,
-  useCreateDeadline,
-} from "../../src/hooks/useDeadlines";
+import { useCalculateDeadline, useCreateDeadline } from "../../src/hooks/useDeadlines";
 import { useGenerateDeadlineReport } from "../../src/hooks/useReports";
 import { ApiError } from "../../src/lib/api-client";
 import { parseTurkishDate } from "../../src/lib/turkish-date";
@@ -31,6 +29,8 @@ function showQuotaAwareError(error: unknown, fallbackMessage: string): void {
 }
 
 export default function CalculateDeadlineScreen() {
+  const theme = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
   const { ruleKey, title } = useLocalSearchParams<{
     ruleKey: string;
     title: string;
@@ -56,10 +56,7 @@ export default function CalculateDeadlineScreen() {
       {
         onSuccess: setResult,
         onError: (error) =>
-          Alert.alert(
-            "Hata",
-            error instanceof Error ? error.message : "Hesaplanamadı.",
-          ),
+          Alert.alert("Hata", error instanceof Error ? error.message : "Hesaplanamadı."),
       },
     );
   };
@@ -78,9 +75,7 @@ export default function CalculateDeadlineScreen() {
       {
         onSuccess: (deadline) => {
           setSavedDeadline(deadline);
-          Alert.alert("Kaydedildi", "Hatırlatıcı takviminize eklendi.", [
-            { text: "Tamam" },
-          ]);
+          Alert.alert("Kaydedildi", "Hatırlatıcı takviminize eklendi.", [{ text: "Tamam" }]);
         },
         onError: (error) => showQuotaAwareError(error, "Kaydedilemedi."),
       },
@@ -96,29 +91,36 @@ export default function CalculateDeadlineScreen() {
         ]);
       },
       onError: (error) =>
-        Alert.alert(
-          "Hata",
-          error instanceof Error ? error.message : "Rapor oluşturulamadı.",
-        ),
+        Alert.alert("Hata", error instanceof Error ? error.message : "Rapor oluşturulamadı."),
     });
   };
 
   return (
     <ScrollView
+      style={styles.screen}
       contentContainerStyle={styles.container}
       keyboardShouldPersistTaps="handled"
     >
-      <Text style={styles.title}>{title}</Text>
+      <View style={styles.headerRow}>
+        <Pressable style={styles.backButton} onPress={() => router.back()} hitSlop={8}>
+          <Icon name="arrow_back" size={20} color={theme.colors.onSurface} />
+        </Pressable>
+        <Text style={styles.title}>{title}</Text>
+      </View>
 
       <View style={styles.field}>
         <Text style={styles.label}>Tebliğ/Karar Tarihi</Text>
-        <TextInput
-          value={dateText}
-          onChangeText={setDateText}
-          style={styles.input}
-          placeholder="GG.AA.YYYY"
-          keyboardType="numbers-and-punctuation"
-        />
+        <View style={styles.inputWrap}>
+          <Icon name="event" size={20} color={theme.colors.outline} style={styles.inputIcon} />
+          <TextInput
+            value={dateText}
+            onChangeText={setDateText}
+            style={styles.input}
+            placeholder="GG.AA.YYYY"
+            placeholderTextColor={theme.colors.outline}
+            keyboardType="numbers-and-punctuation"
+          />
+        </View>
         {dateError ? <Text style={styles.errorText}>{dateError}</Text> : null}
       </View>
 
@@ -128,7 +130,7 @@ export default function CalculateDeadlineScreen() {
         disabled={calculateDeadline.isPending}
       >
         {calculateDeadline.isPending ? (
-          <ActivityIndicator color="#FFFFFF" />
+          <ActivityIndicator color={theme.colors.onPrimary} />
         ) : (
           <Text style={styles.primaryButtonText}>Süreyi Hesapla</Text>
         )}
@@ -141,9 +143,7 @@ export default function CalculateDeadlineScreen() {
 
           <Text style={styles.resultLabel}>Kalan gün</Text>
           <Text style={styles.resultValue}>
-            {result.isExpired
-              ? "Süre dolmuş"
-              : `${result.remainingCalendarDays} gün`}
+            {result.isExpired ? "Süre dolmuş" : `${result.remainingCalendarDays} gün`}
           </Text>
 
           {result.legalBasis.length > 0 ? (
@@ -173,9 +173,10 @@ export default function CalculateDeadlineScreen() {
             <>
               <Text style={styles.resultLabel}>Uyarılar</Text>
               {result.warnings.map((warning) => (
-                <Text key={warning} style={styles.warningText}>
-                  ⚠️ {warning}
-                </Text>
+                <View key={warning} style={styles.warningBanner}>
+                  <Icon name="warning" size={16} color={theme.colors.error} />
+                  <Text style={styles.warningText}>{warning}</Text>
+                </View>
               ))}
             </>
           ) : null}
@@ -186,9 +187,12 @@ export default function CalculateDeadlineScreen() {
             disabled={createDeadline.isPending}
           >
             {createDeadline.isPending ? (
-              <ActivityIndicator color="#175CD3" />
+              <ActivityIndicator color={theme.colors.primary} />
             ) : (
-              <Text style={styles.secondaryButtonText}>Hatırlatıcı Ekle</Text>
+              <>
+                <Icon name="notifications_active" size={18} color={theme.colors.primary} />
+                <Text style={styles.secondaryButtonText}>Hatırlatıcı Ekle</Text>
+              </>
             )}
           </Pressable>
 
@@ -199,9 +203,12 @@ export default function CalculateDeadlineScreen() {
               disabled={generateReport.isPending}
             >
               {generateReport.isPending ? (
-                <ActivityIndicator color="#175CD3" />
+                <ActivityIndicator color={theme.colors.primary} />
               ) : (
-                <Text style={styles.secondaryButtonText}>Rapor Oluştur</Text>
+                <>
+                  <Icon name="picture_as_pdf" size={18} color={theme.colors.primary} />
+                  <Text style={styles.secondaryButtonText}>Rapor Oluştur</Text>
+                </>
               )}
             </Pressable>
           ) : null}
@@ -211,58 +218,126 @@ export default function CalculateDeadlineScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flexGrow: 1,
-    backgroundColor: "#FFFFFF",
-    padding: 24,
-    paddingTop: 64,
-    gap: 16,
-  },
-  title: { fontSize: 22, fontWeight: "700", color: "#101828" },
-  field: { gap: 6 },
-  label: { fontSize: 13, fontWeight: "500", color: "#344054" },
-  input: {
-    borderWidth: 1,
-    borderColor: "#D0D5DD",
-    borderRadius: 10,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    fontSize: 15,
-    color: "#101828",
-  },
-  errorText: { color: "#B42318", fontSize: 12 },
-  primaryButton: {
-    backgroundColor: "#175CD3",
-    borderRadius: 12,
-    paddingVertical: 15,
-    alignItems: "center",
-  },
-  primaryButtonText: { color: "#FFFFFF", fontWeight: "700", fontSize: 15 },
-  resultBox: {
-    borderWidth: 1,
-    borderColor: "#EAECF0",
-    borderRadius: 12,
-    padding: 16,
-    gap: 4,
-  },
-  resultLabel: {
-    fontSize: 12,
-    fontWeight: "700",
-    color: "#667085",
-    marginTop: 10,
-    textTransform: "uppercase",
-  },
-  resultValue: { fontSize: 20, fontWeight: "700", color: "#101828" },
-  bodyText: { fontSize: 13, color: "#344054" },
-  warningText: { fontSize: 12, color: "#B54708" },
-  secondaryButton: {
-    borderWidth: 1,
-    borderColor: "#175CD3",
-    borderRadius: 12,
-    paddingVertical: 13,
-    alignItems: "center",
-    marginTop: 16,
-  },
-  secondaryButtonText: { color: "#175CD3", fontWeight: "700", fontSize: 14 },
-});
+function createStyles(theme: Theme) {
+  return StyleSheet.create({
+    screen: { flex: 1, backgroundColor: theme.colors.background },
+    container: {
+      flexGrow: 1,
+      padding: theme.spacing.containerPadding,
+      paddingTop: 56,
+      paddingBottom: 40,
+      gap: theme.spacing.stackGapMd,
+    },
+    headerRow: { flexDirection: "row", alignItems: "center", gap: 10 },
+    backButton: {
+      width: 36,
+      height: 36,
+      borderRadius: theme.radii.full,
+      backgroundColor: theme.colors.surfaceContainer,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    title: {
+      flex: 1,
+      fontFamily: theme.typography.headlineMd.fontFamily,
+      fontSize: 20,
+      fontWeight: "700",
+      color: theme.colors.onBackground,
+    },
+    field: { gap: 6 },
+    label: {
+      fontFamily: theme.typography.labelMd.fontFamily,
+      fontSize: 11,
+      letterSpacing: 0.5,
+      color: theme.colors.onSurfaceVariant,
+      textTransform: "uppercase",
+    },
+    inputWrap: { position: "relative", justifyContent: "center" },
+    inputIcon: { position: "absolute", left: 14, zIndex: 1 },
+    input: {
+      backgroundColor: theme.colors.surfaceContainerLowest,
+      borderWidth: 1,
+      borderColor: theme.colors.outlineVariant,
+      borderRadius: theme.radii.xl,
+      paddingLeft: 40,
+      paddingRight: 16,
+      paddingVertical: 12,
+      fontFamily: theme.typography.bodyMd.fontFamily,
+      fontSize: 14,
+      color: theme.colors.onSurface,
+    },
+    errorText: {
+      color: theme.colors.error,
+      fontSize: 12,
+      fontFamily: theme.typography.bodyMd.fontFamily,
+    },
+    primaryButton: {
+      backgroundColor: theme.colors.primary,
+      borderRadius: theme.radii.xl,
+      paddingVertical: 15,
+      alignItems: "center",
+    },
+    primaryButtonText: {
+      color: theme.colors.onPrimary,
+      fontFamily: theme.typography.headlineSm.fontFamily,
+      fontWeight: "700",
+      fontSize: 15,
+    },
+    resultBox: {
+      borderWidth: 1,
+      borderColor: theme.colors.outlineVariant,
+      backgroundColor: theme.colors.surfaceContainerLowest,
+      borderRadius: theme.radii.xl,
+      padding: 16,
+      gap: 4,
+    },
+    resultLabel: {
+      fontFamily: theme.typography.labelMd.fontFamily,
+      fontSize: 11,
+      fontWeight: "700",
+      color: theme.colors.onSurfaceVariant,
+      marginTop: 10,
+      textTransform: "uppercase",
+    },
+    resultValue: {
+      fontFamily: theme.typography.amountDisplay.fontFamily,
+      fontSize: 20,
+      fontWeight: "700",
+      color: theme.colors.onSurface,
+    },
+    bodyText: {
+      fontFamily: theme.typography.bodyMd.fontFamily,
+      fontSize: 13,
+      color: theme.colors.onSurfaceVariant,
+    },
+    warningBanner: {
+      flexDirection: "row",
+      gap: 6,
+      alignItems: "flex-start",
+      marginTop: 4,
+    },
+    warningText: {
+      flex: 1,
+      fontFamily: theme.typography.bodyMd.fontFamily,
+      fontSize: 12,
+      color: theme.colors.error,
+    },
+    secondaryButton: {
+      borderWidth: 1,
+      borderColor: theme.colors.primary,
+      borderRadius: theme.radii.xl,
+      paddingVertical: 13,
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "center",
+      gap: 8,
+      marginTop: 16,
+    },
+    secondaryButtonText: {
+      color: theme.colors.primary,
+      fontFamily: theme.typography.bodySmMedium.fontFamily,
+      fontWeight: "700",
+      fontSize: 14,
+    },
+  });
+}

@@ -2,6 +2,21 @@
 
 Bu proje [Keep a Changelog](https://keepachangelog.com/) formatını takip eder.
 
+## [Görsel Tasarım — Stitch Entegrasyonu, 5. Parça]
+
+### Eklendi
+
+- Hesaplama/süre/rapor/paket ekranları yeni tema/ikon sistemine
+  taşındı:
+  - `app/calculation/[slug].tsx` — genel yapılandırma tabanlı form,
+    ikonlu geri/hesapla/rapor düğmeleri, liste alanı editörü
+  - `app/deadline/calculate.tsx`, `app/deadline/custom.tsx`
+  - `app/reports/index.tsx` — PDF ikonlu satırlar, paylaşılan
+    `EmptyState`
+  - `app/billing/index.tsx` — paket/kullanım kartları ikonlu
+- **Kapsam notu:** geri kalan ~21 ekran hâlâ taşınmadı; doğrulama
+  yalnızca typecheck/lint/test ile yapıldı
+
 ## [Görsel Tasarım — Stitch Entegrasyonu, 4. Parça]
 
 ### Eklendi

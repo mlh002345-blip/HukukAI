@@ -228,13 +228,21 @@ o dokümana göre kodlanıyor. Yeni bir şey yapmadan önce bu dokümanı oku.
   paylaşılan `CategoryChip` bileşeniyle) ve **Belge Detayı**
   (`document/[id].tsx` — durum rozeti, ikonlu analiz/rapor düğmeleri,
   uyarı bannerları `errorContainer` tonuyla, önerilen araç
-  satırlarında `chevron_right`). **Kapsam notu:** geri kalan ~26 ekran
-  (belge yükleme seçim/işleniyor ekranları, hesaplama/rapor detay
-  ekranları, bildirim yönetimi, destek merkezi, admin dashboard vb.)
-  henüz taşınmadı — bu, birden fazla oturuma yayılacak devam eden bir
-  iş. Bu ortamda Expo web/Metro pnpm monorepo'da bir bundling sorunu
-  yüzünden canlı ekran görüntüsü alınamadı; doğrulama yalnızca
-  typecheck/lint/test ile yapıldı.
+  satırlarında `chevron_right`). Ardından hesaplama/süre/rapor/paket
+  ekranları taşındı: **Hesaplama Aracı** (`calculation/[slug].tsx` —
+  genel yapılandırma tabanlı form, ikonlu geri/hesapla/rapor
+  düğmeleri, liste alanı editöründe `add`/`remove_circle_outline`),
+  **Süre Hesaplama** (`deadline/calculate.tsx`) ve **Özel Süre**
+  (`deadline/custom.tsx` — ikonlu tarih alanı), **Raporlarım**
+  (`reports/index.tsx` — PDF ikonlu satırlar, `EmptyState`) ve
+  **Kullanım ve Paket** (`billing/index.tsx` — `workspace_premium`/
+  `verified_user`/`security` ikonları). **Kapsam notu:** geri kalan
+  ~21 ekran (belge yükleme seçim/işleniyor ekranları, bildirim
+  yönetimi, destek merkezi, admin dashboard vb.) henüz taşınmadı — bu,
+  birden fazla oturuma yayılacak devam eden bir iş. Bu ortamda Expo
+  web/Metro pnpm monorepo'da bir bundling sorunu yüzünden canlı ekran
+  görüntüsü alınamadı; doğrulama yalnızca typecheck/lint/test ile
+  yapıldı.
 
 Tüm bunlar test edildi: `pnpm typecheck`, `pnpm lint`, `pnpm test` — hepsi
 yeşil. Devam ederken bu üç komutu bozmadan ilerle.
