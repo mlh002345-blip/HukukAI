@@ -2,6 +2,47 @@
 
 Bu proje [Keep a Changelog](https://keepachangelog.com/) formatını takip eder.
 
+## [Otonom Mevzuat Sistemi — 3. Parça: `LegislationModule` + fail-closed `RulesService`]
+
+### Eklendi
+
+- `apps/api/src/modules/legislation/` — `packages/legislation-agents`i
+  `apps/api`'ye bağlayan tam modül:
+  - `LegislationSourceWatcherService` + `LegislationSourceWatcherScheduler`/
+    `Processor` (BullMQ, 15 dakikada bir tekrarlayan iş) — yeni/değişen
+    `contentHash`'e sahip belgeleri idempotent şekilde kaydeder
+  - `LegislationLegalDiffService` — bir önceki belgeyle karşılaştırıp
+    `LegislationChange` üretir
+  - `legislation-rule-impact-map.ts` + `LegislationImpactAnalysisService` —
+    etki değerlendirmesi üretir ve etkilenen `RuleSet`'i
+    `ACTIVE` → `TEMPORARILY_RESTRICTED` yaparak **fail-closed geçişi
+    burada uygular**
+  - `LegislationRuleAuthorService` — yalnızca regex tabanlı, dar kapsamlı
+    gün-sayısı çıkarımı (`DEADLINE_EXTENSION`/`DEADLINE_CHANGE`); AI
+    sağlayıcı çağırmaz, çıkaramadığında `null` döner
+  - `LegislationIndependentReviewService` + `LegislationRuleVerificationService`
+    — 5+1 doğrulama katmanı (kaynak bütünlüğü, ikinci kaynak, model
+    mutabakatı, şema/çakışma, golden testler, regresyon)
+  - `LegislationReleaseDecisionService` — otomatik yayın veya
+    `HOLD_FOR_REVIEW`, admin elle onay/red
+  - `LegislationRuleRemediationService` — geriye dönük `Deadline`
+    yeniden hesaplama + bildirim (mevcut `Notification` altyapısı
+    yeniden kullanılır)
+  - `LegislationPipelineService` — uçtan uca zincir tetikleyici
+  - Admin uçları: `GET/POST /admin/legislation-changes[/:id][/approve|reject]`
+  - 25 yeni birim testi
+- **Fail-closed `RulesService`**: `getRuleValidOn`/`findApplicableRule`,
+  `TEMPORARILY_RESTRICTED` durumunda eşleşen bir kural bulursa yeni
+  `RuleUnderReviewException` (409, `underReview: true`) fırlatır — eski
+  kuralla sessizce devam etmez
+- `LegislationDocument.rawText` alanı (Legal Diff Agent'ın bölüm bazlı
+  karşılaştırması için düz metin; S3'te değil doğrudan DB'de — kamuya
+  açık resmî metinler, taranmış belge değil)
+- `LEGISLATION_SOURCE_SEED` — 6 gerçek `.gov.tr` kaynağı seed'e eklendi
+- **Kapsam notu:** admin panel "Mevzuat İzleme" ekranı ve mobil
+  "doğrulanıyor"/"mevzuat güncel" göstergeleri henüz eklenmedi (uçlar
+  hazır, arayüz sonraki parça)
+
 ## [Otonom Mevzuat Sistemi — 2. Parça: `packages/legislation-agents`]
 
 ### Eklendi

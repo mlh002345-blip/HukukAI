@@ -81,6 +81,9 @@ importers:
       '@hukukai/deadline-engine':
         specifier: workspace:*
         version: link:../../packages/deadline-engine
+      '@hukukai/legislation-agents':
+        specifier: workspace:*
+        version: link:../../packages/legislation-agents
       '@hukukai/rule-engine':
         specifier: workspace:*
         version: link:../../packages/rule-engine

@@ -534,6 +534,11 @@ model LegislationDocument {
   documentType    String
   title           String
   contentHash     String
+  // Tam metin (Doküman modeli gibi bir S3 storageKey'e değil, doğrudan
+  // DB'ye saklanır — bunlar taranmış ikili dosyalar değil, kamuya açık
+  // resmî metinlerdir; Legal Diff Agent'ın madde bazında karşılaştırma
+  // yapabilmesi için gereklidir).
+  rawText         String
   sourceUrl       String
   downloadedAt    DateTime @default(now())
 

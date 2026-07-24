@@ -1,0 +1,60 @@
+/**
+ * Etkilenen mevzuatın başlığından hangi `RuleSet.ruleKey`lerin
+ * etkilendiğine dair MVP eşlemesi. Anahtar kelime tabanlıdır (diğer
+ * sağlayıcılardaki `MockAIProvider`'ın sınıflandırma deseniyle aynı
+ * üslup) — gerçek bir NLP tabanlı eşleme değildir. Bu projede şu an
+ * yalnızca `DEADLINE` modülünde kural var (bkz. CLAUDE.md — hesaplama
+ * motoru henüz RuleSet'ten okumuyor); bu yüzden harita yalnızca süre
+ * kurallarını kapsar. Yeni bir ruleKey eklendiğinde bu tabloya bir
+ * girdi eklenmelidir.
+ */
+export interface RuleImpactMapEntry {
+  keywords: string[];
+  module: string;
+  ruleIds: string[];
+}
+
+export const RULE_IMPACT_MAP: RuleImpactMapEntry[] = [
+  {
+    keywords: ["trafik"],
+    module: "DEADLINE",
+    ruleIds: ["TR_TRAFFIC_FINE_OBJECTION", "TR_TRAFFIC_FINE_DISCOUNTED_PAYMENT"],
+  },
+  {
+    keywords: ["icra", "ödeme emri"],
+    module: "DEADLINE",
+    ruleIds: ["TR_ENFORCEMENT_PAYMENT_ORDER_OBJECTION"],
+  },
+  {
+    keywords: ["vergi"],
+    module: "DEADLINE",
+    ruleIds: ["TR_TAX_COURT_ACTION"],
+  },
+  {
+    keywords: ["sgk", "sosyal güvenlik"],
+    module: "DEADLINE",
+    ruleIds: ["TR_SGK_OBJECTION"],
+  },
+  {
+    keywords: ["istinaf"],
+    module: "DEADLINE",
+    ruleIds: ["TR_COURT_APPEAL"],
+  },
+  {
+    keywords: ["temyiz", "yargıtay"],
+    module: "DEADLINE",
+    ruleIds: ["TR_COURT_CASSATION"],
+  },
+];
+
+export function resolveRuleImpact(
+  affectedLegislation: string,
+): { module: string; ruleIds: string[] } | null {
+  const normalized = affectedLegislation.toLocaleLowerCase("tr");
+  for (const entry of RULE_IMPACT_MAP) {
+    if (entry.keywords.some((keyword) => normalized.includes(keyword))) {
+      return { module: entry.module, ruleIds: entry.ruleIds };
+    }
+  }
+  return null;
+}

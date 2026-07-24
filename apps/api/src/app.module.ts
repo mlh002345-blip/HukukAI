@@ -20,6 +20,7 @@ import { ReportsModule } from "./modules/reports/reports.module";
 import { BillingModule } from "./modules/billing/billing.module";
 import { AdminModule } from "./modules/admin/admin.module";
 import { NotificationsModule } from "./modules/notifications/notifications.module";
+import { LegislationModule } from "./modules/legislation/legislation.module";
 import { JwtAuthGuard } from "./common/guards/jwt-auth.guard";
 import { RolesGuard } from "./common/guards/roles.guard";
 import { SentryExceptionsFilter } from "./common/filters/sentry-exceptions.filter";
@@ -61,6 +62,7 @@ import { parseRedisConnection } from "./queue/redis-connection";
     BillingModule,
     AdminModule,
     NotificationsModule,
+    LegislationModule,
   ],
   providers: [
     { provide: APP_GUARD, useClass: ThrottlerGuard },

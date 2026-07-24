@@ -429,6 +429,58 @@ uca çalışır şekilde kurulacak.
   çoklu-model mutabakatı (kullanıcının sağlayıcı/API anahtarı kararını
   bekler) bilinçli olarak bu pakete dahil edilmedi — yalnızca arayüz +
   Mock var; bu paket henüz `apps/api`'ye bağlanmadı (sonraki parça).
+- **3. Parça — `LegislationModule` + fail-closed `RulesService`**:
+  `packages/legislation-agents` artık `apps/api`'ye bağlandı.
+  `apps/api/src/modules/legislation/` içinde her biri kullanıcının
+  belirttiği bir "ajana" karşılık gelen servisler: `LegislationSourceWatcherService`
+  (`SOURCE_WATCHER_PROVIDER` token'ını enjekte eder, yeni/değişen
+  `contentHash`'e sahip belgeleri `LegislationDocument` olarak kaydeder —
+  idempotent, aynı hash tekrar kaydedilmez), `LegislationLegalDiffService`
+  (`compareLegislationTexts` ile aynı kaynak+başlıktan bir önceki belgeyle
+  karşılaştırıp `LegislationChange` üretir), `legislation-rule-impact-map.ts`
+  (`RULE_IMPACT_MAP` — `affectedLegislation` anahtar kelimesinden
+  `ruleKey`/`module`'e statik, genişletilebilir MVP eşlemesi),
+  `LegislationImpactAnalysisService` (etki değerlendirmesi üretir VE
+  **fail-closed geçişi burada uygulanır**: etkilenen `RuleSet` satırları
+  `ACTIVE` → `TEMPORARILY_RESTRICTED` yapılır), `LegislationRuleAuthorService`
+  (bilinçli olarak dar kapsamlı — hiçbir AI sağlayıcısı çağırmaz, yalnızca
+  `DEADLINE_EXTENSION`/`DEADLINE_CHANGE` metinlerinden regex ile gün sayısı
+  çıkarabildiğinde bir `DRAFT` `RuleSet` taslağı üretir, aksi halde `null`
+  döner — "AI mevzuat metnini anlıyor" gibi güvenilmez bir iddiada
+  bulunmamak için), `LegislationIndependentReviewService`
+  (`MULTI_MODEL_CONSENSUS_PROVIDER` ile ikinci bağımsız taslağı üretip
+  alan alan karşılaştırır), `LegislationRuleVerificationService` (5+1
+  katmanı orkestre eder — kaynak bütünlüğü, ikinci kaynak, model
+  mutabakatı, şema/çakışma, golden testler, regresyon — her katman bir
+  `RuleVerificationResult` satırı yazar), `LegislationReleaseDecisionService`
+  (`decideReleaseRisk` + katman sonuçlarına göre adayı `ACTIVE` yapıp
+  eskisini `SUPERSEDED` işaretler ya da `VERIFIED`/`HOLD_FOR_REVIEW` bırakır;
+  admin elle onay/red için `approveManually`/`rejectManually`),
+  `LegislationRuleRemediationService` (yeni `ACTIVE` sürüm yayınlandığında,
+  ilgili tarih aralığına düşen ve yayından önce oluşturulmuş `Deadline`
+  kayıtlarını `calculateDeadline` ile yeniden hesaplar, sonuç değişmişse
+  `invalidatedAt` ile işaretler ve mevcut `Notification`/bildirim teslim
+  worker'ını yeniden kullanarak kullanıcıyı bilgilendirir — **kapsam notu:**
+  `calculation-engine` henüz `RuleSet`'ten oran okumadığından (Faz 6'dan
+  beri bilinen boşluk) bu yalnızca `Deadline` için çalışır, `Calculation`
+  için kapsam dışıdır), `LegislationPipelineService` (tüm zinciri
+  uçtan uca tetikler) + `LegislationSourceWatcherScheduler`/`Processor`
+  (`NotificationsSchedulerService` deseniyle BullMQ'da 15 dakikada bir
+  tekrarlayan iş — Resmî Gazete'nin en sık önerilen tarama aralığı).
+  Admin uçları (`@Roles("ADMIN")`, `AuditLogService.record` deseniyle):
+  `GET /admin/legislation-changes`, `GET /admin/legislation-changes/:id`,
+  `POST /admin/legislation-changes/:id/approve`, `.../reject`.
+  **Fail-closed `RulesService` değişikliği**: `getRuleValidOn` ve
+  `findApplicableRule` artık bir `ruleKey`/modül için `TEMPORARILY_RESTRICTED`
+  durumundaki (tarih/koşul olarak eşleşen) bir satır bulursa, eski kuralla
+  sessizce "kesin" sonuç üretmek yerine yeni `RuleUnderReviewException`
+  (409 Conflict, `{underReview: true, ruleKey, message}` gövdesiyle)
+  fırlatır. `LEGISLATION_SOURCE_SEED` (6 gerçek `.gov.tr` kaynağı — Resmî
+  Gazete/GİB/SGK/Adalet Bakanlığı/CTE Genel Müdürlüğü/AYM) seed'e eklendi.
+  25 yeni birim testi (toplam API testi artık 151). **Kapsam notu:** admin
+  panelde "Mevzuat İzleme" ekranı ve mobilde "doğrulanıyor" bannerı/
+  "mevzuat güncel" göstergesi henüz eklenmedi — bu uçlar hazır ama arayüzü
+  sonraki bir parça.
 
 ## CI
 
@@ -460,9 +512,10 @@ migration'daki gibi `prisma migrate diff --from-schema-datamodel
 &lt;değişiklik-öncesi-schema.prisma-kopyası&gt; --to-schema-datamodel
 schema.prisma --script` istisnası kabul edilebilir (`rule_sets`/
 `Deadline` genişletmesi ve Otonom Mevzuat Sistemi tabloları için
-`20260724124251_legislation_system` migration'ı bu yöntemle üretildi) —
-gerçek bir geliştirme makinesinde bundan sonraki değişiklikler için
-`prisma migrate dev` tercih edilmelidir.
+`20260724124251_legislation_system` migration'ı, `LegislationDocument.rawText`
+alanı için de `20260724130046_legislation_document_rawtext` migration'ı bu
+yöntemle üretildi) — gerçek bir geliştirme makinesinde bundan sonraki
+değişiklikler için `prisma migrate dev` tercih edilmelidir.
 
 ## Geliştirme komutları
 

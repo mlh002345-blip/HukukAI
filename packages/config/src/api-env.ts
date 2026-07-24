@@ -41,6 +41,12 @@ export const apiEnvSchema = z.object({
   // Ödeme sağlayıcısı değiştirilebilir olmalıdır (Faz 8 — Bölüm 23)
   PAYMENT_PROVIDER: z.enum(["mock"]).default("mock"),
 
+  // Otonom Mevzuat Sistemi — kaynak tarama ve çoklu-model mutabakat
+  // sağlayıcıları değiştirilebilir olmalıdır (bkz. CLAUDE.md). Şu an
+  // yalnızca "mock" var; gerçek sağlayıcılar ayrı, sonraki fazlar.
+  LEGISLATION_SOURCE_WATCHER: z.enum(["mock"]).default("mock"),
+  LEGISLATION_CONSENSUS_PROVIDER: z.enum(["mock"]).default("mock"),
+
   // OCR metninin şifrelenmesi (Bölüm 20 — Güvenlik ve KVKK)
   DOCUMENT_TEXT_ENCRYPTION_KEY: z.string().min(32),
 
