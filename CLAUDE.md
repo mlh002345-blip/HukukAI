@@ -281,8 +281,17 @@ o dokümana göre kodlanıyor. Yeni bir şey yapmadan önce bu dokümanı oku.
   Stitch tasarımındaki e-posta bildirimi anahtarı ve özelleştirilebilir
   uyarı aralığı seçenekleri (bunlar gerçek bir işlevi olmayan sahte
   kontroller olacağından) eklenmedi. Profil menüsündeki daha önce ölü
-  olan "Bildirim Tercihleri" satırı artık bu ekrana bağlı.
-  **Kapsam notu:** Stitch paketindeki geri kalan ~17 yeni ekran (analiz
+  olan "Bildirim Tercihleri" satırı artık bu ekrana bağlı. Ardından
+  **Hesap ve Güvenlik** ekranı eklendi (`app/account/settings.tsx`) —
+  Faz 1'den beri var olan ama mobilde hiç bağlanmamış `GET`/`PATCH
+  /auth/me` uçlarını kullanır: Ad Soyad ve Telefon düzenlenebilir,
+  e-posta salt okunur gösterilir (değiştirme ucu yok). `useUpdateProfile`
+  hook'u ve `auth-store`a eklenen `updateUser` action'ı, kaydetme
+  sonrası profili yeniden login olmadan günceller. Profil menüsündeki
+  "Güvenlik Ayarları" satırı artık bu ekrana bağlı. **Kapsam notu:**
+  Stitch tasarımındaki parola değiştirme, 2FA ve oturum listesi
+  bölümleri backend'de karşılığı olmadığından eklenmedi (ekranda bunu
+  açıklayan bir bilgi bannerı var); geri kalan ~16 yeni ekran (analiz
   sonucu/risk analizi detay ekranları, avukat dashboard'u vb.) henüz
   eklenmedi; bu, birden fazla oturuma yayılacak devam eden bir iştir.
   Bu ortamda Expo web/Metro pnpm monorepo'da bir bundling
