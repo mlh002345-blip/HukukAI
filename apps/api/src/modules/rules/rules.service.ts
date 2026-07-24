@@ -27,17 +27,30 @@ type RuleSetRow = {
   validTo: Date | null;
   ruleData: unknown;
   legalBasis: unknown;
+  status: string;
+  verifiedAt: Date | null;
+  confidenceScore: unknown;
+  sourceUrl: string | null;
 };
 
-type RuleSetStatusRow = RuleSetRow & { status: string };
+export interface RuleLegislationStatus {
+  status: string;
+  validFrom: string;
+  validTo: string | null;
+  verifiedAt: string | null;
+  confidenceScore: string | null;
+  sourceUrl: string | null;
+}
+
+export type VersionedRuleWithStatus = VersionedRule<DeadlineRuleCalculation> & {
+  legislationStatus: RuleLegislationStatus;
+};
 
 function toIsoDate(date: Date): string {
   return date.toISOString().slice(0, 10);
 }
 
-function toVersionedRule(
-  row: RuleSetRow,
-): VersionedRule<DeadlineRuleCalculation> {
+function toVersionedRule(row: RuleSetRow): VersionedRuleWithStatus {
   const data = row.ruleData as DeadlineRuleData;
   return {
     ruleKey: row.ruleKey,
@@ -48,6 +61,14 @@ function toVersionedRule(
     data: data.calculation,
     legalBasis: (row.legalBasis ?? []) as LegalBasisRef[],
     warnings: data.warnings ?? [],
+    legislationStatus: {
+      status: row.status,
+      validFrom: toIsoDate(row.validFrom),
+      validTo: row.validTo ? toIsoDate(row.validTo) : null,
+      verifiedAt: row.verifiedAt ? row.verifiedAt.toISOString() : null,
+      confidenceScore: row.confidenceScore ? String(row.confidenceScore) : null,
+      sourceUrl: row.sourceUrl,
+    },
   };
 }
 
@@ -63,11 +84,11 @@ export class RulesService {
   async getRuleValidOn(
     ruleKey: string,
     onDate: string,
-  ): Promise<VersionedRule<DeadlineRuleCalculation>> {
+  ): Promise<VersionedRuleWithStatus> {
     const rows = await this.prisma.ruleSet.findMany({ where: { ruleKey } });
     const published = rows.filter((row) => row.isPublished);
     const rule = selectRuleVersion(published.map(toVersionedRule), onDate);
-    if (rule) return rule;
+    if (rule) return rule as VersionedRuleWithStatus;
 
     this.assertNotUnderReview(rows, onDate, ruleKey);
     throw new NotFoundException(
@@ -79,11 +100,11 @@ export class RulesService {
     ruleModule: string,
     facts: Record<string, unknown>,
     onDate: string,
-  ): Promise<VersionedRule<DeadlineRuleCalculation>> {
+  ): Promise<VersionedRuleWithStatus> {
     const rows = await this.prisma.ruleSet.findMany({ where: { module: ruleModule } });
     const published = rows.filter((row) => row.isPublished);
     const rule = findApplicableRule(published.map(toVersionedRule), facts, onDate);
-    if (rule) return rule;
+    if (rule) return rule as VersionedRuleWithStatus;
 
     const restricted = rows.filter((row) => row.status === "TEMPORARILY_RESTRICTED");
     const restrictedMatch = findApplicableRule(restricted.map(toVersionedRule), facts, onDate);
@@ -106,7 +127,7 @@ export class RulesService {
    * yanlış" bir sonuç asla dönmez.
    */
   private assertNotUnderReview(
-    rows: RuleSetStatusRow[],
+    rows: RuleSetRow[],
     onDate: string,
     ruleKey: string,
   ): void {

@@ -46,6 +46,14 @@ const sampleRule = {
   },
   legalBasis: [{ law: "Kabahatler Kanunu", article: "27" }],
   warnings: ["test uyarısı"],
+  legislationStatus: {
+    status: "ACTIVE",
+    validFrom: "2020-01-01",
+    validTo: null,
+    verifiedAt: null,
+    confidenceScore: null,
+    sourceUrl: null,
+  },
 };
 
 function buildService() {

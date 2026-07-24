@@ -2,6 +2,27 @@
 
 Bu proje [Keep a Changelog](https://keepachangelog.com/) formatını takip eder.
 
+## [Otonom Mevzuat Sistemi — 6. Parça: mobil "doğrulanıyor" bannerı + "mevzuat güncel" göstergesi (tamamlandı)]
+
+### Eklendi
+
+- `RulesService.getRuleValidOn`/`findApplicableRule` artık her kural
+  sonucuyla birlikte `legislationStatus` (durum, geçerlilik aralığı,
+  son doğrulama zamanı, güven skoru, kaynak URL'i) döndürür
+- `@hukukai/types`e `RuleLegislationStatus` ve
+  `DeadlineCalculationResponse.legislationStatus` eklendi
+- `deadline/calculate.tsx`: her sonuçta "Mevzuat güncel" satırı; backend
+  409 (`RuleUnderReviewException`, `underReview: true`) dönerse kesin
+  sonuç yerine mevcut `WarningBanner` (`@hukukai/ui`) ile "doğrulanıyor"
+  mesajı gösterilir
+
+Otonom Mevzuat Sistemi'nin 6 parçası da tamamlandı: veri modeli, saf
+ajan mantığı (`packages/legislation-agents`), API servisleri + fail-closed
+`RulesService`, admin panel, mobil gösterge. Kapsam dışı bırakılanlar
+(gerçek kaynak scraping, gerçek ikinci LLM sağlayıcısı, canary trafik
+bölme, `Calculation` için geriye dönük düzeltme) ilgili parçaların
+"Kapsam notu"nda işaretli.
+
 ## [Otonom Mevzuat Sistemi — 5. Parça: admin panel "Mevzuat İzleme"]
 
 ### Eklendi

@@ -22,6 +22,17 @@ export interface DeadlineAdjustment {
   description: string;
 }
 
+/** Otonom Mevzuat Sistemi'nin ürettiği kural sürümü meta verisi — her
+ * sonuç ekranında "Mevzuat güncel" göstergesi için kullanılır. */
+export interface RuleLegislationStatus {
+  status: string;
+  validFrom: string;
+  validTo: string | null;
+  verifiedAt: string | null;
+  confidenceScore: string | null;
+  sourceUrl: string | null;
+}
+
 /** Bkz. Doküman Bölüm 16 — `DeadlineOutput`. Kalıcı bir `Deadline`
  * kaydı oluşturmadan yapılan tek seferlik hesaplamanın sonucudur. */
 export interface DeadlineCalculationResponse {
@@ -35,6 +46,7 @@ export interface DeadlineCalculationResponse {
   appliedAdjustments: DeadlineAdjustment[];
   legalBasis: LegalBasisRef[];
   warnings: string[];
+  legislationStatus: RuleLegislationStatus;
 }
 
 export interface DeadlineSummary {
