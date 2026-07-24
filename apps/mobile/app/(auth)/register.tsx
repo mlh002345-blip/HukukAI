@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -12,12 +12,15 @@ import {
   View,
 } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
+import { Icon, useTheme, type Theme } from "@hukukai/ui";
 import { registerSchema, type RegisterInput } from "@hukukai/validation";
 import type { UserRole } from "@hukukai/types";
 import { useRegister } from "../../src/hooks/useAuth";
 import { LEGAL_TEXT_VERSION } from "../../src/content/legal";
 
 export default function RegisterScreen() {
+  const theme = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
   const params = useLocalSearchParams<{ role?: string }>();
   const registrableRoles: Array<Exclude<UserRole, "ADMIN">> = [
     "CITIZEN",
@@ -31,6 +34,7 @@ export default function RegisterScreen() {
     : "CITIZEN";
   const registerMutation = useRegister();
   const [termsAccepted, setTermsAccepted] = useState(false);
+  const [passwordVisible, setPasswordVisible] = useState(false);
 
   const {
     control,
@@ -62,72 +66,98 @@ export default function RegisterScreen() {
 
   return (
     <ScrollView
-      contentContainerStyle={styles.container}
+      style={styles.container}
+      contentContainerStyle={styles.content}
       keyboardShouldPersistTaps="handled"
     >
-      <Text style={styles.title}>Hesap Oluştur</Text>
+      <View style={styles.header}>
+        <Icon name="gavel" size={30} color={theme.colors.primary} />
+        <Text style={styles.brand}>HukukAI</Text>
+      </View>
+
+      <Text style={styles.title}>Yeni Hesap Oluştur</Text>
+      <Text style={styles.subtitle}>
+        Profesyonel hukuk araçlarına erişmek için kayıt olun.
+      </Text>
 
       <View style={styles.field}>
-        <Text style={styles.label}>Ad Soyad</Text>
-        <Controller
-          control={control}
-          name="fullName"
-          render={({ field: { value, onChange, onBlur } }) => (
-            <TextInput
-              value={value}
-              onChangeText={onChange}
-              onBlur={onBlur}
-              style={styles.input}
-              placeholder="Ad Soyad"
-            />
-          )}
-        />
-        {errors.fullName ? (
-          <Text style={styles.errorText}>{errors.fullName.message}</Text>
-        ) : null}
+        <Text style={styles.label}>AD SOYAD</Text>
+        <View style={styles.inputWrap}>
+          <Icon name="person" size={20} color={theme.colors.outline} style={styles.inputIcon} />
+          <Controller
+            control={control}
+            name="fullName"
+            render={({ field: { value, onChange, onBlur } }) => (
+              <TextInput
+                value={value}
+                onChangeText={onChange}
+                onBlur={onBlur}
+                style={styles.input}
+                placeholder="Örn: Av. Selin Yılmaz"
+                placeholderTextColor={theme.colors.outline}
+              />
+            )}
+          />
+        </View>
+        {errors.fullName ? <Text style={styles.errorText}>{errors.fullName.message}</Text> : null}
       </View>
 
       <View style={styles.field}>
-        <Text style={styles.label}>E-posta</Text>
-        <Controller
-          control={control}
-          name="email"
-          render={({ field: { value, onChange, onBlur } }) => (
-            <TextInput
-              value={value}
-              onChangeText={onChange}
-              onBlur={onBlur}
-              style={styles.input}
-              autoCapitalize="none"
-              keyboardType="email-address"
-              placeholder="ornek@eposta.com"
-            />
-          )}
-        />
-        {errors.email ? (
-          <Text style={styles.errorText}>{errors.email.message}</Text>
-        ) : null}
+        <Text style={styles.label}>E-POSTA ADRESİ</Text>
+        <View style={styles.inputWrap}>
+          <Icon name="mail" size={20} color={theme.colors.outline} style={styles.inputIcon} />
+          <Controller
+            control={control}
+            name="email"
+            render={({ field: { value, onChange, onBlur } }) => (
+              <TextInput
+                value={value}
+                onChangeText={onChange}
+                onBlur={onBlur}
+                style={styles.input}
+                autoCapitalize="none"
+                keyboardType="email-address"
+                placeholder="isim@sirket.com"
+                placeholderTextColor={theme.colors.outline}
+              />
+            )}
+          />
+        </View>
+        {errors.email ? <Text style={styles.errorText}>{errors.email.message}</Text> : null}
       </View>
 
       <View style={styles.field}>
-        <Text style={styles.label}>Parola</Text>
-        <Controller
-          control={control}
-          name="password"
-          render={({ field: { value, onChange, onBlur } }) => (
-            <TextInput
-              value={value}
-              onChangeText={onChange}
-              onBlur={onBlur}
-              style={styles.input}
-              secureTextEntry
-              placeholder="En az 10 karakter"
+        <Text style={styles.label}>PAROLA</Text>
+        <View style={styles.inputWrap}>
+          <Icon name="lock" size={20} color={theme.colors.outline} style={styles.inputIcon} />
+          <Controller
+            control={control}
+            name="password"
+            render={({ field: { value, onChange, onBlur } }) => (
+              <TextInput
+                value={value}
+                onChangeText={onChange}
+                onBlur={onBlur}
+                style={[styles.input, styles.inputWithTrailingIcon]}
+                secureTextEntry={!passwordVisible}
+                placeholder="En az 10 karakter"
+                placeholderTextColor={theme.colors.outline}
+              />
+            )}
+          />
+          <Pressable
+            style={styles.trailingIcon}
+            onPress={() => setPasswordVisible((v) => !v)}
+            hitSlop={8}
+          >
+            <Icon
+              name={passwordVisible ? "visibility_off" : "visibility"}
+              size={20}
+              color={theme.colors.outline}
             />
-          )}
-        />
-        {errors.password ? (
-          <Text style={styles.errorText}>{errors.password.message}</Text>
-        ) : null}
+          </Pressable>
+        </View>
+        {errors.password ? <Text style={styles.errorText}>{errors.password.message}</Text> : null}
       </View>
 
       <View style={styles.termsRow}>
@@ -153,87 +183,129 @@ export default function RegisterScreen() {
       ) : null}
 
       <Pressable
-        style={[
-          styles.submitButton,
-          !termsAccepted && styles.submitButtonDisabled,
-        ]}
+        style={[styles.submitButton, !termsAccepted && styles.submitButtonDisabled]}
         onPress={onSubmit}
         disabled={!termsAccepted || registerMutation.isPending}
       >
         {registerMutation.isPending ? (
-          <ActivityIndicator color="#FFFFFF" />
+          <ActivityIndicator color={theme.colors.onPrimary} />
         ) : (
-          <Text style={styles.submitButtonText}>Kayıt Ol</Text>
+          <>
+            <Text style={styles.submitButtonText}>Kayıt Ol</Text>
+            <Icon name="arrow_forward" size={20} color={theme.colors.onPrimary} />
+          </>
         )}
       </Pressable>
+
+      <View style={styles.footerRow}>
+        <Text style={styles.footerText}>Zaten hesabınız var mı? </Text>
+        <Pressable onPress={() => router.push("/(auth)/login")} hitSlop={8}>
+          <Text style={styles.footerLink}>Giriş Yap</Text>
+        </Pressable>
+      </View>
     </ScrollView>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flexGrow: 1,
-    backgroundColor: "#FFFFFF",
-    padding: 24,
-    paddingTop: 64,
-    gap: 16,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: "700",
-    color: "#101828",
-    marginBottom: 8,
-  },
-  field: {
-    gap: 6,
-  },
-  label: {
-    fontSize: 13,
-    fontWeight: "500",
-    color: "#344054",
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: "#D0D5DD",
-    borderRadius: 10,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    fontSize: 15,
-    color: "#101828",
-  },
-  errorText: {
-    color: "#B42318",
-    fontSize: 12,
-  },
-  termsRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-  },
-  termsText: {
-    flex: 1,
-    fontSize: 12,
-    color: "#475467",
-    lineHeight: 17,
-  },
-  termsLink: {
-    color: "#175CD3",
-    fontWeight: "600",
-    textDecorationLine: "underline",
-  },
-  submitButton: {
-    backgroundColor: "#175CD3",
-    borderRadius: 12,
-    paddingVertical: 15,
-    alignItems: "center",
-    marginTop: 8,
-  },
-  submitButtonDisabled: {
-    backgroundColor: "#A6C4F0",
-  },
-  submitButtonText: {
-    color: "#FFFFFF",
-    fontWeight: "700",
-    fontSize: 15,
-  },
-});
+function createStyles(theme: Theme) {
+  return StyleSheet.create({
+    container: { flex: 1, backgroundColor: theme.colors.background },
+    content: {
+      flexGrow: 1,
+      padding: theme.spacing.containerPadding,
+      paddingTop: 56,
+      paddingBottom: 40,
+      gap: theme.spacing.stackGapMd,
+    },
+    header: { flexDirection: "row", alignItems: "center", gap: 8, alignSelf: "center", marginBottom: 4 },
+    brand: {
+      fontFamily: theme.typography.headlineMd.fontFamily,
+      fontSize: 20,
+      fontWeight: "700",
+      color: theme.colors.primary,
+    },
+    title: {
+      fontFamily: theme.typography.headlineMd.fontFamily,
+      fontSize: 22,
+      fontWeight: "700",
+      color: theme.colors.onBackground,
+    },
+    subtitle: {
+      fontFamily: theme.typography.bodyMd.fontFamily,
+      fontSize: 13,
+      color: theme.colors.onSurfaceVariant,
+      marginTop: -8,
+    },
+    field: { gap: 6 },
+    label: {
+      fontFamily: theme.typography.labelMd.fontFamily,
+      fontSize: 11,
+      letterSpacing: 0.5,
+      color: theme.colors.onSurfaceVariant,
+      textTransform: "uppercase",
+    },
+    inputWrap: { position: "relative", justifyContent: "center" },
+    inputIcon: { position: "absolute", left: 14, zIndex: 1 },
+    trailingIcon: { position: "absolute", right: 14 },
+    input: {
+      backgroundColor: theme.colors.surfaceContainerLowest,
+      borderWidth: 1,
+      borderColor: theme.colors.outlineVariant,
+      borderRadius: theme.radii.xl,
+      paddingLeft: 40,
+      paddingRight: 16,
+      paddingVertical: 12,
+      fontFamily: theme.typography.bodyMd.fontFamily,
+      fontSize: 14,
+      color: theme.colors.onSurface,
+    },
+    inputWithTrailingIcon: { paddingRight: 44 },
+    errorText: {
+      color: theme.colors.error,
+      fontSize: 12,
+      fontFamily: theme.typography.bodyMd.fontFamily,
+    },
+    termsRow: { flexDirection: "row", alignItems: "center", gap: 10 },
+    termsText: {
+      flex: 1,
+      fontFamily: theme.typography.bodyMd.fontFamily,
+      fontSize: 12,
+      color: theme.colors.onSurfaceVariant,
+      lineHeight: 17,
+    },
+    termsLink: {
+      color: theme.colors.secondary,
+      fontWeight: "600",
+      textDecorationLine: "underline",
+    },
+    submitButton: {
+      backgroundColor: theme.colors.primary,
+      borderRadius: theme.radii.xl,
+      paddingVertical: 15,
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "center",
+      gap: 8,
+      marginTop: 4,
+    },
+    submitButtonDisabled: { opacity: 0.5 },
+    submitButtonText: {
+      color: theme.colors.onPrimary,
+      fontFamily: theme.typography.headlineSm.fontFamily,
+      fontWeight: "700",
+      fontSize: 15,
+    },
+    footerRow: { flexDirection: "row", justifyContent: "center", paddingTop: 8 },
+    footerText: {
+      fontFamily: theme.typography.bodyMd.fontFamily,
+      fontSize: 13,
+      color: theme.colors.onSurfaceVariant,
+    },
+    footerLink: {
+      fontFamily: theme.typography.bodySmMedium.fontFamily,
+      fontSize: 13,
+      fontWeight: "700",
+      color: theme.colors.primary,
+    },
+  });
+}

@@ -2,6 +2,23 @@
 
 Bu proje [Keep a Changelog](https://keepachangelog.com/) formatını takip eder.
 
+## [Görsel Tasarım — Stitch Entegrasyonu, 3. Parça]
+
+### Eklendi
+
+- Auth/onboarding akışı yeni tema/ikon sistemine taşındı:
+  - `app/onboarding.tsx` — 3 adımlı tanıtım, ikon dairesi + nokta
+    göstergeler
+  - `app/(auth)/role-selection.tsx` — 3 rol kartı, seçili karta
+    `check_circle` rozeti
+  - `app/(auth)/login.tsx`, `register.tsx`, `forgot-password.tsx` —
+    marka başlığı, pill-şekilli ikonlu form alanları, göz ikonuyla
+    parola göster/gizle
+- Tasarım paketindeki sosyal giriş (Google/Apple) düğmeleri,
+  uygulamada karşılığı olmadığından eklenmedi
+- **Kapsam notu:** geri kalan ~31 ekran hâlâ taşınmadı; doğrulama
+  yalnızca typecheck/lint/test ile yapıldı
+
 ## [Görsel Tasarım — Stitch Entegrasyonu, 2. Parça]
 
 ### Eklendi

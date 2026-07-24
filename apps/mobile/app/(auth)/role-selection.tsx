@@ -1,24 +1,28 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { router } from "expo-router";
+import { Icon, useTheme, type Theme } from "@hukukai/ui";
 import type { UserRole } from "@hukukai/types";
 import { useAuthStore } from "../../src/stores/auth-store";
 
-const ROLE_OPTIONS: Array<{ role: UserRole; label: string; hint: string }> = [
+const ROLE_OPTIONS: Array<{ role: UserRole; label: string; hint: string; icon: string }> = [
   {
     role: "CITIZEN",
     label: "Vatandaş",
     hint: "Belgemi anlamak ve sürelerimi takip etmek istiyorum",
+    icon: "person",
   },
   {
     role: "LAWYER",
     label: "Avukat",
     hint: "Dava, icra ve süre işlerimi hızlandırmak istiyorum",
+    icon: "gavel",
   },
   {
     role: "ACCOUNTANT",
     label: "Mali Müşavir",
     hint: "Vergi, SGK ve mali hesaplamalar yapmak istiyorum",
+    icon: "account_balance",
   },
 ];
 
@@ -28,11 +32,18 @@ const ROLE_OPTIONS: Array<{ role: UserRole; label: string; hint: string }> = [
  * tüm araçlar her zaman görünür kalır.
  */
 export default function RoleSelectionScreen() {
+  const theme = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
   const [selected, setSelected] = useState<UserRole>("CITIZEN");
   const continueAsGuest = useAuthStore((state) => state.continueAsGuest);
 
   return (
     <View style={styles.container}>
+      <View style={styles.header}>
+        <Icon name="gavel" size={26} color={theme.colors.primary} />
+        <Text style={styles.brand}>HukukAI</Text>
+      </View>
+
       <Text style={styles.title}>Sizi nasıl tanımlarsınız?</Text>
       <Text style={styles.subtitle}>
         Bu seçim hiçbir aracı gizlemez; yalnızca size önerdiğimiz araçların
@@ -40,26 +51,38 @@ export default function RoleSelectionScreen() {
       </Text>
 
       <View style={styles.optionsList}>
-        {ROLE_OPTIONS.map((option) => (
-          <Pressable
-            key={option.role}
-            onPress={() => setSelected(option.role)}
-            style={[
-              styles.optionCard,
-              selected === option.role && styles.optionCardSelected,
-            ]}
-          >
-            <Text
-              style={[
-                styles.optionLabel,
-                selected === option.role && styles.optionLabelSelected,
-              ]}
+        {ROLE_OPTIONS.map((option) => {
+          const isSelected = selected === option.role;
+          return (
+            <Pressable
+              key={option.role}
+              onPress={() => setSelected(option.role)}
+              style={[styles.optionCard, isSelected && styles.optionCardSelected]}
             >
-              {option.label}
-            </Text>
-            <Text style={styles.optionHint}>{option.hint}</Text>
-          </Pressable>
-        ))}
+              {isSelected ? (
+                <View style={styles.checkBadge}>
+                  <Icon name="check_circle" filled size={18} color={theme.colors.primary} />
+                </View>
+              ) : null}
+              <View
+                style={[
+                  styles.optionIconWrap,
+                  isSelected && styles.optionIconWrapSelected,
+                ]}
+              >
+                <Icon
+                  name={option.icon}
+                  size={26}
+                  color={isSelected ? theme.colors.onPrimaryContainer : theme.colors.primary}
+                />
+              </View>
+              <Text style={[styles.optionLabel, isSelected && styles.optionLabelSelected]}>
+                {option.label}
+              </Text>
+              <Text style={styles.optionHint}>{option.hint}</Text>
+            </Pressable>
+          );
+        })}
       </View>
 
       <View style={styles.footer}>
@@ -96,84 +119,112 @@ export default function RoleSelectionScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#FFFFFF",
-    padding: 24,
-    paddingTop: 64,
-    gap: 20,
-  },
-  title: {
-    fontSize: 22,
-    fontWeight: "700",
-    color: "#101828",
-  },
-  subtitle: {
-    fontSize: 13,
-    color: "#667085",
-    lineHeight: 19,
-  },
-  optionsList: {
-    gap: 12,
-  },
-  optionCard: {
-    borderWidth: 1.5,
-    borderColor: "#E4E7EC",
-    borderRadius: 14,
-    padding: 16,
-    gap: 4,
-  },
-  optionCardSelected: {
-    borderColor: "#175CD3",
-    backgroundColor: "#EFF4FF",
-  },
-  optionLabel: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#101828",
-  },
-  optionLabelSelected: {
-    color: "#175CD3",
-  },
-  optionHint: {
-    fontSize: 12,
-    color: "#667085",
-  },
-  footer: {
-    marginTop: "auto",
-    gap: 12,
-    alignItems: "center",
-  },
-  primaryButton: {
-    backgroundColor: "#175CD3",
-    borderRadius: 12,
-    paddingVertical: 15,
-    width: "100%",
-    alignItems: "center",
-  },
-  primaryButtonText: {
-    color: "#FFFFFF",
-    fontWeight: "700",
-    fontSize: 15,
-  },
-  secondaryButton: {
-    borderRadius: 12,
-    paddingVertical: 15,
-    width: "100%",
-    alignItems: "center",
-    borderWidth: 1,
-    borderColor: "#E4E7EC",
-  },
-  secondaryButtonText: {
-    color: "#101828",
-    fontWeight: "600",
-    fontSize: 15,
-  },
-  guestLink: {
-    color: "#667085",
-    fontSize: 13,
-    textDecorationLine: "underline",
-    marginTop: 4,
-  },
-});
+function createStyles(theme: Theme) {
+  return StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: theme.colors.background,
+      padding: theme.spacing.containerPadding,
+      paddingTop: 56,
+      gap: theme.spacing.stackGapMd,
+    },
+    header: { flexDirection: "row", alignItems: "center", gap: 8 },
+    brand: {
+      fontFamily: theme.typography.headlineMd.fontFamily,
+      fontSize: 18,
+      fontWeight: "700",
+      color: theme.colors.primary,
+    },
+    title: {
+      fontFamily: theme.typography.headlineLgMobile.fontFamily,
+      fontSize: 22,
+      fontWeight: "700",
+      color: theme.colors.onBackground,
+    },
+    subtitle: {
+      fontFamily: theme.typography.bodyLg.fontFamily,
+      fontSize: 13,
+      color: theme.colors.onSurfaceVariant,
+      lineHeight: 19,
+    },
+    optionsList: { gap: 12 },
+    optionCard: {
+      position: "relative",
+      borderWidth: 1.5,
+      borderColor: theme.colors.outlineVariant,
+      backgroundColor: theme.colors.surfaceContainerLowest,
+      borderRadius: theme.radii.xl,
+      padding: 16,
+      gap: 4,
+      alignItems: "center",
+    },
+    optionCardSelected: {
+      borderColor: theme.colors.primary,
+      backgroundColor: theme.colors.surfaceContainer,
+    },
+    checkBadge: {
+      position: "absolute",
+      top: 12,
+      right: 12,
+    },
+    optionIconWrap: {
+      width: 52,
+      height: 52,
+      borderRadius: theme.radii.full,
+      backgroundColor: theme.colors.surfaceContainer,
+      alignItems: "center",
+      justifyContent: "center",
+      marginBottom: 4,
+    },
+    optionIconWrapSelected: {
+      backgroundColor: theme.colors.primaryContainer,
+    },
+    optionLabel: {
+      fontFamily: theme.typography.headlineSm.fontFamily,
+      fontSize: 16,
+      fontWeight: "600",
+      color: theme.colors.onSurface,
+    },
+    optionLabelSelected: { color: theme.colors.primary },
+    optionHint: {
+      fontFamily: theme.typography.bodyMd.fontFamily,
+      fontSize: 12,
+      color: theme.colors.onSurfaceVariant,
+      textAlign: "center",
+    },
+    footer: { marginTop: "auto", gap: 12, alignItems: "center" },
+    primaryButton: {
+      backgroundColor: theme.colors.primary,
+      borderRadius: theme.radii.full,
+      paddingVertical: 15,
+      width: "100%",
+      alignItems: "center",
+    },
+    primaryButtonText: {
+      color: theme.colors.onPrimary,
+      fontFamily: theme.typography.headlineSm.fontFamily,
+      fontWeight: "700",
+      fontSize: 15,
+    },
+    secondaryButton: {
+      borderRadius: theme.radii.full,
+      paddingVertical: 15,
+      width: "100%",
+      alignItems: "center",
+      borderWidth: 1,
+      borderColor: theme.colors.outlineVariant,
+    },
+    secondaryButtonText: {
+      color: theme.colors.onSurface,
+      fontFamily: theme.typography.bodySmMedium.fontFamily,
+      fontWeight: "600",
+      fontSize: 15,
+    },
+    guestLink: {
+      color: theme.colors.onSurfaceVariant,
+      fontSize: 13,
+      textDecorationLine: "underline",
+      marginTop: 4,
+    },
+  });
+}

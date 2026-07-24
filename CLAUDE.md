@@ -211,12 +211,22 @@ o dokümana göre kodlanıyor. Yeni bir şey yapmadan önce bu dokümanı oku.
   kalan süreler için amber sol-kenarlıklı acil kart stili,
   `priority_high`/`event`/`warning` ikonları) ve **Profil**
   (`profile.tsx` — `MENU_ITEMS` dizisi ile ikonlu menü satırları,
-  avatar dairesi, rol rozeti). **Kapsam notu:** geri kalan ~35 ekran
-  (auth/onboarding, belge yükleme/analiz akışları, hesaplama/rapor
-  detay ekranları, admin dashboard vb.) henüz taşınmadı — bu, birden
-  fazla oturuma yayılacak devam eden bir iş. Bu ortamda Expo web/Metro
-  pnpm monorepo'da bir bundling sorunu yüzünden canlı ekran görüntüsü
-  alınamadı; doğrulama yalnızca typecheck/lint/test ile yapıldı.
+  avatar dairesi, rol rozeti). Ardından auth/onboarding akışı da
+  taşındı: **Onboarding** (`app/onboarding.tsx` — 3 adımlı kaydırmalı
+  tanıtım, ikon dairesi + nokta göstergeler), **Rol Seçimi**
+  (`role-selection.tsx` — 3 rol kartı, seçili karta `check_circle`
+  rozeti), **Giriş Yap** (`login.tsx` — marka başlığı, pill-şekilli
+  ikonlu form alanları, göz ikonuyla parola göster/gizle), **Kayıt Ol**
+  (`register.tsx` — aynı form deseni + KVKK/Kullanım Koşulları onay
+  anahtarı) ve **Parolamı Unuttum** (`forgot-password.tsx`). Tasarım
+  paketindeki sosyal giriş (Google/Apple) düğmeleri, uygulamada
+  karşılığı olmadığından eklenmedi. **Kapsam notu:** geri kalan ~31
+  ekran (belge yükleme/analiz akışları, hesaplama/rapor detay
+  ekranları, bildirim yönetimi, destek merkezi, admin dashboard vb.)
+  henüz taşınmadı — bu, birden fazla oturuma yayılacak devam eden bir
+  iş. Bu ortamda Expo web/Metro pnpm monorepo'da bir bundling sorunu
+  yüzünden canlı ekran görüntüsü alınamadı; doğrulama yalnızca
+  typecheck/lint/test ile yapıldı.
 
 Tüm bunlar test edildi: `pnpm typecheck`, `pnpm lint`, `pnpm test` — hepsi
 yeşil. Devam ederken bu üç komutu bozmadan ilerle.
