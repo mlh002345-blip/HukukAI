@@ -4,6 +4,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { StatusBar } from "expo-status-bar";
 import { queryClient } from "../src/lib/query-client";
 import { useAuthStore } from "../src/stores/auth-store";
+import { usePushNotificationRegistration } from "../src/hooks/usePushNotifications";
 
 export default function RootLayout() {
   const hydrate = useAuthStore((state) => state.hydrate);
@@ -11,6 +12,8 @@ export default function RootLayout() {
   useEffect(() => {
     hydrate();
   }, [hydrate]);
+
+  usePushNotificationRegistration();
 
   return (
     <QueryClientProvider client={queryClient}>

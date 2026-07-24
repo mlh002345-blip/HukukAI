@@ -151,6 +151,24 @@ o dokümana göre kodlanıyor. Yeni bir şey yapmadan önce bu dokümanı oku.
   bünyesindeki eski/bakımsız `pdf.js` sürümü `pdfkit` çıktısı gibi
   modern PDF'leri ayrıştıramadığı (XRef hatası) için `pdfjs-dist`
   (Mozilla'nın güncel PDF.js'i) ile değiştirildi.
+- **Bildirim gönderim worker'ı** — `Notification` kayıtları
+  (`DeadlinesService.scheduleReminders`, Faz 5) artık yalnızca
+  veritabanında beklemiyor, gerçekten teslim ediliyor. API'de
+  `NotificationsModule`: `ExpoPushService` (Expo push API sarmalayıcı),
+  `NotificationsService.deliverDueNotifications` (zamanı gelmiş ve
+  `sentAt`/`failedAt` boş bildirimleri tarar, `sentAt`/`providerId` veya
+  `failedAt` ile işaretler), `NotificationsDeliveryProcessor` (BullMQ
+  `WorkerHost`) ve `NotificationsSchedulerService` — uygulama açılışında
+  her dakika tekrarlayan bir BullMQ işi kaydeder (bu codebase'deki ilk
+  tekrarlayan/zamanlı iş). `POST /notifications/push-token` ucu ile
+  kullanıcının Expo push token'ı `User.expoPushToken` alanına kaydedilir.
+  Mobilde `usePushNotificationRegistration` hook'u, giriş yapan (misafir
+  olmayan) kullanıcı için izin isteyip token'ı backend'e kaydeder; bu
+  `app/_layout.tsx`'e bağlandı. **Kapsam notu:** gerçek bir push token
+  almak için `app.json`'da bir EAS proje kimliği (`extra.eas.projectId`)
+  yapılandırılmalıdır — bu ortamda henüz yok, hook kimlik yoksa sessizce
+  hiçbir şey yapmaz; gerçek cihazda/EAS ortamında uçtan uca test
+  edilmedi.
 
 Tüm bunlar test edildi: `pnpm typecheck`, `pnpm lint`, `pnpm test` — hepsi
 yeşil. Devam ederken bu üç komutu bozmadan ilerle.
