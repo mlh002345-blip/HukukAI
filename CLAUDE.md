@@ -245,15 +245,22 @@ o dokümana göre kodlanıyor. Yeni bir şey yapmadan önce bu dokümanı oku.
   (`legal/kvkk.tsx`, `legal/terms.tsx` — geri düğmesi, `tertiaryFixed`
   tonunda taslak bilgi bannerı). Böylece mobil uygulamadaki *var olan*
   her ekran artık hem açık (Lexi-Trust) hem koyu (Obsidian) temayı
-  destekliyor. **Kapsam notu:** Stitch tasarım paketindeki, uygulamada
-  henüz karşılığı olmayan ~21 *yeni* ekran (belge yükleme seçim/
-  işleniyor akışı, bildirim yönetimi, destek merkezi, avukat
-  dashboard'u vb. — bunlar mevcut bir ekranın restilize edilmesi değil,
-  sıfırdan yeni özellik/ekran gerektirir) henüz eklenmedi; bu, ayrı bir
-  ürün kararı gerektiren, birden fazla oturuma yayılacak bir iştir. Bu
-  ortamda Expo web/Metro pnpm monorepo'da bir bundling sorunu yüzünden
-  canlı ekran görüntüsü alınamadı; doğrulama yalnızca typecheck/lint/
-  test ile yapıldı.
+  destekliyor. Ardından Stitch paketindeki **Belge Yükle** ekranı
+  (`belge_y_kle_1`/`belge_y_kle_2`) ilk kez uygulamaya eklendi —
+  `folder/[id]/upload.tsx`: Kamera/Galeri/PDF Yükle üç seçenekli bento
+  kart, güvenlik bannerı, ipuçları bölümü. Kamera ve galeri için daha
+  önce yüklü ama kullanılmayan `expo-image-picker` paketi devreye
+  alındı (izin akışı: `requestCameraPermissionsAsync`/
+  `requestMediaLibraryPermissionsAsync`); PDF seçimi mevcut
+  `expo-document-picker` akışını kullanır. `folder/[id].tsx`'teki
+  "Belge Yükle" düğmesi artık doğrudan `DocumentPicker` çağırmak
+  yerine bu yeni ekrana yönlendiriyor. **Kapsam notu:** Stitch
+  paketindeki geri kalan ~20 yeni ekran (işleniyor animasyonu, analiz
+  sonucu/risk analizi detay ekranları, bildirim yönetimi, destek
+  merkezi, avukat dashboard'u vb.) henüz eklenmedi; bu, birden fazla
+  oturuma yayılacak devam eden bir iştir. Bu ortamda Expo web/Metro
+  pnpm monorepo'da bir bundling sorunu yüzünden canlı ekran görüntüsü
+  alınamadı; doğrulama yalnızca typecheck/lint/test ile yapıldı.
 
 Tüm bunlar test edildi: `pnpm typecheck`, `pnpm lint`, `pnpm test` — hepsi
 yeşil. Devam ederken bu üç komutu bozmadan ilerle.

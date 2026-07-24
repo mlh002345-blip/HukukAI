@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -9,16 +9,10 @@ import {
   View,
 } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
-import * as DocumentPicker from "expo-document-picker";
 import { EmptyState, Icon, useTheme, type Theme } from "@hukukai/ui";
-import { UPLOAD_LIMITS } from "@hukukai/config";
 import type { DocumentSummary } from "@hukukai/types";
 import { useDeleteFolder, useFolder } from "../../src/hooks/useFolders";
-import {
-  useDeleteDocument,
-  useDocuments,
-  useUploadDocument,
-} from "../../src/hooks/useDocuments";
+import { useDeleteDocument, useDocuments } from "../../src/hooks/useDocuments";
 
 const DOCUMENT_STATUS_LABELS: Record<DocumentSummary["status"], string> = {
   UPLOADED: "Yüklendi",
@@ -80,50 +74,14 @@ export default function FolderDetailScreen() {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
   const { id } = useLocalSearchParams<{ id: string }>();
-  const [uploadError, setUploadError] = useState<string | null>(null);
 
   const folderQuery = useFolder(id);
   const documentsQuery = useDocuments(id);
-  const uploadDocument = useUploadDocument(id);
   const deleteDocument = useDeleteDocument();
   const deleteFolder = useDeleteFolder();
 
   const folder = folderQuery.data;
   const documents = documentsQuery.data ?? [];
-
-  const onPickFile = async () => {
-    setUploadError(null);
-    const result = await DocumentPicker.getDocumentAsync({
-      type: [...UPLOAD_LIMITS.allowedMimeTypes],
-      copyToCacheDirectory: true,
-    });
-    if (result.canceled || result.assets.length === 0) return;
-
-    const asset = result.assets[0];
-    if (!asset) return;
-    if (
-      asset.size !== undefined &&
-      asset.size !== null &&
-      asset.size > UPLOAD_LIMITS.maxFileSizeBytes
-    ) {
-      setUploadError("Dosya boyutu izin verilen azami boyutu aşıyor.");
-      return;
-    }
-
-    uploadDocument.mutate(
-      {
-        uri: asset.uri,
-        name: asset.name,
-        mimeType: asset.mimeType ?? "application/octet-stream",
-      },
-      {
-        onError: (error) =>
-          setUploadError(
-            error instanceof Error ? error.message : "Yükleme başarısız oldu.",
-          ),
-      },
-    );
-  };
 
   const onDeleteFolder = () => {
     if (!id) return;
@@ -180,21 +138,12 @@ export default function FolderDetailScreen() {
         <Text style={styles.sectionTitle}>Belgeler</Text>
         <Pressable
           style={styles.uploadButton}
-          onPress={onPickFile}
-          disabled={uploadDocument.isPending}
+          onPress={() => router.push(`/folder/${folder.id}/upload`)}
         >
-          {uploadDocument.isPending ? (
-            <ActivityIndicator color={theme.colors.onPrimary} size="small" />
-          ) : (
-            <>
-              <Icon name="upload_file" size={16} color={theme.colors.onPrimary} />
-              <Text style={styles.uploadButtonText}>Belge Yükle</Text>
-            </>
-          )}
+          <Icon name="upload_file" size={16} color={theme.colors.onPrimary} />
+          <Text style={styles.uploadButtonText}>Belge Yükle</Text>
         </Pressable>
       </View>
-
-      {uploadError ? <Text style={styles.errorText}>{uploadError}</Text> : null}
 
       {documents.length === 0 && !documentsQuery.isLoading ? (
         <EmptyState
@@ -293,11 +242,6 @@ function createStyles(theme: Theme) {
       color: theme.colors.onPrimary,
       fontFamily: theme.typography.bodySmMedium.fontFamily,
       fontSize: 13,
-    },
-    errorText: {
-      color: theme.colors.error,
-      fontSize: 12,
-      fontFamily: theme.typography.bodyMd.fontFamily,
     },
     docList: { gap: 8 },
     docRow: {
