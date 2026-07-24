@@ -68,46 +68,130 @@ enum PaymentTransactionStatus {
   FAILED
 }
 
-model User {
-  id                   String    @id @default(cuid())
-  email                String    @unique
-  passwordHash         String
-  fullName             String
-  phone                String?
-  role                 UserRole
-  subscriptionPlan     SubscriptionPlan @default(FREE)
-  oneTimeCreditsRemaining Int    @default(0)
-  expoPushToken        String?
-  emailVerifiedAt      DateTime?
-  isActive             Boolean   @default(true)
-  acceptedTermsVersion String?
-  acceptedKvkkVersion  String?
-  createdAt            DateTime  @default(now())
-  updatedAt            DateTime  @updatedAt
-  deletedAt            DateTime?
+// Otonom Mevzuat Sistemi (bkz. CLAUDE.md) — kaynak izleme, değişiklik
+// tespiti, etki analizi, kural üretimi ve çok katmanlı doğrulama boru
+// hattının veri modeli.
+enum LegislationSourceCategory {
+  RESMI_GAZETE
+  GIB
+  SGK
+  ADALET_BAKANLIGI
+  CTE_GENEL_MUDURLUGU
+  ANAYASA_MAHKEMESI
+  DIGER_KURUM
+}
 
-  refreshTokens      RefreshToken[]
-  folders            CaseFolder[]
-  documents          Document[]
-  calculations       Calculation[]
-  deadlines          Deadline[]
-  generatedDocuments GeneratedDocument[]
-  notifications      Notification[]
-  auditLogs          AuditLog[]
-  favorites          UserFavoriteTool[]
-  usageCounters      UsageCounter[]
+enum LegislationChangeType {
+  NEW_PROVISION
+  AMENDED_PROVISION
+  REPEALED_PROVISION
+  RATE_CHANGE
+  THRESHOLD_CHANGE
+  DEADLINE_CHANGE
+  TEMPORARY_ARTICLE
+  EFFECTIVE_DATE_CHANGE
+  COURT_ANNULMENT
+  DEADLINE_EXTENSION
+  ADMINISTRATIVE_HOLIDAY
+  IMPLEMENTATION_CIRCULAR
+}
+
+enum LegislationChangeStatus {
+  DETECTED
+  ANALYZING
+  RULE_PROPOSED
+  VERIFIED
+  PUBLISHED
+  REJECTED
+  HOLD_FOR_REVIEW
+}
+
+enum RiskLevel {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+// RuleSet.isPublished/publishedAt kuralın hesaplama motorlarınca
+// GERÇEKTE kullanılıp kullanılmadığının tek kapısıdır (bkz.
+// RulesService.getRuleValidOn) — status yalnızca bu kapının nasıl
+// yönetildiğini açıklayan, servis katmanınca isPublished ile senkron
+// tutulan bir durum etiketidir.
+enum RuleSetStatus {
+  DRAFT
+  CHANGE_DETECTED
+  TEMPORARILY_RESTRICTED
+  VERIFIED
+  CANARY
+  ACTIVE
+  SUPERSEDED
+  REJECTED
+}
+
+enum RuleSelectorDateType {
+  TRANSACTION_DATE
+  OFFENSE_DATE
+  JUDGMENT_DATE
+  FINALIZATION_DATE
+  EXECUTION_DATE
+  PUBLICATION_DATE
+}
+
+enum VerificationLayer {
+  SOURCE_INTEGRITY
+  SECOND_SOURCE
+  MODEL_CONSENSUS
+  SCHEMA_VALIDATION
+  GOLDEN_TESTS
+  REGRESSION
+}
+
+enum RemediationStatus {
+  PENDING
+  RECALCULATED
+  NOTIFIED
+}
+
+model User {
+  id                      String           @id @default(cuid())
+  email                   String           @unique
+  passwordHash            String
+  fullName                String
+  phone                   String?
+  role                    UserRole
+  subscriptionPlan        SubscriptionPlan @default(FREE)
+  oneTimeCreditsRemaining Int              @default(0)
+  expoPushToken           String?
+  emailVerifiedAt         DateTime?
+  isActive                Boolean          @default(true)
+  acceptedTermsVersion    String?
+  acceptedKvkkVersion     String?
+  createdAt               DateTime         @default(now())
+  updatedAt               DateTime         @updatedAt
+  deletedAt               DateTime?
+
+  refreshTokens       RefreshToken[]
+  folders             CaseFolder[]
+  documents           Document[]
+  calculations        Calculation[]
+  deadlines           Deadline[]
+  generatedDocuments  GeneratedDocument[]
+  notifications       Notification[]
+  auditLogs           AuditLog[]
+  favorites           UserFavoriteTool[]
+  usageCounters       UsageCounter[]
   paymentTransactions PaymentTransaction[]
 
   @@map("users")
 }
 
 model UsageCounter {
-  id                     String   @id @default(cuid())
-  userId                 String
-  periodKey              String
-  documentAnalysisCount  Int      @default(0)
-  createdAt              DateTime @default(now())
-  updatedAt              DateTime @updatedAt
+  id                    String   @id @default(cuid())
+  userId                String
+  periodKey             String
+  documentAnalysisCount Int      @default(0)
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -163,7 +247,7 @@ model UserFavoriteTool {
   createdAt DateTime @default(now())
 
   user User           @relation(fields: [userId], references: [id], onDelete: Cascade)
-  tool ToolDefinition  @relation(fields: [toolId], references: [id], onDelete: Cascade)
+  tool ToolDefinition @relation(fields: [toolId], references: [id], onDelete: Cascade)
 
   @@id([userId, toolId])
   @@map("user_favorite_tools")
@@ -232,10 +316,10 @@ model Document {
   calculations Calculation[]
   deadlines    Deadline[]
 
+  @@unique([userId, checksum])
   @@index([userId, createdAt])
   @@index([folderId])
   @@index([status])
-  @@unique([userId, checksum])
   @@map("documents")
 }
 
@@ -303,6 +387,7 @@ model Deadline {
   legalBasis        Json
   warnings          Json
   completedAt       DateTime?
+  invalidatedAt     DateTime?
   createdAt         DateTime       @default(now())
   updatedAt         DateTime       @updatedAt
 
@@ -368,9 +453,28 @@ model RuleSet {
   createdAt   DateTime  @default(now())
   publishedAt DateTime?
 
+  // Otonom Mevzuat Sistemi alanları — status, servis katmanınca
+  // isPublished ile senkron tutulur (bkz. ReleaseDecisionService).
+  status                         RuleSetStatus         @default(DRAFT)
+  selectorDateType               RuleSelectorDateType?
+  requiresFavorableLawComparison Boolean               @default(false)
+  confidenceScore                Decimal?              @db.Decimal(5, 4)
+  verifiedAt                     DateTime?
+
+  changeId String?
+  change   LegislationChange? @relation(fields: [changeId], references: [id])
+
+  supersedesRuleSetId String?
+  supersedes          RuleSet?  @relation("RuleSetSupersedes", fields: [supersedesRuleSetId], references: [id])
+  supersededBy        RuleSet[] @relation("RuleSetSupersedes")
+
+  verificationResults RuleVerificationResult[]
+  goldenTestResults   GoldenTestResult[]
+
   @@unique([ruleKey, version])
   @@index([module, isPublished])
   @@index([validFrom, validTo])
+  @@index([status])
   @@map("rule_sets")
 }
 
@@ -400,4 +504,140 @@ model AuditLog {
   @@index([userId, createdAt])
   @@index([entityType, entityId])
   @@map("audit_logs")
+}
+
+// --- Otonom Mevzuat Sistemi ---
+// Resmî kaynak izleme → değişiklik tespiti → etki analizi → kural
+// üretimi → bağımsız doğrulama → golden test → yayın kararı →
+// geriye dönük düzeltme boru hattının veri modeli. Bkz. CLAUDE.md.
+
+model LegislationSource {
+  id                  String                    @id @default(cuid())
+  key                 String                    @unique
+  name                String
+  url                 String
+  category            LegislationSourceCategory
+  pollIntervalMinutes Int
+  lastPolledAt        DateTime?
+  createdAt           DateTime                  @default(now())
+
+  documents LegislationDocument[]
+
+  @@map("legislation_sources")
+}
+
+model LegislationDocument {
+  id              String   @id @default(cuid())
+  sourceId        String
+  publicationDate DateTime
+  gazetteNumber   String?
+  documentType    String
+  title           String
+  contentHash     String
+  sourceUrl       String
+  downloadedAt    DateTime @default(now())
+
+  source  LegislationSource   @relation(fields: [sourceId], references: [id], onDelete: Cascade)
+  changes LegislationChange[]
+
+  @@index([sourceId, publicationDate])
+  @@index([contentHash])
+  @@map("legislation_documents")
+}
+
+model LegislationChange {
+  id                  String                  @id @default(cuid())
+  documentId          String
+  affectedLegislation String
+  changeType          LegislationChangeType
+  affectedSections    Json
+  oldTextHash         String?
+  newTextHash         String
+  effectiveDate       DateTime
+  publicationDate     DateTime
+  status              LegislationChangeStatus @default(DETECTED)
+  createdAt           DateTime                @default(now())
+
+  document         LegislationDocument   @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  impactAssessment RuleImpactAssessment?
+  ruleSets         RuleSet[]
+
+  @@index([documentId])
+  @@index([status])
+  @@map("legislation_changes")
+}
+
+model RuleImpactAssessment {
+  id                String    @id @default(cuid())
+  changeId          String    @unique
+  affectedModules   Json
+  affectedRuleIds   Json
+  historicalImpact  Boolean
+  prospectiveImpact Boolean
+  requiresMigration Boolean
+  riskLevel         RiskLevel
+  dateSelectorNotes Json?
+  createdAt         DateTime  @default(now())
+
+  change LegislationChange @relation(fields: [changeId], references: [id], onDelete: Cascade)
+
+  @@map("rule_impact_assessments")
+}
+
+model RuleVerificationResult {
+  id        String            @id @default(cuid())
+  ruleSetId String
+  layer     VerificationLayer
+  passed    Boolean
+  details   Json
+  createdAt DateTime          @default(now())
+
+  ruleSet RuleSet @relation(fields: [ruleSetId], references: [id], onDelete: Cascade)
+
+  @@index([ruleSetId, layer])
+  @@map("rule_verification_results")
+}
+
+model GoldenTestCase {
+  id              String   @id @default(cuid())
+  ruleKey         String
+  name            String
+  facts           Json
+  expectedOutcome Json
+  createdAt       DateTime @default(now())
+
+  results GoldenTestResult[]
+
+  @@index([ruleKey])
+  @@map("golden_test_cases")
+}
+
+model GoldenTestResult {
+  id            String   @id @default(cuid())
+  testCaseId    String
+  ruleSetId     String
+  passed        Boolean
+  actualOutcome Json
+  createdAt     DateTime @default(now())
+
+  testCase GoldenTestCase @relation(fields: [testCaseId], references: [id], onDelete: Cascade)
+  ruleSet  RuleSet        @relation(fields: [ruleSetId], references: [id], onDelete: Cascade)
+
+  @@index([ruleSetId])
+  @@map("golden_test_results")
+}
+
+// supersededRuleSetId/newRuleSetId ve affectedDeadlineIds, AuditLog.entityId
+// ile aynı gevşek bağlı (FK'siz) kayıt desenini izler — bu tablo yalnızca
+// bir izleme/denetim kaydıdır, referans bütünlüğü RuleRemediationService
+// tarafından uygulama katmanında sağlanır.
+model RuleRemediation {
+  id                  String            @id @default(cuid())
+  supersededRuleSetId String
+  newRuleSetId        String
+  affectedDeadlineIds Json
+  status              RemediationStatus @default(PENDING)
+  createdAt           DateTime          @default(now())
+
+  @@map("rule_remediations")
 }

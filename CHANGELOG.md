@@ -2,6 +2,29 @@
 
 Bu proje [Keep a Changelog](https://keepachangelog.com/) formatını takip eder.
 
+## [Otonom Mevzuat Sistemi — 1. Parça: veri modeli]
+
+### Eklendi
+
+- Prisma şemasına Otonom Mevzuat Sistemi veri modeli eklendi:
+  `LegislationSource`, `LegislationDocument`, `LegislationChange`,
+  `RuleImpactAssessment`, `RuleVerificationResult`, `GoldenTestCase`,
+  `GoldenTestResult`, `RuleRemediation`
+- Mevcut `RuleSet` modeli genişletildi: `status`, `selectorDateType`,
+  `requiresFavorableLawComparison`, `confidenceScore`, `verifiedAt`,
+  `changeId`, `supersedesRuleSetId` — mevcut `isPublished`/`publishedAt`
+  alanları hâlâ hesaplama motorunun tek gerçek kapısı, `status` servis
+  katmanınca bunlarla senkron tutulacak
+- `Deadline`e `invalidatedAt` eklendi (geriye dönük düzeltme için,
+  `Calculation.invalidatedAt` ile aynı önceden var olan desen)
+- Yeni migration (`20260724124251_legislation_system`), ilk migration'la
+  aynı canlı-DB-gerektirmeyen yöntemle üretildi; mevcut yayınlanmış
+  seed `RuleSet` satırları için `status='ACTIVE'` veri-göçü satırı
+  eklendi
+- **Kapsam notu:** bu parça yalnızca şema; servis katmanı (ajanlar,
+  fail-closed sorgu değişikliği, admin/mobil ekranlar) sonraki
+  parçalarda gelecek
+
 ## [Görsel Tasarım — Stitch Entegrasyonu, 14. Parça — Panel (Dashboard), tasarım paketi tamamlandı]
 
 ### Eklendi
