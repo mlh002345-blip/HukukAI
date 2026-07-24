@@ -2,6 +2,31 @@
 
 Bu proje [Keep a Changelog](https://keepachangelog.com/) formatını takip eder.
 
+## [Otonom Mevzuat Sistemi — 2. Parça: `packages/legislation-agents`]
+
+### Eklendi
+
+- Yeni paket `packages/legislation-agents` — saf mantık (ağ çağrısı/
+  Prisma erişimi yok), diğer motor paketleriyle aynı üslup:
+  - `compareLegislationTexts` — Legal Diff Agent çekirdeği (hash
+    karşılaştırma + anahtar kelime tabanlı `changeType`/madde referansı
+    tahmini)
+  - `validateRuleSchema` — çakışan/boşluklu geçerlilik aralığı, geçersiz
+    decimal/tarih formatı, boş `legalBasis` denetimi
+  - `runGoldenTests`/`runRegressionCheck` — jenerik golden test ve
+    regresyon çalıştırıcıları (motor bağımsız, `evaluate` kapanışı
+    enjekte edilir)
+  - `decideReleaseRisk` — otomatik-yayın/asla-otomatik-değil
+    `changeType` listelerini ve %99,5 güven eşiğini kodlayan saf risk
+    kararı
+  - `SourceWatcherProvider`/`MultiModelConsensusProvider` — `AIProvider`/
+    `PaymentProvider` ile aynı değiştirilebilir arayüz + `factory.ts`
+    deseni, şu an yalnızca deterministik `Mock` sağlayıcılar
+  - 30 birim testi (`vitest`)
+- **Kapsam notu:** gerçek kaynak tarama ve gerçek ikinci LLM sağlayıcısı
+  entegrasyonu bilinçli olarak dahil edilmedi (yalnızca arayüz + Mock);
+  bu paket henüz `apps/api`'ye bağlanmadı
+
 ## [Otonom Mevzuat Sistemi — 1. Parça: veri modeli]
 
 ### Eklendi
