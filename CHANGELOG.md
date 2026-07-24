@@ -2,6 +2,32 @@
 
 Bu proje [Keep a Changelog](https://keepachangelog.com/) formatını takip eder.
 
+## [Bildirim Gönderim Worker'ı]
+
+### Eklendi
+
+- API'de `NotificationsModule`:
+  - `ExpoPushService` — Expo push API'sini sarmalar (`isValidToken`,
+    `send`)
+  - `NotificationsService.deliverDueNotifications` — zamanı gelmiş
+    (`scheduledAt <= şimdi`) ve henüz işlenmemiş (`sentAt`/`failedAt`
+    boş) bildirimleri tarar, gönderir ve `sentAt`/`providerId` ya da
+    `failedAt` ile işaretler; kullanıcının push token'ı yoksa denemeden
+    `failedAt` ile işaretlenir
+  - `NotificationsDeliveryProcessor` (BullMQ `WorkerHost`) ve
+    `NotificationsSchedulerService` — uygulama açılışında her dakika
+    tekrarlayan bir iş kaydeder (`repeat: { every: 60000 }`,
+    `jobId` ile idempotent); bu codebase'deki ilk tekrarlayan/zamanlı iş
+  - `POST /notifications/push-token` — kullanıcının Expo push token'ını
+    kaydeder (yeni `User.expoPushToken` alanı)
+- Mobilde `usePushNotificationRegistration` hook'u (`app/_layout.tsx`'e
+  bağlandı) — giriş yapan (misafir olmayan) kullanıcı için izin isteyip
+  push token'ı backend'e kaydeder
+- 6 yeni birim testi (`NotificationsService`)
+- **Kapsam notu:** gerçek push token için `app.json`'da bir EAS proje
+  kimliği yapılandırılmalı (bu ortamda yok); gerçek cihazda/EAS
+  ortamında uçtan uca test edilmedi
+
 ## [Faz 4 İyileştirmesi] — OCR Üretim Entegrasyonu
 
 ### Eklendi
