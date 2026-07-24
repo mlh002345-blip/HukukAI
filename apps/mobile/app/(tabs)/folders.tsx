@@ -69,6 +69,12 @@ export default function FoldersScreen() {
         </Pressable>
       </View>
 
+      <Pressable style={styles.allDocumentsRow} onPress={() => router.push("/documents")}>
+        <Icon name="folder_open" size={20} color={theme.colors.primary} />
+        <Text style={styles.allDocumentsText}>Tüm Belgeler</Text>
+        <Icon name="chevron_right" size={20} color={theme.colors.onSurfaceVariant} />
+      </Pressable>
+
       {foldersQuery.isLoading ? <Text style={styles.mutedText}>Yükleniyor…</Text> : null}
 
       {folders.length === 0 && !foldersQuery.isLoading ? (
@@ -120,6 +126,24 @@ function createStyles(theme: Theme) {
       fontFamily: theme.typography.bodyMd.fontFamily,
       fontSize: 13,
       color: theme.colors.onSurfaceVariant,
+    },
+    allDocumentsRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 10,
+      borderWidth: 1,
+      borderColor: theme.colors.outlineVariant,
+      backgroundColor: theme.colors.surfaceContainer,
+      borderRadius: theme.radii.xl,
+      paddingHorizontal: 14,
+      paddingVertical: 12,
+    },
+    allDocumentsText: {
+      flex: 1,
+      fontFamily: theme.typography.bodySmMedium.fontFamily,
+      fontSize: 14,
+      fontWeight: "600",
+      color: theme.colors.onSurface,
     },
     cardList: { gap: 10 },
     card: {
