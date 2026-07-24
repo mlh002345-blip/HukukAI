@@ -2,6 +2,19 @@
 
 Bu proje [Keep a Changelog](https://keepachangelog.com/) formatını takip eder.
 
+## [CI Pipeline]
+
+### Eklendi
+
+- `.github/workflows/ci.yml` — Faz 0'da hedeflenen ama hiç kurulmayan
+  CI eklendi. Her push (`claude/**`, `main`) ve pull request'te:
+  `pnpm install --frozen-lockfile`, Prisma client üretimi,
+  `pnpm typecheck`, `pnpm lint`, `pnpm test` çalışır
+- **Kapsam notu:** `format:check` bilinçli olarak dahil edilmedi —
+  mevcut kod tabanında (bu CI'den önce yazılmış ~112 dosyada) Prettier
+  hiç uygulanmamış; toplu yeniden biçimlendirme bu işten ayrı, ilgisiz
+  bir değişiklik olacağından kapsam dışı bırakıldı
+
 ## [Bildirim Gönderim Worker'ı]
 
 ### Eklendi
