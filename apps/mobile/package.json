@@ -15,6 +15,8 @@
     "clean": "rimraf dist .expo"
   },
   "dependencies": {
+    "@expo-google-fonts/inter": "^0.4.2",
+    "@expo-google-fonts/jetbrains-mono": "^0.4.1",
     "@hookform/resolvers": "^3.9.0",
     "@hukukai/config": "workspace:*",
     "@hukukai/search-engine": "workspace:*",
@@ -28,11 +30,13 @@
     "expo-crypto": "~13.0.2",
     "expo-document-picker": "~12.0.2",
     "expo-file-system": "~17.0.1",
+    "expo-font": "^57.0.1",
     "expo-image-picker": "~15.0.7",
     "expo-linking": "~6.3.1",
     "expo-notifications": "~0.28.16",
     "expo-router": "~3.5.23",
     "expo-secure-store": "~13.0.2",
+    "expo-splash-screen": "^57.0.5",
     "expo-status-bar": "~1.12.1",
     "react": "18.2.0",
     "react-hook-form": "^7.53.0",

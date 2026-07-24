@@ -5,11 +5,14 @@
     "scheme": "hukukai",
     "version": "0.1.0",
     "orientation": "portrait",
-    "userInterfaceStyle": "light",
-    "primaryColor": "#175CD3",
+    "userInterfaceStyle": "automatic",
+    "primaryColor": "#00236f",
     "icon": "./assets/icon.png",
     "splash": {
-      "backgroundColor": "#175CD3"
+      "backgroundColor": "#f8f9ff",
+      "dark": {
+        "backgroundColor": "#09090b"
+      }
     },
     "assetBundlePatterns": ["**/*"],
     "android": {

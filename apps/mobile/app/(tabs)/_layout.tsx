@@ -1,31 +1,36 @@
 import { Tabs } from "expo-router";
-import { Text } from "react-native";
-
-function TabIcon({ symbol, focused }: { symbol: string; focused: boolean }) {
-  return (
-    <Text style={{ fontSize: 20, opacity: focused ? 1 : 0.5 }}>{symbol}</Text>
-  );
-}
+import { Icon, useTheme } from "@hukukai/ui";
 
 /**
  * Ana Navigasyon — Bölüm 6: Ana Sayfa, Araçlar, Dosyalarım, Takvim, Profil.
  * Görev odaklıdır; meslek/rol bazlı ayrı sekmeler YOKTUR (Bölüm 29 madde 3).
+ * Tasarım: Lexi-Trust Framework / Obsidian — Material Symbols ikonları.
  */
 export default function TabsLayout() {
+  const theme = useTheme();
+
   return (
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: "#175CD3",
-        tabBarInactiveTintColor: "#98A2B3",
+        tabBarActiveTintColor: theme.colors.primary,
+        tabBarInactiveTintColor: theme.colors.onSurfaceVariant,
+        tabBarStyle: {
+          backgroundColor: theme.colors.surface,
+          borderTopColor: theme.colors.outlineVariant,
+        },
+        tabBarLabelStyle: {
+          fontFamily: theme.typography.labelMd.fontFamily,
+          fontSize: 11,
+        },
       }}
     >
       <Tabs.Screen
         name="index"
         options={{
           title: "Ana Sayfa",
-          tabBarIcon: ({ focused }) => (
-            <TabIcon symbol="🏠" focused={focused} />
+          tabBarIcon: ({ focused, color }) => (
+            <Icon name="home" filled={focused} size={22} color={color} />
           ),
         }}
       />
@@ -33,8 +38,8 @@ export default function TabsLayout() {
         name="tools"
         options={{
           title: "Araçlar",
-          tabBarIcon: ({ focused }) => (
-            <TabIcon symbol="🧰" focused={focused} />
+          tabBarIcon: ({ focused, color }) => (
+            <Icon name="build_circle" filled={focused} size={22} color={color} />
           ),
         }}
       />
@@ -42,8 +47,8 @@ export default function TabsLayout() {
         name="folders"
         options={{
           title: "Dosyalarım",
-          tabBarIcon: ({ focused }) => (
-            <TabIcon symbol="🗂️" focused={focused} />
+          tabBarIcon: ({ focused, color }) => (
+            <Icon name="folder_open" filled={focused} size={22} color={color} />
           ),
         }}
       />
@@ -51,8 +56,8 @@ export default function TabsLayout() {
         name="calendar"
         options={{
           title: "Takvim",
-          tabBarIcon: ({ focused }) => (
-            <TabIcon symbol="📅" focused={focused} />
+          tabBarIcon: ({ focused, color }) => (
+            <Icon name="calendar_today" filled={focused} size={22} color={color} />
           ),
         }}
       />
@@ -60,8 +65,8 @@ export default function TabsLayout() {
         name="profile"
         options={{
           title: "Profil",
-          tabBarIcon: ({ focused }) => (
-            <TabIcon symbol="👤" focused={focused} />
+          tabBarIcon: ({ focused, color }) => (
+            <Icon name="person" filled={focused} size={22} color={color} />
           ),
         }}
       />
