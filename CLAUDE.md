@@ -267,9 +267,23 @@ o dokümana göre kodlanıyor. Yeni bir şey yapmadan önce bu dokümanı oku.
   iletişim kartı) ve `app/help/[slug].tsx` (breadcrumb, makale
   içeriği, "yararlı oldu mu" geri bildirimi — yalnızca ekran içi
   durumda tutulur, kalıcı değildir, ilgili makaleler). Profil menüsüne
-  "Yardım Merkezi" satırı eklendi. **Kapsam notu:** Stitch paketindeki
-  geri kalan ~18 yeni ekran (analiz sonucu/risk analizi detay
-  ekranları, bildirim yönetimi, avukat dashboard'u vb.) henüz
+  "Yardım Merkezi" satırı eklendi. Ardından **Bildirim Yönetimi**
+  eklendi — API'de ilk kez `GET /notifications` ucu
+  (`NotificationsService.findAllForUser`, kullanıcının bildirimlerini
+  `scheduledAt`e göre azalan sırada döner) ve `@hukukai/types`e
+  `NotificationSummary`. Mobilde `useNotifications` hook'u ve
+  `app/notifications/index.tsx`: **Bildirimler** sekmesi gerçek süre
+  hatırlatıcısı geçmişini (`sentAt`/`failedAt`e göre Gönderildi/
+  İletilemedi/Bekliyor rozeti) listeler, **Ayarlar** sekmesi ise
+  gerçek push kayıt akışını ve sabit 7/3/1/0 gün hatırlatıcı
+  zamanlamasını salt bilgi amaçlı gösterir — backend'de kullanıcı
+  başına yapılandırılabilir bir bildirim tercihi henüz yok, bu yüzden
+  Stitch tasarımındaki e-posta bildirimi anahtarı ve özelleştirilebilir
+  uyarı aralığı seçenekleri (bunlar gerçek bir işlevi olmayan sahte
+  kontroller olacağından) eklenmedi. Profil menüsündeki daha önce ölü
+  olan "Bildirim Tercihleri" satırı artık bu ekrana bağlı.
+  **Kapsam notu:** Stitch paketindeki geri kalan ~17 yeni ekran (analiz
+  sonucu/risk analizi detay ekranları, avukat dashboard'u vb.) henüz
   eklenmedi; bu, birden fazla oturuma yayılacak devam eden bir iştir.
   Bu ortamda Expo web/Metro pnpm monorepo'da bir bundling
   sorunu yüzünden canlı ekran görüntüsü

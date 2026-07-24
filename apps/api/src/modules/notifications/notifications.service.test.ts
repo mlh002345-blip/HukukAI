@@ -23,6 +23,26 @@ function buildService() {
   return { service, prisma, expoPush };
 }
 
+describe("NotificationsService.findAllForUser", () => {
+  it("kullanıcının bildirimlerini scheduledAt'e göre azalan sırada döner", async () => {
+    const { service, prisma } = buildService();
+    const notifications = [
+      { id: "notif-2", scheduledAt: new Date("2026-01-02T00:00:00.000Z") },
+      { id: "notif-1", scheduledAt: new Date("2026-01-01T00:00:00.000Z") },
+    ];
+    prisma.notification.findMany.mockResolvedValue(notifications);
+
+    const result = await service.findAllForUser("user-1");
+
+    expect(result).toBe(notifications);
+    expect(prisma.notification.findMany).toHaveBeenCalledWith({
+      where: { userId: "user-1" },
+      orderBy: { scheduledAt: "desc" },
+      take: 100,
+    });
+  });
+});
+
 describe("NotificationsService.registerPushToken", () => {
   it("geçerli token'ı kaydeder", async () => {
     const { service, prisma } = buildService();

@@ -1,8 +1,23 @@
 import { useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
 import * as Notifications from "expo-notifications";
 import Constants from "expo-constants";
+import type { NotificationSummary } from "@hukukai/types";
 import { apiRequest } from "../lib/api-client";
 import { useAuthStore } from "../stores/auth-store";
+
+/**
+ * Kullanıcının bildirim geçmişini döner (Bildirim Yönetimi ekranı).
+ */
+export function useNotifications() {
+  const token = useAuthStore((state) => state.accessToken);
+  return useQuery({
+    queryKey: ["notifications"],
+    queryFn: () =>
+      apiRequest<NotificationSummary[]>("/notifications", { accessToken: token }),
+    enabled: !!token,
+  });
+}
 
 /**
  * Uygulama girişinde bir kez Expo push bildirim izni ister, push

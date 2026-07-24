@@ -13,7 +13,12 @@ const ROLE_LABELS: Record<string, string> = {
 
 const MENU_ITEMS = [
   { key: "reports", label: "Raporlarım", icon: "description", route: "/reports" as const },
-  { key: "notifications", label: "Bildirim Tercihleri", icon: "notifications" },
+  {
+    key: "notifications",
+    label: "Bildirim Yönetimi",
+    icon: "notifications",
+    route: "/notifications" as const,
+  },
   { key: "security", label: "Güvenlik Ayarları", icon: "security" },
   {
     key: "billing",
