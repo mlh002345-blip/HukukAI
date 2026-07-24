@@ -18,6 +18,7 @@ interface AuthState {
     refreshToken: string;
   }) => Promise<void>;
   continueAsGuest: (role: UserRole) => void;
+  updateUser: (patch: Partial<PublicUserProfile>) => void;
   signOut: () => Promise<void>;
 }
 
@@ -56,6 +57,10 @@ export const useAuthStore = create<AuthState>((set) => ({
 
   continueAsGuest: (role) => {
     set({ status: "guest", guestRole: role });
+  },
+
+  updateUser: (patch) => {
+    set((state) => ({ user: state.user ? { ...state.user, ...patch } : state.user }));
   },
 
   signOut: async () => {

@@ -2,6 +2,21 @@
 
 Bu proje [Keep a Changelog](https://keepachangelog.com/) formatını takip eder.
 
+## [Görsel Tasarım — Stitch Entegrasyonu, 11. Parça — Hesap ve Güvenlik]
+
+### Eklendi
+
+- **Hesap ve Güvenlik** ekranı eklendi (`app/account/settings.tsx`) —
+  Faz 1'den beri var olan ama mobilde hiç bağlanmamış `GET`/`PATCH
+  /auth/me` uçlarını kullanır: Ad Soyad ve Telefon düzenlenebilir,
+  e-posta salt okunur gösterilir
+- `useUpdateProfile` hook'u ve `auth-store`a `updateUser` action'ı
+  eklendi — kaydetme sonrası profil yeniden login olmadan güncellenir
+- Profil menüsündeki "Güvenlik Ayarları" satırı artık bu ekrana bağlı
+- **Kapsam notu:** parola değiştirme, 2FA ve oturum listesi backend'de
+  karşılığı olmadığından eklenmedi (ekranda açıklayıcı bilgi bannerı
+  var); geri kalan ~16 yeni ekran hâlâ eklenmedi
+
 ## [Görsel Tasarım — Stitch Entegrasyonu, 10. Parça — Bildirim Yönetimi]
 
 ### Eklendi

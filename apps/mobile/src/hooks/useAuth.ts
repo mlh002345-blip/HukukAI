@@ -43,3 +43,17 @@ export function useDeleteAccount() {
     onSuccess: () => signOut(),
   });
 }
+
+export function useUpdateProfile() {
+  const accessToken = useAuthStore((state) => state.accessToken);
+  const updateUser = useAuthStore((state) => state.updateUser);
+  return useMutation({
+    mutationFn: (input: { fullName?: string; phone?: string }) =>
+      apiRequest<PublicUserProfile>("/auth/me", {
+        method: "PATCH",
+        accessToken,
+        body: input,
+      }),
+    onSuccess: (data) => updateUser(data),
+  });
+}

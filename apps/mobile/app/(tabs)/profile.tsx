@@ -19,7 +19,12 @@ const MENU_ITEMS = [
     icon: "notifications",
     route: "/notifications" as const,
   },
-  { key: "security", label: "Güvenlik Ayarları", icon: "security" },
+  {
+    key: "security",
+    label: "Hesap ve Güvenlik",
+    icon: "security",
+    route: "/account/settings" as const,
+  },
   {
     key: "billing",
     label: "Abonelik",
