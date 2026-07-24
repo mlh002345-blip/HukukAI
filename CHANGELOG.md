@@ -2,6 +2,28 @@
 
 Bu proje [Keep a Changelog](https://keepachangelog.com/) formatını takip eder.
 
+## [Faz 4 İyileştirmesi] — OCR Üretim Entegrasyonu
+
+### Eklendi
+
+- `TesseractOcrProvider` (`OCR_PROVIDER=tesseract`) eklendi —
+  `@hukukai/ai-provider`/`@hukukai/billing`'deki sağlayıcı-agnostik
+  factory deseniyle `OcrModule` içinden seçilir:
+  - PDF'lerde önce `pdfjs-dist` ile gömülü metin katmanı okunur
+    (yüksek güven skoruyla); metin katmanı yoksa (taranmış PDF)
+    kullanıcıya yeniden fotoğraf olarak yükleme uyarısı döner
+  - JPEG/PNG görüntülerde `tesseract.js` (`tur+eng`) ile gerçek OCR
+    uygulanır
+  - HEIC formatı (tesseract.js'in görüntü çözücüsü desteklemediği
+    için) aynı "yeniden yükle" uyarısını döner
+- `pdf-parse` denendi ama bünyesindeki eski `pdf.js` sürümü modern
+  PDF'leri (ör. `pdfkit` çıktısı) ayrıştıramadığı için (XRef hatası)
+  `pdfjs-dist`e geçildi
+- 4 yeni birim testi (`hasSufficientEmbeddedText`)
+- **Kapsam notu:** taranmış/görüntü tabanlı PDF sayfalarında gerçek OCR
+  için sayfa görüntüye dönüştürme (poppler/ghostscript) gerekir, bu
+  sürümde yok
+
 ## [Faz 10] — Pilot ve Mağaza
 
 ### Eklendi

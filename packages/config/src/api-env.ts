@@ -31,6 +31,13 @@ export const apiEnvSchema = z.object({
   AI_API_KEY: z.string().optional(),
   AI_MODEL: z.string().optional(),
 
+  // OCR sağlayıcısı değiştirilebilir olmalıdır (Faz 4 / OCR üretim entegrasyonu)
+  OCR_PROVIDER: z.enum(["tesseract", "mock"]).default("mock"),
+  OCR_TESSERACT_LANGUAGES: z.string().default("tur+eng"),
+  // Self-hosted traineddata dizini (belirtilmezse tesseract.js varsayılan
+  // uzak CDN'den indirir — üretimde self-hosted bir yol önerilir).
+  OCR_TESSERACT_LANG_PATH: z.string().optional(),
+
   // Ödeme sağlayıcısı değiştirilebilir olmalıdır (Faz 8 — Bölüm 23)
   PAYMENT_PROVIDER: z.enum(["mock"]).default("mock"),
 

@@ -134,6 +134,23 @@ o dokümana göre kodlanıyor. Yeni bir şey yapmadan önce bu dokümanı oku.
   listesi taslaktır — yayına alınmadan önce bir hukuk danışmanı ve
   pazarlama ekibi tarafından incelenmelidir; gerçek kapalı test/cihaz
   denemesi ve ekran görüntüleri bu ortamda üretilemedi.
+- **Faz 4 iyileştirmesi (OCR üretim entegrasyonu)** — `MockOcrProvider`
+  yerine gerçek çalışan bir `TesseractOcrProvider` eklendi
+  (`OCR_PROVIDER=tesseract`, `AIProvider`/`PaymentProvider` deseniyle
+  aynı sağlayıcı-agnostik factory `OcrModule` içinde): PDF'lerde önce
+  `pdfjs-dist` ile gömülü metin katmanı okunur (çoğu kurumsal belge —
+  icra ödeme emri, trafik cezası vb. — dijital üretildiğinden bu
+  yeterlidir ve yüksek güvenle sonuç verir); JPEG/PNG görüntülerde
+  `tesseract.js` ile gerçek OCR uygulanır. **Kapsam notu:** taranmış
+  (görüntü tabanlı) PDF sayfaları, sayfa görüntüye dönüştürülmeden OCR
+  edilemez (poppler/ghostscript gibi yerel bağımlılık gerektirir,
+  bilinçli olarak bu sürümün dışında bırakıldı) — bu durumda kullanıcıya
+  net bir "yeniden fotoğraf olarak yükle" uyarısı döner; HEIC formatı
+  da aynı nedenle (tesseract.js'in görüntü çözücüsü desteklemiyor) aynı
+  uyarıyı döner. Not: ilk denemede `pdf-parse` paketi denendi, ancak
+  bünyesindeki eski/bakımsız `pdf.js` sürümü `pdfkit` çıktısı gibi
+  modern PDF'leri ayrıştıramadığı (XRef hatası) için `pdfjs-dist`
+  (Mozilla'nın güncel PDF.js'i) ile değiştirildi.
 
 Tüm bunlar test edildi: `pnpm typecheck`, `pnpm lint`, `pnpm test` — hepsi
 yeşil. Devam ederken bu üç komutu bozmadan ilerle.
