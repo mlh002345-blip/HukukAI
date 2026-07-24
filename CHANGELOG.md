@@ -2,6 +2,21 @@
 
 Bu proje [Keep a Changelog](https://keepachangelog.com/) formatını takip eder.
 
+## [Görsel Tasarım — Stitch Entegrasyonu, 7. Parça — ilk yeni ekran: Belge Yükle]
+
+### Eklendi
+
+- Stitch tasarım paketindeki **Belge Yükle** ekranı ilk kez uygulamaya
+  eklendi (`app/folder/[id]/upload.tsx`): Kamera/Galeri/PDF Yükle üç
+  seçenekli bento kart, güvenlik bannerı, ipuçları bölümü
+- Kamera ve galeriden belge seçimi için önceden kurulu ama kullanılmayan
+  `expo-image-picker` paketi devreye alındı (izin akışlarıyla birlikte)
+- `app/folder/[id].tsx`'teki "Belge Yükle" düğmesi artık bu yeni ekrana
+  yönlendiriyor; doğrudan `DocumentPicker` çağrısı kaldırıldı
+- **Kapsam notu:** geri kalan ~20 yeni ekran (işleniyor animasyonu,
+  analiz sonucu/risk analizi, bildirim yönetimi, destek merkezi, avukat
+  dashboard'u vb.) henüz eklenmedi
+
 ## [Görsel Tasarım — Stitch Entegrasyonu, 6. Parça — mevcut ekranların tamamı tamamlandı]
 
 ### Eklendi
