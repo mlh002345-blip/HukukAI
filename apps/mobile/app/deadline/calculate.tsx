@@ -10,12 +10,23 @@ import {
   View,
 } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
-import { Icon, useTheme, type Theme } from "@hukukai/ui";
+import { Icon, useTheme, WarningBanner, type Theme } from "@hukukai/ui";
 import type { DeadlineCalculationResponse, DeadlineSummary } from "@hukukai/types";
 import { useCalculateDeadline, useCreateDeadline } from "../../src/hooks/useDeadlines";
 import { useGenerateDeadlineReport } from "../../src/hooks/useReports";
 import { ApiError } from "../../src/lib/api-client";
 import { parseTurkishDate } from "../../src/lib/turkish-date";
+
+const LEGISLATION_STATUS_LABELS: Record<string, string> = {
+  DRAFT: "Taslak",
+  CHANGE_DETECTED: "Değişiklik tespit edildi",
+  TEMPORARILY_RESTRICTED: "Geçici olarak kısıtlı",
+  VERIFIED: "Doğrulandı",
+  CANARY: "Kademeli yayında",
+  ACTIVE: "Yürürlükte",
+  SUPERSEDED: "Yerini yeni sürüm aldı",
+  REJECTED: "Reddedildi",
+};
 
 function showQuotaAwareError(error: unknown, fallbackMessage: string): void {
   if (error instanceof ApiError && error.status === 403) {
@@ -26,6 +37,19 @@ function showQuotaAwareError(error: unknown, fallbackMessage: string): void {
     return;
   }
   Alert.alert("Hata", error instanceof Error ? error.message : fallbackMessage);
+}
+
+function extractUnderReviewMessage(error: unknown): string | null {
+  if (
+    error instanceof ApiError &&
+    error.status === 409 &&
+    typeof error.details === "object" &&
+    error.details !== null &&
+    (error.details as { underReview?: boolean }).underReview === true
+  ) {
+    return error.message;
+  }
+  return null;
 }
 
 export default function CalculateDeadlineScreen() {
@@ -39,6 +63,7 @@ export default function CalculateDeadlineScreen() {
   const [dateError, setDateError] = useState<string | null>(null);
   const [result, setResult] = useState<DeadlineCalculationResponse | null>(null);
   const [savedDeadline, setSavedDeadline] = useState<DeadlineSummary | null>(null);
+  const [underReviewMessage, setUnderReviewMessage] = useState<string | null>(null);
 
   const calculateDeadline = useCalculateDeadline();
   const createDeadline = useCreateDeadline();
@@ -51,12 +76,23 @@ export default function CalculateDeadlineScreen() {
       return;
     }
     setDateError(null);
+    setUnderReviewMessage(null);
     calculateDeadline.mutate(
       { ruleKey, startDate: isoDate, startEvent: "MANUAL" },
       {
-        onSuccess: setResult,
-        onError: (error) =>
-          Alert.alert("Hata", error instanceof Error ? error.message : "Hesaplanamadı."),
+        onSuccess: (data) => {
+          setResult(data);
+          setUnderReviewMessage(null);
+        },
+        onError: (error) => {
+          const underReview = extractUnderReviewMessage(error);
+          if (underReview) {
+            setResult(null);
+            setUnderReviewMessage(underReview);
+            return;
+          }
+          Alert.alert("Hata", error instanceof Error ? error.message : "Hesaplanamadı.");
+        },
       },
     );
   };
@@ -136,8 +172,30 @@ export default function CalculateDeadlineScreen() {
         )}
       </Pressable>
 
+      {underReviewMessage ? <WarningBanner message={underReviewMessage} /> : null}
+
       {result ? (
         <View style={styles.resultBox}>
+          <View style={styles.legislationStatusRow}>
+            <Icon
+              name={
+                result.legislationStatus.status === "ACTIVE" ? "verified" : "info"
+              }
+              size={16}
+              color={theme.colors.primary}
+            />
+            <Text style={styles.legislationStatusText}>
+              Mevzuat güncel · sürüm {result.ruleVersion} ·{" "}
+              {LEGISLATION_STATUS_LABELS[result.legislationStatus.status] ??
+                result.legislationStatus.status}
+              {result.legislationStatus.verifiedAt
+                ? ` · son doğrulama: ${new Date(
+                    result.legislationStatus.verifiedAt,
+                  ).toLocaleDateString("tr-TR")}`
+                : ""}
+            </Text>
+          </View>
+
           <Text style={styles.resultLabel}>Son gün</Text>
           <Text style={styles.resultValue}>{result.adjustedEndDate}</Text>
 
@@ -290,6 +348,21 @@ function createStyles(theme: Theme) {
       borderRadius: theme.radii.xl,
       padding: 16,
       gap: 4,
+    },
+    legislationStatusRow: {
+      flexDirection: "row",
+      alignItems: "flex-start",
+      gap: 6,
+      paddingBottom: 10,
+      marginBottom: 6,
+      borderBottomWidth: 1,
+      borderBottomColor: theme.colors.outlineVariant,
+    },
+    legislationStatusText: {
+      flex: 1,
+      fontFamily: theme.typography.bodyMd.fontFamily,
+      fontSize: 11,
+      color: theme.colors.onSurfaceVariant,
     },
     resultLabel: {
       fontFamily: theme.typography.labelMd.fontFamily,

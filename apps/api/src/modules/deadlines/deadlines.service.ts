@@ -94,6 +94,7 @@ export class DeadlinesService {
       ...result,
       legalBasis: rule.legalBasis,
       warnings: rule.warnings,
+      legislationStatus: rule.legislationStatus,
     };
   }
 

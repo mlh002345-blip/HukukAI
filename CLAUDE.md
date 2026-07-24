@@ -498,6 +498,23 @@ uca çalışır şekilde kurulacak.
   Ana navigasyona "Mevzuat İzleme" satırı eklendi. **Kapsam notu:** mobilde
   "doğrulanıyor" bannerı/"mevzuat güncel" göstergesi henüz eklenmedi —
   sonraki (son) parça.
+- **6. Parça — mobil "doğrulanıyor" bannerı ve "mevzuat güncel" göstergesi
+  (Otonom Mevzuat Sistemi tamamlandı)**: `RulesService.getRuleValidOn`/
+  `findApplicableRule` artık `legislationStatus` (status, geçerlilik
+  aralığı, `verifiedAt`, `confidenceScore`, `sourceUrl`) alanını da
+  döndürüyor; `DeadlineCalculationResponse`e (`@hukukai/types`)
+  `legislationStatus: RuleLegislationStatus` eklendi.
+  `deadline/calculate.tsx`: hesaplama sonucu her zaman "Mevzuat güncel ·
+  sürüm X · <durum> · son doğrulama: <tarih>" satırını gösterir; backend
+  `RuleUnderReviewException` (409, `underReview: true`) döndürürse —
+  yani ilgili kural yakın zamanda tespit edilen bir mevzuat değişikliği
+  nedeniyle geçici olarak kısıtlanmışsa — sonuç kutusu yerine mevcut
+  `WarningBanner` bileşeni (`@hukukai/ui`) ile "doğrulanıyor, kesin sonuç
+  yok" mesajı gösterilir; controller katmanında ekstra bir
+  try/catch gerekmedi (`RuleUnderReviewException`'ın yapısal gövdesi
+  zaten NestJS tarafından olduğu gibi serileştirilir). Böylece Otonom
+  Mevzuat Sistemi'nin tüm 6 parçası (veri modeli → saf ajan mantığı →
+  API servisleri/fail-closed → admin panel → mobil gösterge) tamamlandı.
 
 ## CI
 
