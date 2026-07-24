@@ -236,13 +236,24 @@ o dokümana göre kodlanıyor. Yeni bir şey yapmadan önce bu dokümanı oku.
   (`deadline/custom.tsx` — ikonlu tarih alanı), **Raporlarım**
   (`reports/index.tsx` — PDF ikonlu satırlar, `EmptyState`) ve
   **Kullanım ve Paket** (`billing/index.tsx` — `workspace_premium`/
-  `verified_user`/`security` ikonları). **Kapsam notu:** geri kalan
-  ~21 ekran (belge yükleme seçim/işleniyor ekranları, bildirim
-  yönetimi, destek merkezi, admin dashboard vb.) henüz taşınmadı — bu,
-  birden fazla oturuma yayılacak devam eden bir iş. Bu ortamda Expo
-  web/Metro pnpm monorepo'da bir bundling sorunu yüzünden canlı ekran
-  görüntüsü alınamadı; doğrulama yalnızca typecheck/lint/test ile
-  yapıldı.
+  `verified_user`/`security` ikonları). Son olarak, uygulamada halihazırda
+  var olan geri kalan tüm ekranlar da (daha önce hiç `useTheme`
+  kullanmayan dört ekran) aynı sisteme taşındı: **Splash** (`index.tsx`
+  — marka ikonu + logo, `theme.colors.primary` arka plan), **Hesabımı
+  Sil** (`account/delete.tsx` — `errorContainer` tonunda uyarı
+  bannerı, ikonlu onay kutusu), **KVKK** ve **Kullanım Koşulları**
+  (`legal/kvkk.tsx`, `legal/terms.tsx` — geri düğmesi, `tertiaryFixed`
+  tonunda taslak bilgi bannerı). Böylece mobil uygulamadaki *var olan*
+  her ekran artık hem açık (Lexi-Trust) hem koyu (Obsidian) temayı
+  destekliyor. **Kapsam notu:** Stitch tasarım paketindeki, uygulamada
+  henüz karşılığı olmayan ~21 *yeni* ekran (belge yükleme seçim/
+  işleniyor akışı, bildirim yönetimi, destek merkezi, avukat
+  dashboard'u vb. — bunlar mevcut bir ekranın restilize edilmesi değil,
+  sıfırdan yeni özellik/ekran gerektirir) henüz eklenmedi; bu, ayrı bir
+  ürün kararı gerektiren, birden fazla oturuma yayılacak bir iştir. Bu
+  ortamda Expo web/Metro pnpm monorepo'da bir bundling sorunu yüzünden
+  canlı ekran görüntüsü alınamadı; doğrulama yalnızca typecheck/lint/
+  test ile yapıldı.
 
 Tüm bunlar test edildi: `pnpm typecheck`, `pnpm lint`, `pnpm test` — hepsi
 yeşil. Devam ederken bu üç komutu bozmadan ilerle.

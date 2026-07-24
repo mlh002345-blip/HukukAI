@@ -2,6 +2,26 @@
 
 Bu proje [Keep a Changelog](https://keepachangelog.com/) formatını takip eder.
 
+## [Görsel Tasarım — Stitch Entegrasyonu, 6. Parça — mevcut ekranların tamamı tamamlandı]
+
+### Eklendi
+
+- Uygulamada halihazırda var olan, henüz `useTheme` kullanmayan son 4
+  ekran da tema sistemine taşındı:
+  - `app/index.tsx` (Splash) — marka ikonu, `theme.colors.primary`
+    arka plan
+  - `app/account/delete.tsx` (Hesabımı Sil) — `errorContainer`
+    tonunda uyarı bannerı, ikonlu onay kutusu
+  - `app/legal/kvkk.tsx`, `app/legal/terms.tsx` — geri düğmesi,
+    `tertiaryFixed` tonunda taslak bilgi bannerı
+- Bu parçayla birlikte mobil uygulamadaki **var olan her ekran** artık
+  hem açık (Lexi-Trust) hem koyu (Obsidian) temayı destekliyor.
+- **Kapsam notu:** Stitch tasarım paketindeki, uygulamada henüz
+  karşılığı olmayan ~21 yeni ekran (belge yükleme/işleniyor akışı,
+  bildirim yönetimi, destek merkezi, avukat dashboard'u vb.) hâlâ
+  eklenmedi — bunlar restilize değil, yeni özellik/ekran
+  gerektiriyor; ayrı bir kapsam kararı.
+
 ## [Görsel Tasarım — Stitch Entegrasyonu, 5. Parça]
 
 ### Eklendi
