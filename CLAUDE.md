@@ -220,8 +220,16 @@ o dokümana göre kodlanıyor. Yeni bir şey yapmadan önce bu dokümanı oku.
   (`register.tsx` — aynı form deseni + KVKK/Kullanım Koşulları onay
   anahtarı) ve **Parolamı Unuttum** (`forgot-password.tsx`). Tasarım
   paketindeki sosyal giriş (Google/Apple) düğmeleri, uygulamada
-  karşılığı olmadığından eklenmedi. **Kapsam notu:** geri kalan ~31
-  ekran (belge yükleme/analiz akışları, hesaplama/rapor detay
+  karşılığı olmadığından eklenmedi. Ardından Dosyalarım detay akışı
+  taşındı: **Klasör Detayı** (`folder/[id].tsx` — geri/düzenle ikon
+  düğmeleri, belge satırlarında MIME türüne göre ikon, "Belge Yükle"
+  ve "Klasörü Sil" ikonlu düğmeler), **Yeni/Düzenle Klasör**
+  (`folder/new.tsx`, `folder/[id]/edit.tsx` — kategori seçimi artık
+  paylaşılan `CategoryChip` bileşeniyle) ve **Belge Detayı**
+  (`document/[id].tsx` — durum rozeti, ikonlu analiz/rapor düğmeleri,
+  uyarı bannerları `errorContainer` tonuyla, önerilen araç
+  satırlarında `chevron_right`). **Kapsam notu:** geri kalan ~26 ekran
+  (belge yükleme seçim/işleniyor ekranları, hesaplama/rapor detay
   ekranları, bildirim yönetimi, destek merkezi, admin dashboard vb.)
   henüz taşınmadı — bu, birden fazla oturuma yayılacak devam eden bir
   iş. Bu ortamda Expo web/Metro pnpm monorepo'da bir bundling sorunu

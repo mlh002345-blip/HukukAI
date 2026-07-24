@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -10,7 +10,7 @@ import {
 } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
 import * as DocumentPicker from "expo-document-picker";
-import { EmptyState } from "@hukukai/ui";
+import { EmptyState, Icon, useTheme, type Theme } from "@hukukai/ui";
 import { UPLOAD_LIMITS } from "@hukukai/config";
 import type { DocumentSummary } from "@hukukai/types";
 import { useDeleteFolder, useFolder } from "../../src/hooks/useFolders";
@@ -29,6 +29,13 @@ const DOCUMENT_STATUS_LABELS: Record<DocumentSummary["status"], string> = {
   FAILED: "Başarısız",
 };
 
+const DOCUMENT_ICONS: Record<string, string> = {
+  "application/pdf": "picture_as_pdf",
+  "image/jpeg": "image",
+  "image/png": "image",
+  "image/heic": "image",
+};
+
 function formatFileSize(sizeBytes: number): string {
   if (sizeBytes < 1024 * 1024) return `${Math.round(sizeBytes / 1024)} KB`;
   return `${(sizeBytes / (1024 * 1024)).toFixed(1)} MB`;
@@ -37,32 +44,41 @@ function formatFileSize(sizeBytes: number): string {
 function DocumentRow({
   document,
   onDelete,
+  styles,
+  theme,
 }: {
   document: DocumentSummary;
   onDelete: () => void;
+  styles: ReturnType<typeof createStyles>;
+  theme: Theme;
 }) {
   return (
-    <Pressable
-      style={styles.docRow}
-      onPress={() => router.push(`/document/${document.id}`)}
-    >
+    <Pressable style={styles.docRow} onPress={() => router.push(`/document/${document.id}`)}>
+      <View style={styles.docIconWrap}>
+        <Icon
+          name={DOCUMENT_ICONS[document.mimeType] ?? "description"}
+          size={20}
+          color={theme.colors.primary}
+        />
+      </View>
       <View style={styles.docInfo}>
         <Text style={styles.docName} numberOfLines={1}>
           {document.originalName}
         </Text>
         <Text style={styles.docMeta}>
-          {formatFileSize(document.sizeBytes)} ·{" "}
-          {DOCUMENT_STATUS_LABELS[document.status]}
+          {formatFileSize(document.sizeBytes)} · {DOCUMENT_STATUS_LABELS[document.status]}
         </Text>
       </View>
       <Pressable onPress={onDelete} hitSlop={8}>
-        <Text style={styles.docDelete}>Sil</Text>
+        <Icon name="delete" size={20} color={theme.colors.error} />
       </Pressable>
     </Pressable>
   );
 }
 
 export default function FolderDetailScreen() {
+  const theme = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
   const { id } = useLocalSearchParams<{ id: string }>();
   const [uploadError, setUploadError] = useState<string | null>(null);
 
@@ -131,26 +147,30 @@ export default function FolderDetailScreen() {
   if (folderQuery.isLoading || !folder) {
     return (
       <View style={styles.centered}>
-        <ActivityIndicator />
+        <ActivityIndicator color={theme.colors.primary} />
       </View>
     );
   }
 
   return (
-    <ScrollView
-      style={styles.container}
-      contentContainerStyle={styles.content}
-    >
+    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       <View style={styles.headerRow}>
-        <Text style={styles.title}>{folder.title}</Text>
-        <Pressable onPress={() => router.push(`/folder/${folder.id}/edit`)}>
-          <Text style={styles.editLink}>Düzenle</Text>
+        <Pressable style={styles.backButton} onPress={() => router.back()} hitSlop={8}>
+          <Icon name="arrow_back" size={20} color={theme.colors.onSurface} />
+        </Pressable>
+        <Text style={styles.title} numberOfLines={1}>
+          {folder.title}
+        </Text>
+        <Pressable
+          style={styles.editButton}
+          onPress={() => router.push(`/folder/${folder.id}/edit`)}
+          hitSlop={8}
+        >
+          <Icon name="edit" size={18} color={theme.colors.primary} />
         </Pressable>
       </View>
 
-      {folder.clientName ? (
-        <Text style={styles.meta}>{folder.clientName}</Text>
-      ) : null}
+      {folder.clientName ? <Text style={styles.meta}>{folder.clientName}</Text> : null}
       {folder.referenceNumber ? (
         <Text style={styles.meta}>Referans: {folder.referenceNumber}</Text>
       ) : null}
@@ -164,9 +184,12 @@ export default function FolderDetailScreen() {
           disabled={uploadDocument.isPending}
         >
           {uploadDocument.isPending ? (
-            <ActivityIndicator color="#FFFFFF" size="small" />
+            <ActivityIndicator color={theme.colors.onPrimary} size="small" />
           ) : (
-            <Text style={styles.uploadButtonText}>+ Belge Yükle</Text>
+            <>
+              <Icon name="upload_file" size={16} color={theme.colors.onPrimary} />
+              <Text style={styles.uploadButtonText}>Belge Yükle</Text>
+            </>
           )}
         </Pressable>
       </View>
@@ -186,59 +209,139 @@ export default function FolderDetailScreen() {
             key={document.id}
             document={document}
             onDelete={() => deleteDocument.mutate(document.id)}
+            styles={styles}
+            theme={theme}
           />
         ))}
       </View>
 
       <Pressable style={styles.deleteFolderButton} onPress={onDeleteFolder}>
+        <Icon name="delete" size={16} color={theme.colors.error} />
         <Text style={styles.deleteFolderText}>Klasörü Sil</Text>
       </Pressable>
     </ScrollView>
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#FFFFFF" },
-  content: { padding: 20, paddingTop: 60, gap: 12, paddingBottom: 48 },
-  centered: { flex: 1, alignItems: "center", justifyContent: "center" },
-  headerRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-  },
-  title: { fontSize: 22, fontWeight: "700", color: "#101828", flexShrink: 1 },
-  editLink: { color: "#175CD3", fontWeight: "600", fontSize: 13 },
-  meta: { fontSize: 14, color: "#475467" },
-  notes: { fontSize: 13, color: "#667085", marginTop: 4 },
-  sectionHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginTop: 16,
-  },
-  sectionTitle: { fontSize: 16, fontWeight: "700", color: "#101828" },
-  uploadButton: {
-    backgroundColor: "#175CD3",
-    borderRadius: 10,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-  },
-  uploadButtonText: { color: "#FFFFFF", fontWeight: "600", fontSize: 13 },
-  errorText: { color: "#B42318", fontSize: 12 },
-  docList: { gap: 8 },
-  docRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    borderWidth: 1,
-    borderColor: "#EAECF0",
-    borderRadius: 10,
-    padding: 12,
-  },
-  docInfo: { flex: 1, gap: 2, marginRight: 8 },
-  docName: { fontSize: 14, fontWeight: "600", color: "#101828" },
-  docMeta: { fontSize: 12, color: "#667085" },
-  docDelete: { color: "#B42318", fontWeight: "600", fontSize: 13 },
-  deleteFolderButton: { alignItems: "center", marginTop: 24 },
-  deleteFolderText: { color: "#B42318", fontWeight: "600", fontSize: 13 },
-});
+function createStyles(theme: Theme) {
+  return StyleSheet.create({
+    container: { flex: 1, backgroundColor: theme.colors.background },
+    content: {
+      padding: theme.spacing.containerPadding,
+      paddingTop: 56,
+      gap: 12,
+      paddingBottom: 48,
+    },
+    centered: { flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: theme.colors.background },
+    headerRow: { flexDirection: "row", alignItems: "center", gap: 10 },
+    backButton: {
+      width: 36,
+      height: 36,
+      borderRadius: theme.radii.full,
+      backgroundColor: theme.colors.surfaceContainer,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    editButton: {
+      width: 36,
+      height: 36,
+      borderRadius: theme.radii.full,
+      backgroundColor: theme.colors.surfaceContainer,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    title: {
+      flex: 1,
+      fontFamily: theme.typography.headlineMd.fontFamily,
+      fontSize: 20,
+      fontWeight: "700",
+      color: theme.colors.onBackground,
+    },
+    meta: {
+      fontFamily: theme.typography.bodyMd.fontFamily,
+      fontSize: 14,
+      color: theme.colors.onSurfaceVariant,
+    },
+    notes: {
+      fontFamily: theme.typography.bodyMd.fontFamily,
+      fontSize: 13,
+      color: theme.colors.onSurfaceVariant,
+      marginTop: 4,
+    },
+    sectionHeader: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      marginTop: 16,
+    },
+    sectionTitle: {
+      fontFamily: theme.typography.headlineSm.fontFamily,
+      fontSize: 16,
+      fontWeight: "700",
+      color: theme.colors.onBackground,
+    },
+    uploadButton: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 6,
+      backgroundColor: theme.colors.primary,
+      borderRadius: theme.radii.lg,
+      paddingHorizontal: 12,
+      paddingVertical: 9,
+    },
+    uploadButtonText: {
+      color: theme.colors.onPrimary,
+      fontFamily: theme.typography.bodySmMedium.fontFamily,
+      fontSize: 13,
+    },
+    errorText: {
+      color: theme.colors.error,
+      fontSize: 12,
+      fontFamily: theme.typography.bodyMd.fontFamily,
+    },
+    docList: { gap: 8 },
+    docRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 12,
+      borderWidth: 1,
+      borderColor: theme.colors.outlineVariant,
+      backgroundColor: theme.colors.surfaceContainerLowest,
+      borderRadius: theme.radii.xl,
+      padding: 12,
+    },
+    docIconWrap: {
+      width: 38,
+      height: 38,
+      borderRadius: theme.radii.lg,
+      backgroundColor: theme.colors.surfaceContainerHigh,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    docInfo: { flex: 1, gap: 2 },
+    docName: {
+      fontFamily: theme.typography.bodySmMedium.fontFamily,
+      fontSize: 14,
+      fontWeight: "600",
+      color: theme.colors.onSurface,
+    },
+    docMeta: {
+      fontFamily: theme.typography.bodyMd.fontFamily,
+      fontSize: 12,
+      color: theme.colors.onSurfaceVariant,
+    },
+    deleteFolderButton: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "center",
+      gap: 6,
+      marginTop: 24,
+    },
+    deleteFolderText: {
+      color: theme.colors.error,
+      fontFamily: theme.typography.bodySmMedium.fontFamily,
+      fontWeight: "600",
+      fontSize: 13,
+    },
+  });
+}

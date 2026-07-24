@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -10,6 +10,7 @@ import {
   View,
 } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
+import { Icon, useTheme, type Theme } from "@hukukai/ui";
 import type { DocumentStatus } from "@hukukai/types";
 import { ApiError } from "../../src/lib/api-client";
 import { useDocument } from "../../src/hooks/useDocuments";
@@ -48,19 +49,20 @@ const ANALYZABLE_STATUSES = new Set<DocumentStatus>([
   "COMPLETED",
   "REVIEW_REQUIRED",
 ]);
-const PROCESSING_STATUSES = new Set<DocumentStatus>([
-  "OCR_PROCESSING",
-  "AI_PROCESSING",
-]);
+const PROCESSING_STATUSES = new Set<DocumentStatus>(["OCR_PROCESSING", "AI_PROCESSING"]);
 
 function ExtractedDataForm({
   initialData,
   onSave,
   isSaving,
+  styles,
+  theme,
 }: {
   initialData: Record<string, unknown>;
   onSave: (data: Record<string, unknown>) => void;
   isSaving: boolean;
+  styles: ReturnType<typeof createStyles>;
+  theme: Theme;
 }) {
   const [fields, setFields] = useState<Record<string, string>>(() =>
     Object.fromEntries(
@@ -71,10 +73,7 @@ function ExtractedDataForm({
   useEffect(() => {
     setFields(
       Object.fromEntries(
-        Object.entries(initialData).map(([key, value]) => [
-          key,
-          String(value ?? ""),
-        ]),
+        Object.entries(initialData).map(([key, value]) => [key, String(value ?? "")]),
       ),
     );
   }, [initialData]);
@@ -87,28 +86,20 @@ function ExtractedDataForm({
       <Text style={styles.helperText}>
         AI tarafından çıkarılan alanları kontrol edin ve gerekirse düzeltin.
       </Text>
-      {fieldEntries.length === 0 ? (
-        <Text style={styles.mutedText}>Çıkarılan alan yok.</Text>
-      ) : null}
+      {fieldEntries.length === 0 ? <Text style={styles.mutedText}>Çıkarılan alan yok.</Text> : null}
       {fieldEntries.map(([key, value]) => (
         <View key={key} style={styles.field}>
           <Text style={styles.label}>{key}</Text>
           <TextInput
             value={value}
-            onChangeText={(text) =>
-              setFields((prev) => ({ ...prev, [key]: text }))
-            }
+            onChangeText={(text) => setFields((prev) => ({ ...prev, [key]: text }))}
             style={styles.input}
           />
         </View>
       ))}
-      <Pressable
-        style={styles.primaryButton}
-        onPress={() => onSave(fields)}
-        disabled={isSaving}
-      >
+      <Pressable style={styles.primaryButton} onPress={() => onSave(fields)} disabled={isSaving}>
         {isSaving ? (
-          <ActivityIndicator color="#FFFFFF" size="small" />
+          <ActivityIndicator color={theme.colors.onPrimary} size="small" />
         ) : (
           <Text style={styles.primaryButtonText}>Onayla ve Kaydet</Text>
         )}
@@ -118,6 +109,8 @@ function ExtractedDataForm({
 }
 
 export default function DocumentDetailScreen() {
+  const theme = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
   const { id } = useLocalSearchParams<{ id: string }>();
 
   const documentQuery = useDocument(id);
@@ -129,16 +122,13 @@ export default function DocumentDetailScreen() {
 
   const analysisQuery = useDocumentAnalysisResult(id, showAnalysis);
   const updateExtractedData = useUpdateExtractedData(id ?? "");
-  const recommendedActionsQuery = useRecommendedActions(
-    id,
-    status === "COMPLETED",
-  );
+  const recommendedActionsQuery = useRecommendedActions(id, status === "COMPLETED");
   const generateReport = useGenerateDocumentAnalysisReport();
 
   if (documentQuery.isLoading || !documentQuery.data) {
     return (
       <View style={styles.centered}>
-        <ActivityIndicator />
+        <ActivityIndicator color={theme.colors.primary} />
       </View>
     );
   }
@@ -146,16 +136,18 @@ export default function DocumentDetailScreen() {
   const document = documentQuery.data;
 
   return (
-    <ScrollView
-      style={styles.container}
-      contentContainerStyle={styles.content}
-    >
-      <Text style={styles.title} numberOfLines={2}>
-        {document.originalName}
-      </Text>
-      <Text style={styles.statusBadge}>
-        {status ? STATUS_LABELS[status] : ""}
-      </Text>
+    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+      <View style={styles.headerRow}>
+        <Pressable style={styles.backButton} onPress={() => router.back()} hitSlop={8}>
+          <Icon name="arrow_back" size={20} color={theme.colors.onSurface} />
+        </Pressable>
+        <Text style={styles.title} numberOfLines={2}>
+          {document.originalName}
+        </Text>
+      </View>
+      <View style={styles.statusBadge}>
+        <Text style={styles.statusBadgeText}>{status ? STATUS_LABELS[status] : ""}</Text>
+      </View>
 
       {status && ANALYZABLE_STATUSES.has(status) ? (
         <Pressable
@@ -168,28 +160,34 @@ export default function DocumentDetailScreen() {
           disabled={analyzeDocument.isPending}
         >
           {analyzeDocument.isPending ? (
-            <ActivityIndicator color="#FFFFFF" size="small" />
+            <ActivityIndicator color={theme.colors.onPrimary} size="small" />
           ) : (
-            <Text style={styles.primaryButtonText}>
-              {status === "FAILED" || status === "COMPLETED" || status === "REVIEW_REQUIRED"
-                ? "Yeniden Analiz Et"
-                : "Belgeyi Analiz Et"}
-            </Text>
+            <>
+              <Icon name="auto_awesome" size={18} color={theme.colors.onPrimary} />
+              <Text style={styles.primaryButtonText}>
+                {status === "FAILED" || status === "COMPLETED" || status === "REVIEW_REQUIRED"
+                  ? "Yeniden Analiz Et"
+                  : "Belgeyi Analiz Et"}
+              </Text>
+            </>
           )}
         </Pressable>
       ) : null}
 
       {status && PROCESSING_STATUSES.has(status) ? (
         <View style={styles.processingBox}>
-          <ActivityIndicator />
+          <ActivityIndicator color={theme.colors.primary} />
           <Text style={styles.mutedText}>Belge işleniyor, lütfen bekleyin…</Text>
         </View>
       ) : null}
 
       {status === "FAILED" && documentQuery.data ? (
-        <Text style={styles.errorText}>
-          Analiz sırasında bir hata oluştu. Tekrar deneyebilirsiniz.
-        </Text>
+        <View style={styles.warningBanner}>
+          <Icon name="warning" size={18} color={theme.colors.error} />
+          <Text style={styles.warningText}>
+            Analiz sırasında bir hata oluştu. Tekrar deneyebilirsiniz.
+          </Text>
+        </View>
       ) : null}
 
       {showAnalysis && analysisQuery.data ? (
@@ -204,9 +202,10 @@ export default function DocumentDetailScreen() {
           {analysisQuery.data.warnings.length > 0 ? (
             <View style={styles.section}>
               {analysisQuery.data.warnings.map((warning) => (
-                <Text key={warning} style={styles.warningText}>
-                  ⚠️ {warning}
-                </Text>
+                <View key={warning} style={styles.warningBanner}>
+                  <Icon name="warning" size={16} color={theme.colors.error} />
+                  <Text style={styles.warningText}>{warning}</Text>
+                </View>
               ))}
             </View>
           ) : null}
@@ -215,28 +214,23 @@ export default function DocumentDetailScreen() {
             <ExtractedDataForm
               initialData={analysisQuery.data.extractedData}
               isSaving={updateExtractedData.isPending}
+              styles={styles}
+              theme={theme}
               onSave={(data) =>
                 updateExtractedData.mutate(data, {
                   onError: (error) =>
-                    Alert.alert(
-                      "Hata",
-                      error instanceof Error
-                        ? error.message
-                        : "Kaydedilemedi.",
-                    ),
+                    Alert.alert("Hata", error instanceof Error ? error.message : "Kaydedilemedi."),
                 })
               }
             />
           ) : (
             <View style={styles.section}>
               <Text style={styles.sectionTitle}>Çıkarılan Veriler</Text>
-              {Object.entries(analysisQuery.data.extractedData).map(
-                ([key, value]) => (
-                  <Text key={key} style={styles.bodyText}>
-                    {key}: {String(value)}
-                  </Text>
-                ),
-              )}
+              {Object.entries(analysisQuery.data.extractedData).map(([key, value]) => (
+                <Text key={key} style={styles.bodyText}>
+                  {key}: {String(value)}
+                </Text>
+              ))}
             </View>
           )}
         </>
@@ -256,17 +250,17 @@ export default function DocumentDetailScreen() {
                 );
               },
               onError: (error) =>
-                Alert.alert(
-                  "Hata",
-                  error instanceof Error ? error.message : "Rapor oluşturulamadı.",
-                ),
+                Alert.alert("Hata", error instanceof Error ? error.message : "Rapor oluşturulamadı."),
             })
           }
         >
           {generateReport.isPending ? (
-            <ActivityIndicator color="#175CD3" />
+            <ActivityIndicator color={theme.colors.primary} />
           ) : (
-            <Text style={styles.secondaryButtonText}>Rapor Oluştur</Text>
+            <>
+              <Icon name="picture_as_pdf" size={18} color={theme.colors.primary} />
+              <Text style={styles.secondaryButtonText}>Rapor Oluştur</Text>
+            </>
           )}
         </Pressable>
       ) : null}
@@ -283,6 +277,7 @@ export default function DocumentDetailScreen() {
               onPress={() => Alert.alert(action.toolName, action.route)}
             >
               <Text style={styles.actionText}>{action.toolName}</Text>
+              <Icon name="chevron_right" size={20} color={theme.colors.primary} />
             </Pressable>
           ))}
         </View>
@@ -291,60 +286,148 @@ export default function DocumentDetailScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#FFFFFF" },
-  content: { padding: 20, paddingTop: 60, gap: 14, paddingBottom: 48 },
-  centered: { flex: 1, alignItems: "center", justifyContent: "center" },
-  title: { fontSize: 20, fontWeight: "700", color: "#101828" },
-  statusBadge: {
-    alignSelf: "flex-start",
-    backgroundColor: "#EFF8FF",
-    color: "#175CD3",
-    fontSize: 12,
-    fontWeight: "600",
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 999,
-  },
-  primaryButton: {
-    backgroundColor: "#175CD3",
-    borderRadius: 12,
-    paddingVertical: 14,
-    alignItems: "center",
-  },
-  primaryButtonText: { color: "#FFFFFF", fontWeight: "700", fontSize: 14 },
-  secondaryButton: {
-    borderWidth: 1,
-    borderColor: "#175CD3",
-    borderRadius: 12,
-    paddingVertical: 13,
-    alignItems: "center",
-  },
-  secondaryButtonText: { color: "#175CD3", fontWeight: "700", fontSize: 14 },
-  processingBox: { alignItems: "center", gap: 8, paddingVertical: 16 },
-  mutedText: { fontSize: 13, color: "#667085" },
-  errorText: { fontSize: 13, color: "#B42318" },
-  section: { gap: 8, marginTop: 8 },
-  sectionTitle: { fontSize: 15, fontWeight: "700", color: "#101828" },
-  helperText: { fontSize: 12, color: "#667085" },
-  bodyText: { fontSize: 14, color: "#344054", lineHeight: 20 },
-  warningText: { fontSize: 13, color: "#B54708" },
-  field: { gap: 4 },
-  label: { fontSize: 12, fontWeight: "600", color: "#344054" },
-  input: {
-    borderWidth: 1,
-    borderColor: "#D0D5DD",
-    borderRadius: 10,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    fontSize: 14,
-    color: "#101828",
-  },
-  actionRow: {
-    borderWidth: 1,
-    borderColor: "#EAECF0",
-    borderRadius: 10,
-    padding: 12,
-  },
-  actionText: { fontSize: 14, fontWeight: "600", color: "#175CD3" },
-});
+function createStyles(theme: Theme) {
+  return StyleSheet.create({
+    container: { flex: 1, backgroundColor: theme.colors.background },
+    content: {
+      padding: theme.spacing.containerPadding,
+      paddingTop: 56,
+      gap: 14,
+      paddingBottom: 48,
+    },
+    centered: { flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: theme.colors.background },
+    headerRow: { flexDirection: "row", alignItems: "flex-start", gap: 10 },
+    backButton: {
+      width: 36,
+      height: 36,
+      borderRadius: theme.radii.full,
+      backgroundColor: theme.colors.surfaceContainer,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    title: {
+      flex: 1,
+      fontFamily: theme.typography.headlineSm.fontFamily,
+      fontSize: 18,
+      fontWeight: "700",
+      color: theme.colors.onBackground,
+    },
+    statusBadge: {
+      alignSelf: "flex-start",
+      backgroundColor: theme.colors.surfaceContainerHigh,
+      borderRadius: theme.radii.full,
+      paddingHorizontal: 10,
+      paddingVertical: 4,
+    },
+    statusBadgeText: {
+      color: theme.colors.secondary,
+      fontFamily: theme.typography.bodySmMedium.fontFamily,
+      fontSize: 12,
+      fontWeight: "600",
+    },
+    primaryButton: {
+      backgroundColor: theme.colors.primary,
+      borderRadius: theme.radii.xl,
+      paddingVertical: 14,
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "center",
+      gap: 8,
+    },
+    primaryButtonText: {
+      color: theme.colors.onPrimary,
+      fontFamily: theme.typography.bodySmMedium.fontFamily,
+      fontWeight: "700",
+      fontSize: 14,
+    },
+    secondaryButton: {
+      borderWidth: 1,
+      borderColor: theme.colors.primary,
+      borderRadius: theme.radii.xl,
+      paddingVertical: 13,
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "center",
+      gap: 8,
+    },
+    secondaryButtonText: {
+      color: theme.colors.primary,
+      fontFamily: theme.typography.bodySmMedium.fontFamily,
+      fontWeight: "700",
+      fontSize: 14,
+    },
+    processingBox: { alignItems: "center", gap: 8, paddingVertical: 16 },
+    mutedText: {
+      fontFamily: theme.typography.bodyMd.fontFamily,
+      fontSize: 13,
+      color: theme.colors.onSurfaceVariant,
+    },
+    warningBanner: {
+      flexDirection: "row",
+      gap: 8,
+      backgroundColor: theme.colors.errorContainer,
+      borderRadius: theme.radii.lg,
+      padding: 12,
+      alignItems: "flex-start",
+    },
+    warningText: {
+      flex: 1,
+      fontFamily: theme.typography.bodyMd.fontFamily,
+      fontSize: 13,
+      color: theme.colors.onErrorContainer,
+      lineHeight: 18,
+    },
+    section: { gap: 8, marginTop: 8 },
+    sectionTitle: {
+      fontFamily: theme.typography.headlineSm.fontFamily,
+      fontSize: 15,
+      fontWeight: "700",
+      color: theme.colors.onBackground,
+    },
+    helperText: {
+      fontFamily: theme.typography.bodyMd.fontFamily,
+      fontSize: 12,
+      color: theme.colors.onSurfaceVariant,
+    },
+    bodyText: {
+      fontFamily: theme.typography.bodyMd.fontFamily,
+      fontSize: 14,
+      color: theme.colors.onSurface,
+      lineHeight: 20,
+    },
+    field: { gap: 4 },
+    label: {
+      fontFamily: theme.typography.bodySmMedium.fontFamily,
+      fontSize: 12,
+      fontWeight: "600",
+      color: theme.colors.onSurfaceVariant,
+    },
+    input: {
+      borderWidth: 1,
+      borderColor: theme.colors.outlineVariant,
+      backgroundColor: theme.colors.surfaceContainerLowest,
+      borderRadius: theme.radii.lg,
+      paddingHorizontal: 12,
+      paddingVertical: 10,
+      fontFamily: theme.typography.bodyMd.fontFamily,
+      fontSize: 14,
+      color: theme.colors.onSurface,
+    },
+    actionRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      borderWidth: 1,
+      borderColor: theme.colors.outlineVariant,
+      backgroundColor: theme.colors.surfaceContainerLowest,
+      borderRadius: theme.radii.lg,
+      padding: 12,
+    },
+    actionText: {
+      fontFamily: theme.typography.bodySmMedium.fontFamily,
+      fontSize: 14,
+      fontWeight: "600",
+      color: theme.colors.primary,
+    },
+  });
+}
