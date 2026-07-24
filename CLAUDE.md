@@ -354,6 +354,55 @@ Kalan iş, MVP'yi üretime hazırlayan altyapı/entegrasyon parçalarıdır
 (gerçek ödeme sağlayıcısı, Sentry, E2E test altyapısı, Prisma migration
 seti vb.) — bkz. bu dosyadaki ilgili "Kapsam notu" uyarıları.
 
+## Otonom Mevzuat Sistemi (devam ediyor)
+
+Seed `RuleSet` verisi hâlâ "üretime alınmadan önce gerçek/güncel mevzuat
+kaynağına karşı doğrulanmalı" uyarısıyla işaretliydi — bu, kullanıcı
+talebiyle çözülen bir sonraki büyük iş kalemi: resmî kaynakları kendisi
+izleyen, değişikliği tespit eden, etkisini analiz eden, yeni kural
+sürümü üreten, bağımsız doğrulayan, test eden ve yalnızca güvenli
+değişiklikleri otomatik yayınlayan bir sistem. Kritik ilke: **fail-closed**
+— bir kuralda değişiklik tespit edilip henüz doğrulanmadıysa, sistem eski
+kuralla sessizce "kesin" (ama potansiyel olarak yanlış) sonuç üretmeye
+devam etmez.
+
+Kapsam kararları: kaynak tarama (Resmî Gazete/GİB/SGK/Adalet Bakanlığı/
+AYM) ve çoklu-model mutabakatı için gerçek sağlayıcı **arayüzü** + mevcut
+`AIProvider`/`PaymentProvider` deseniyle birebir aynı deterministik
+**Mock** sağlayıcı kurulacak — gerçek scraping (siteye özel parser + ToS
+incelemesi) ve gerçek ikinci LLM entegrasyonu (kullanıcının sağlayıcı/API
+anahtarı kararını bekler) ayrı, sonraki fazlar. Geri kalan her şey (diff
+tespiti, etki analizi, kural üretimi, 5+1 katmanlı doğrulama, golden
+testler, risk kararı, fail-closed durum makinesi, admin inceleme ekranı,
+mobil "doğrulanıyor" göstergesi, geriye dönük düzeltme) gerçek ve uçtan
+uca çalışır şekilde kurulacak.
+
+- **1. Parça — veri modeli**: Prisma şemasına `LegislationSource`,
+  `LegislationDocument`, `LegislationChange`, `RuleImpactAssessment`,
+  `RuleVerificationResult`, `GoldenTestCase`/`GoldenTestResult`,
+  `RuleRemediation` modelleri eklendi. Mevcut `RuleSet` genişletildi:
+  `status` (DRAFT/CHANGE_DETECTED/TEMPORARILY_RESTRICTED/VERIFIED/
+  CANARY/ACTIVE/SUPERSEDED/REJECTED — servis katmanınca mevcut
+  `isPublished`/`publishedAt` ile senkron tutulur, bu ikisi hâlâ
+  `RulesService.getRuleValidOn`'ın gerçek kapısıdır), `selectorDateType`
+  (TRANSACTION_DATE/OFFENSE_DATE/JUDGMENT_DATE/FINALIZATION_DATE/
+  EXECUTION_DATE/PUBLICATION_DATE — infaz gibi hesaplamalarda hangi
+  hukuki olay tarihinin kural seçimini belirlediğini tanımlar),
+  `requiresFavorableLawComparison`, `confidenceScore`,
+  `supersedesRuleSetId` (kendine referans, sürüm zinciri), `changeId`
+  (üreten `LegislationChange`'e referans, null = admin elle oluşturdu,
+  bugün olduğu gibi). `Deadline`e `invalidatedAt` eklendi (mevcut
+  `Calculation.status`/`invalidatedAt` alanlarıyla aynı, önceden var
+  olan ama hiç kullanılmamış emsal desen — geriye dönük düzeltme
+  bunu kullanacak). Migration, ilk migration'la aynı yöntemle
+  (`prisma migrate diff --from-schema-datamodel/--to-schema-datamodel`,
+  canlı DB gerektirmez) üretildi; mevcut yayınlanmış (seed) `RuleSet`
+  satırlarının yeni `status` sütununu `isPublished` ile tutarlı hale
+  getiren bir `UPDATE ... SET status = 'ACTIVE'` veri-göçü satırı elle
+  eklendi (yeni sütun `DEFAULT 'DRAFT'` ile geldiği için). **Kapsam
+  notu:** bu parça yalnızca şema; servis katmanı (ajanlar, fail-closed
+  sorgu değişikliği, admin/mobil ekranlar) sonraki parçalarda gelecek.
+
 ## CI
 
 `.github/workflows/ci.yml` — her push/PR'da `pnpm install --frozen-lockfile`,
@@ -376,9 +425,17 @@ veritabanına bağlanmadan `prisma migrate diff --from-empty
 --to-schema-datamodel` ile bizzat şemadan üretildi (bu yüzden şemadan
 sapma riski yoktur) ve CI'deki `prisma migrate deploy` adımıyla gerçek
 bir Postgres'e karşı doğrulanır. Bundan sonraki şema değişiklikleri
-`pnpm --filter @hukukai/api prisma:migrate` (yerel `prisma migrate dev`)
-ile yeni migration dosyaları üretmelidir — artık asla `db push`
-kullanılmamalı, migration geçmişi bozulur.
+`pnpm --filter @hukukai/api prisma:migrate` (yerel `prisma migrate dev`,
+canlı bir Postgres'e ihtiyaç duyar) ile yeni migration dosyaları
+üretmelidir — artık asla `db push` kullanılmamalı, migration geçmişi
+bozulur. Bu sandbox ortamında canlı Postgres olmadığı sürece, ilk
+migration'daki gibi `prisma migrate diff --from-schema-datamodel
+&lt;değişiklik-öncesi-schema.prisma-kopyası&gt; --to-schema-datamodel
+schema.prisma --script` istisnası kabul edilebilir (`rule_sets`/
+`Deadline` genişletmesi ve Otonom Mevzuat Sistemi tabloları için
+`20260724124251_legislation_system` migration'ı bu yöntemle üretildi) —
+gerçek bir geliştirme makinesinde bundan sonraki değişiklikler için
+`prisma migrate dev` tercih edilmelidir.
 
 ## Geliştirme komutları
 
