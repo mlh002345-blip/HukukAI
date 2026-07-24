@@ -65,6 +65,62 @@ export interface AuditLogEntry {
   createdAt: string;
 }
 
+export interface LegislationChangeSummary {
+  id: string;
+  affectedLegislation: string;
+  changeType: string;
+  status: string;
+  effectiveDate: string;
+  publicationDate: string;
+  createdAt: string;
+  document: {
+    title: string;
+    source: { name: string; category: string };
+  };
+  impactAssessment: { riskLevel: string } | null;
+}
+
+export interface LegislationVerificationResultSummary {
+  id: string;
+  layer: string;
+  passed: boolean;
+  details: Record<string, unknown>;
+  createdAt: string;
+}
+
+export interface LegislationCandidateRuleSetSummary {
+  id: string;
+  ruleKey: string;
+  module: string;
+  version: string;
+  status: string;
+  confidenceScore: string | null;
+  supersedesRuleSetId: string | null;
+  ruleData: Record<string, unknown>;
+  legalBasis: unknown;
+  createdAt: string;
+  verificationResults: LegislationVerificationResultSummary[];
+}
+
+export interface LegislationChangeImpactAssessmentDetail {
+  riskLevel: string;
+  affectedModules: unknown;
+  affectedRuleIds: unknown;
+  historicalImpact: boolean;
+  prospectiveImpact: boolean;
+  requiresMigration: boolean;
+  dateSelectorNotes: unknown;
+}
+
+export interface LegislationChangeDetail
+  extends Omit<LegislationChangeSummary, "impactAssessment"> {
+  affectedSections: unknown;
+  oldTextHash: string | null;
+  newTextHash: string;
+  impactAssessment: LegislationChangeImpactAssessmentDetail | null;
+  ruleSets: LegislationCandidateRuleSetSummary[];
+}
+
 export interface AdminDashboardSummary {
   totalUsers: number;
   activeUsers: number;

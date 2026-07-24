@@ -481,6 +481,23 @@ uca çalışır şekilde kurulacak.
   panelde "Mevzuat İzleme" ekranı ve mobilde "doğrulanıyor" bannerı/
   "mevzuat güncel" göstergesi henüz eklenmedi — bu uçlar hazır ama arayüzü
   sonraki bir parça.
+- **5. Parça — admin panel "Mevzuat İzleme"**: `apps/admin/app/legislation/`
+  (mevcut `rule-sets`/`holidays` sayfalarıyla aynı sade `fetch`+`useState`
+  deseni): liste sayfası tespit edilen tüm `LegislationChange` kayıtlarını
+  (kaynak, belge, `changeType`, risk seviyesi, durum rozeti, yürürlük
+  tarihi) gösterir; detay sayfası (`legislation/[id]`) etki analizini,
+  aday kuralın 5+1 doğrulama katmanının geçti/kaldı rozetlerini, aday
+  `ruleData`/`legalBasis` JSON'unu gösterir ve `HOLD_FOR_REVIEW`
+  durumundaki değişiklikler için Onayla/Reddet düğmeleri sunar (mevcut
+  `POST /admin/legislation-changes/:id/{approve,reject}` uçlarını
+  çağırır). `@hukukai/types`e `LegislationChangeSummary`/
+  `LegislationChangeDetail`/`LegislationCandidateRuleSetSummary`/
+  `LegislationVerificationResultSummary` eklendi (diğer admin DTO'larıyla
+  aynı desen). Yeni paylaşılan `statusBadgeStyle` yardımcı fonksiyonu
+  (`apps/admin/src/lib/status-badge.ts`) durum/katman rozetlerini renklendirir.
+  Ana navigasyona "Mevzuat İzleme" satırı eklendi. **Kapsam notu:** mobilde
+  "doğrulanıyor" bannerı/"mevzuat güncel" göstergesi henüz eklenmedi —
+  sonraki (son) parça.
 
 ## CI
 

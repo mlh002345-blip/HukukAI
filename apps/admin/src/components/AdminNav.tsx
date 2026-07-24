@@ -8,6 +8,7 @@ const NAV_ITEMS = [
   { href: "/users", label: "Kullanıcılar" },
   { href: "/document-errors", label: "Belge Hataları" },
   { href: "/rule-sets", label: "Kural Setleri" },
+  { href: "/legislation", label: "Mevzuat İzleme" },
   { href: "/holidays", label: "Resmi Tatiller" },
   { href: "/ai-usage", label: "AI Maliyeti" },
   { href: "/audit-logs", label: "Audit Log" },

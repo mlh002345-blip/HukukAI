@@ -2,6 +2,25 @@
 
 Bu proje [Keep a Changelog](https://keepachangelog.com/) formatını takip eder.
 
+## [Otonom Mevzuat Sistemi — 5. Parça: admin panel "Mevzuat İzleme"]
+
+### Eklendi
+
+- `apps/admin/app/legislation/page.tsx` — tespit edilen tüm mevzuat
+  değişikliklerinin listesi (kaynak, belge, değişiklik türü, risk
+  seviyesi, durum rozeti, yürürlük tarihi)
+- `apps/admin/app/legislation/[id]/page.tsx` — değişiklik detayı: etki
+  analizi, aday kuralın 5+1 doğrulama katmanı geçti/kaldı rozetleri, aday
+  `ruleData`/`legalBasis` JSON görünümü, `HOLD_FOR_REVIEW` durumundaki
+  değişiklikler için Onayla/Reddet düğmeleri
+- `apps/admin/src/lib/status-badge.ts` — paylaşılan durum rozeti renklendirme
+- `@hukukai/types`e `LegislationChangeSummary`/`LegislationChangeDetail`/
+  `LegislationCandidateRuleSetSummary`/`LegislationVerificationResultSummary`
+  eklendi
+- Ana navigasyona "Mevzuat İzleme" satırı eklendi
+- **Kapsam notu:** mobil "doğrulanıyor" bannerı/"mevzuat güncel" göstergesi
+  henüz eklenmedi — sonraki (son) parça
+
 ## [Otonom Mevzuat Sistemi — 3. Parça: `LegislationModule` + fail-closed `RulesService`]
 
 ### Eklendi
