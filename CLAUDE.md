@@ -260,11 +260,18 @@ o dokümana göre kodlanıyor. Yeni bir şey yapmadan önce bu dokümanı oku.
   (`Yükleme`/`Tarama`/`Analiz`/`Sonuç`) ilerleme göstergesi, ilerleme
   çubuğu ve "Lexi-Trust Motoru aktif" AI bilgi bannerı eklendi —
   `OCR_PROCESSING`/`AI_PROCESSING` durumlarına göre aktif adım
-  hesaplanır (`activeStepIndex`). **Kapsam notu:** Stitch paketindeki
-  geri kalan ~19 yeni ekran (analiz sonucu/risk analizi detay
-  ekranları, bildirim yönetimi, destek merkezi, avukat dashboard'u
-  vb.) henüz eklenmedi; bu, birden fazla oturuma yayılacak devam eden
-  bir iştir. Bu ortamda Expo web/Metro pnpm monorepo'da bir bundling
+  hesaplanır (`activeStepIndex`). Ardından **Yardım Merkezi**
+  eklendi — `apps/mobile/src/content/help.ts` (statik kategori/makale
+  içeriği, sunucu tarafı bir Destek API'si yok), `app/help/index.tsx`
+  (arama, kategori bento grid'i, popüler sorular, destek ekibiyle
+  iletişim kartı) ve `app/help/[slug].tsx` (breadcrumb, makale
+  içeriği, "yararlı oldu mu" geri bildirimi — yalnızca ekran içi
+  durumda tutulur, kalıcı değildir, ilgili makaleler). Profil menüsüne
+  "Yardım Merkezi" satırı eklendi. **Kapsam notu:** Stitch paketindeki
+  geri kalan ~18 yeni ekran (analiz sonucu/risk analizi detay
+  ekranları, bildirim yönetimi, avukat dashboard'u vb.) henüz
+  eklenmedi; bu, birden fazla oturuma yayılacak devam eden bir iştir.
+  Bu ortamda Expo web/Metro pnpm monorepo'da bir bundling
   sorunu yüzünden canlı ekran görüntüsü
   alınamadı; doğrulama yalnızca typecheck/lint/test ile yapıldı.
 

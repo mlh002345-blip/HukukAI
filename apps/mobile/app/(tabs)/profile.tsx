@@ -33,6 +33,12 @@ const MENU_ITEMS = [
     icon: "verified_user",
     route: "/legal/kvkk" as const,
   },
+  {
+    key: "help",
+    label: "Yardım Merkezi",
+    icon: "help",
+    route: "/help" as const,
+  },
 ];
 
 export default function ProfileScreen() {
