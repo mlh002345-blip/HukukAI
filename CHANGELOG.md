@@ -2,6 +2,31 @@
 
 Bu proje [Keep a Changelog](https://keepachangelog.com/) formatını takip eder.
 
+## [Görsel Tasarım — Stitch Entegrasyonu, 1. Parça]
+
+### Eklendi
+
+- Kullanıcı tarafından sağlanan tasarım paketi (Google Stitch, ~40
+  ekran, açık+koyu tema) uygulanmaya başlandı:
+  - `packages/ui/src/theme/`: renk (Lexi-Trust Framework açık /
+    Obsidian koyu), tipografi (Inter/JetBrains Mono ölçeği), spacing/
+    radius tokenleri; saf `ThemeProvider`/`useTheme`
+  - `apps/mobile/src/theme/`: sistem teması + kalıcı kullanıcı tercihi
+    (`expo-secure-store`) çözümleyen sarmalayıcı sağlayıcı, font
+    yükleme hook'u
+  - `packages/ui/src/Icon.tsx`: Material Symbols Outlined ligature
+    render bileşeni; iki statik TTF (`FILL` 0/1) `apps/mobile/assets/
+    fonts/`e eklendi
+  - `GlobalSearchBar`, `ToolCard`, `CategoryChip`, `Feedback` (paylaşılan
+    bileşenler), Ana Sayfa sekmesi ve alt navigasyon yeni tema/ikon
+    sistemine taşındı
+  - `app.json`: `userInterfaceStyle: "automatic"`, tema rengi
+    güncellendi
+- **Kapsam notu:** geri kalan ~35 ekran henüz taşınmadı (devam eden,
+  çok oturumlu bir iş); bu ortamda Metro/pnpm monorepo web bundling
+  sorunu yüzünden canlı ekran görüntüsü alınamadı, doğrulama yalnızca
+  typecheck/lint/test ile yapıldı
+
 ## [Prisma Migration Seti]
 
 ### Eklendi

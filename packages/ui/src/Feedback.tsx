@@ -1,5 +1,7 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { StyleSheet, Text, View } from "react-native";
+import { Icon } from "./Icon";
+import { useTheme, type Theme } from "./theme/ThemeContext";
 
 export function EmptyState({
   title,
@@ -8,60 +10,65 @@ export function EmptyState({
   title: string;
   description?: string;
 }) {
+  const theme = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
+
   return (
     <View style={styles.emptyContainer}>
       <Text style={styles.emptyTitle}>{title}</Text>
-      {description ? (
-        <Text style={styles.emptyDescription}>{description}</Text>
-      ) : null}
+      {description ? <Text style={styles.emptyDescription}>{description}</Text> : null}
     </View>
   );
 }
 
 export function WarningBanner({ message }: { message: string }) {
+  const theme = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
+
   return (
     <View style={styles.warningContainer}>
-      <Text style={styles.warningIcon}>⚠️</Text>
+      <Icon name="warning" size={18} color={theme.colors.tertiaryContainer} />
       <Text style={styles.warningText}>{message}</Text>
     </View>
   );
 }
 
-const styles = StyleSheet.create({
-  emptyContainer: {
-    alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: 48,
-    gap: 6,
-  },
-  emptyTitle: {
-    fontSize: 15,
-    fontWeight: "600",
-    color: "#101828",
-  },
-  emptyDescription: {
-    fontSize: 13,
-    color: "#667085",
-    textAlign: "center",
-    paddingHorizontal: 24,
-  },
-  warningContainer: {
-    flexDirection: "row",
-    gap: 8,
-    backgroundColor: "#FFFAEB",
-    borderColor: "#FEDF89",
-    borderWidth: 1,
-    borderRadius: 10,
-    padding: 12,
-    alignItems: "flex-start",
-  },
-  warningIcon: {
-    fontSize: 14,
-  },
-  warningText: {
-    flex: 1,
-    fontSize: 13,
-    color: "#93370D",
-    lineHeight: 18,
-  },
-});
+function createStyles(theme: Theme) {
+  return StyleSheet.create({
+    emptyContainer: {
+      alignItems: "center",
+      justifyContent: "center",
+      paddingVertical: 48,
+      gap: 6,
+    },
+    emptyTitle: {
+      fontFamily: theme.typography.headlineSm.fontFamily,
+      fontSize: 15,
+      color: theme.colors.onSurface,
+    },
+    emptyDescription: {
+      fontFamily: theme.typography.bodyMd.fontFamily,
+      fontSize: 13,
+      color: theme.colors.onSurfaceVariant,
+      textAlign: "center",
+      paddingHorizontal: 24,
+    },
+    warningContainer: {
+      flexDirection: "row",
+      gap: 8,
+      backgroundColor: theme.colors.tertiaryFixed,
+      borderColor: theme.colors.tertiaryContainer,
+      borderWidth: 1,
+      borderRadius: theme.radii.lg,
+      padding: 12,
+      alignItems: "flex-start",
+    },
+    warningText: {
+      flex: 1,
+      fontFamily: theme.typography.bodyMd.fontFamily,
+      fontSize: 13,
+      color: theme.colors.onTertiaryFixed,
+      lineHeight: 18,
+    },
+  });
+}

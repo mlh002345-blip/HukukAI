@@ -2,3 +2,8 @@ export * from "./GlobalSearchBar";
 export * from "./ToolCard";
 export * from "./CategoryChip";
 export * from "./Feedback";
+export * from "./Icon";
+export * from "./theme/ThemeContext";
+export * from "./theme/colors";
+export * from "./theme/typography";
+export * from "./theme/spacing";

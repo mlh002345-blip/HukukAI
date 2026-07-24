@@ -182,6 +182,32 @@ o dokümana göre kodlanıyor. Yeni bir şey yapmadan önce bu dokümanı oku.
   bırakılırsa SDK no-op çalışır** — gerçek bir DSN olmadan bu ortamda
   hiçbir olay gönderilmez/test edilemez; üretime alınmadan önce gerçek
   bir Sentry projesi oluşturulup DSN'ler ayarlanmalıdır.
+- **Görsel tasarım — Stitch tasarım paketi entegrasyonu (devam ediyor)**:
+  Kullanıcı tarafından sağlanan bir tasarım paketi (Google Stitch
+  export, ~40 ekran, açık+koyu tema) uygulanmaya başlandı. İki tema
+  sistemi: **Lexi-Trust Framework** (açık — "Institutional Blue"
+  `#00236f`, Inter/JetBrains Mono, Material Symbols Outlined ikonları)
+  ve **Obsidian** (koyu — `#a78bfa` mor, near-black, aynı ikon seti).
+  `packages/ui/src/theme/` — renk/tipografi/spacing tokenleri + saf
+  `ThemeProvider`/`useTheme` (hangi şemanın kullanılacağına karar
+  vermez, yalnızca verilen `scheme`i uygular). `apps/mobile/src/theme/
+  ThemeProvider.tsx` — sistem teması + `expo-secure-store`'da saklanan
+  kullanıcı tercihini çözümleyip `@hukukai/ui`'nin sağlayıcısına iletir.
+  `packages/ui/src/Icon.tsx` — Material Symbols Outlined'ı ligature
+  (harf dizisi → glif) yaklaşımıyla render eder; iki statik TTF
+  (FILL 0/1) `apps/mobile/assets/fonts/`e indirildi (Google Fonts'tan,
+  eski bir User-Agent ile gerçek `.ttf` — varsayılan `.woff2` RN'de
+  çalışmaz). Inter/JetBrains Mono `@expo-google-fonts/*` paketleriyle
+  yüklendi. Paylaşılan bileşenler (`GlobalSearchBar`, `ToolCard`,
+  `CategoryChip`, `Feedback`) ve Ana Sayfa sekmesi + alt navigasyon
+  (Material Symbols ikonlarıyla) bu sisteme taşındı; `app.json`
+  `userInterfaceStyle: "automatic"` oldu. **Kapsam notu:** geri kalan
+  ~35 ekran (Araçlar, Dosyalarım, Takvim, Profil, auth/onboarding,
+  belge yükleme/analiz akışları, admin dashboard vb.) henüz taşınmadı —
+  bu, birden fazla oturuma yayılacak devam eden bir iş. Bu ortamda
+  Expo web/Metro pnpm monorepo'da bir bundling sorunu yüzünden canlı
+  ekran görüntüsü alınamadı; doğrulama yalnızca typecheck/lint/test ile
+  yapıldı.
 
 Tüm bunlar test edildi: `pnpm typecheck`, `pnpm lint`, `pnpm test` — hepsi
 yeşil. Devam ederken bu üç komutu bozmadan ilerle.
