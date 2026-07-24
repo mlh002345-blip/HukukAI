@@ -2,6 +2,23 @@
 
 Bu proje [Keep a Changelog](https://keepachangelog.com/) formatını takip eder.
 
+## [Görsel Tasarım — Stitch Entegrasyonu, 12. Parça — Tüm Belgeler]
+
+### Eklendi
+
+- **Tüm Belgeler** ekranı eklendi (`app/documents/index.tsx`) — arama,
+  durum filtre çipleri (Tümü/Tamamlandı/İşleniyor/İnceleme Gerekli/
+  Başarısız), belge kartlarında MIME türüne göre ikon ve durum rozeti.
+  `GET /documents` ucu zaten klasör filtresiz sorguyu desteklediğinden
+  backend değişikliği gerekmedi
+- Dosyalarım sekmesine bu ekrana giden bir satır eklendi
+
+### Kapsam dışı bırakıldı (kullanıcı talebiyle)
+
+- Risk skorlama/analiz sonucu ekranları — güvenilir bir risk puanlama
+  modeli olmadan yanıltıcı olabileceği değerlendirilerek bu
+  iterasyona dahil edilmedi
+
 ## [Görsel Tasarım — Stitch Entegrasyonu, 11. Parça — Hesap ve Güvenlik]
 
 ### Eklendi

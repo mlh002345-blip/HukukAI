@@ -291,12 +291,21 @@ o dokümana göre kodlanıyor. Yeni bir şey yapmadan önce bu dokümanı oku.
   "Güvenlik Ayarları" satırı artık bu ekrana bağlı. **Kapsam notu:**
   Stitch tasarımındaki parola değiştirme, 2FA ve oturum listesi
   bölümleri backend'de karşılığı olmadığından eklenmedi (ekranda bunu
-  açıklayan bir bilgi bannerı var); geri kalan ~16 yeni ekran (analiz
-  sonucu/risk analizi detay ekranları, avukat dashboard'u vb.) henüz
-  eklenmedi; bu, birden fazla oturuma yayılacak devam eden bir iştir.
-  Bu ortamda Expo web/Metro pnpm monorepo'da bir bundling
-  sorunu yüzünden canlı ekran görüntüsü
-  alınamadı; doğrulama yalnızca typecheck/lint/test ile yapıldı.
+  açıklayan bir bilgi bannerı var). Ardından **Tüm Belgeler** ekranı
+  eklendi (`app/documents/index.tsx`) — `GET /documents` ucu zaten
+  klasör filtresiz (tüm belgeler) sorguyu destekliyordu, backend
+  değişikliği gerekmedi; arama, durum filtre çipleri (Tümü/Tamamlandı/
+  İşleniyor/İnceleme Gerekli/Başarısız), belge kartlarında MIME türüne
+  göre ikon ve durum rozeti. Dosyalarım sekmesine bu ekrana giden bir
+  satır eklendi. **Kullanıcı talebiyle kapsam dışı bırakıldı:** risk
+  skorlama/analiz sonucu ekranları — güvenilir bir risk puanlama
+  modeli olmadan yanıltıcı olabileceği değerlendirilerek bu iterasyona
+  dahil edilmedi. **Kapsam notu:** geri kalan yeni ekranlar (gelişmiş
+  arama/filtreleme, avukat dashboard'u vb.) henüz eklenmedi; bu,
+  birden fazla oturuma yayılacak devam eden bir iştir. Bu ortamda Expo
+  web/Metro pnpm monorepo'da bir bundling sorunu yüzünden canlı ekran
+  görüntüsü alınamadı; doğrulama yalnızca typecheck/lint/test ile
+  yapıldı.
 
 Tüm bunlar test edildi: `pnpm typecheck`, `pnpm lint`, `pnpm test` — hepsi
 yeşil. Devam ederken bu üç komutu bozmadan ilerle.
