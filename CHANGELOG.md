@@ -2,6 +2,21 @@
 
 Bu proje [Keep a Changelog](https://keepachangelog.com/) formatını takip eder.
 
+## [Görsel Tasarım — Stitch Entegrasyonu, 4. Parça]
+
+### Eklendi
+
+- Dosyalarım detay akışı yeni tema/ikon sistemine taşındı:
+  - `app/folder/[id].tsx` — geri/düzenle ikon düğmeleri, belge
+    satırlarında MIME türüne göre ikon, ikonlu "Belge Yükle"/"Klasörü
+    Sil" düğmeleri
+  - `app/folder/new.tsx`, `app/folder/[id]/edit.tsx` — kategori seçimi
+    paylaşılan `CategoryChip` bileşenine taşındı
+  - `app/document/[id].tsx` — durum rozeti, ikonlu analiz/rapor
+    düğmeleri, uyarı bannerları tema renkleriyle
+- **Kapsam notu:** geri kalan ~26 ekran hâlâ taşınmadı; doğrulama
+  yalnızca typecheck/lint/test ile yapıldı
+
 ## [Görsel Tasarım — Stitch Entegrasyonu, 3. Parça]
 
 ### Eklendi

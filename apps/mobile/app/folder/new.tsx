@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -10,6 +11,7 @@ import {
   View,
 } from "react-native";
 import { router } from "expo-router";
+import { CategoryChip, Icon, useTheme, type Theme } from "@hukukai/ui";
 import { createFolderSchema, type CreateFolderInput } from "@hukukai/validation";
 import { FOLDER_TYPES, type FolderType } from "@hukukai/types";
 import { useCreateFolder } from "../../src/hooks/useFolders";
@@ -26,6 +28,8 @@ const FOLDER_TYPE_LABELS: Record<FolderType, string> = {
 };
 
 export default function CreateFolderScreen() {
+  const theme = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
   const createFolder = useCreateFolder();
 
   const {
@@ -51,10 +55,17 @@ export default function CreateFolderScreen() {
 
   return (
     <ScrollView
-      contentContainerStyle={styles.container}
+      style={styles.container}
+      contentContainerStyle={styles.content}
       keyboardShouldPersistTaps="handled"
     >
-      <Text style={styles.title}>Yeni Klasör</Text>
+      <View style={styles.headerRow}>
+        <Pressable style={styles.backButton} onPress={() => router.back()} hitSlop={8}>
+          <Icon name="close" size={20} color={theme.colors.onSurface} />
+        </Pressable>
+        <Text style={styles.title}>Yeni Klasör</Text>
+        <View style={styles.backButtonSpacer} />
+      </View>
 
       <View style={styles.field}>
         <Text style={styles.label}>Klasör Adı</Text>
@@ -68,12 +79,11 @@ export default function CreateFolderScreen() {
               onBlur={onBlur}
               style={styles.input}
               placeholder="Örn. Ahmet Yılmaz - İcra Dosyası"
+              placeholderTextColor={theme.colors.outline}
             />
           )}
         />
-        {errors.title ? (
-          <Text style={styles.errorText}>{errors.title.message}</Text>
-        ) : null}
+        {errors.title ? <Text style={styles.errorText}>{errors.title.message}</Text> : null}
       </View>
 
       <View style={styles.field}>
@@ -84,20 +94,12 @@ export default function CreateFolderScreen() {
           render={({ field: { value, onChange } }) => (
             <View style={styles.chipRow}>
               {FOLDER_TYPES.map((type) => (
-                <Pressable
+                <CategoryChip
                   key={type}
-                  style={[styles.chip, value === type && styles.chipSelected]}
+                  label={FOLDER_TYPE_LABELS[type]}
+                  selected={value === type}
                   onPress={() => onChange(type)}
-                >
-                  <Text
-                    style={[
-                      styles.chipText,
-                      value === type && styles.chipTextSelected,
-                    ]}
-                  >
-                    {FOLDER_TYPE_LABELS[type]}
-                  </Text>
-                </Pressable>
+                />
               ))}
             </View>
           )}
@@ -116,6 +118,7 @@ export default function CreateFolderScreen() {
               onBlur={onBlur}
               style={styles.input}
               placeholder="İsteğe bağlı"
+              placeholderTextColor={theme.colors.outline}
             />
           )}
         />
@@ -133,6 +136,7 @@ export default function CreateFolderScreen() {
               onBlur={onBlur}
               style={styles.input}
               placeholder="İsteğe bağlı"
+              placeholderTextColor={theme.colors.outline}
             />
           )}
         />
@@ -150,6 +154,7 @@ export default function CreateFolderScreen() {
               onBlur={onBlur}
               style={[styles.input, styles.textArea]}
               placeholder="İsteğe bağlı"
+              placeholderTextColor={theme.colors.outline}
               multiline
             />
           )}
@@ -170,7 +175,7 @@ export default function CreateFolderScreen() {
         disabled={createFolder.isPending}
       >
         {createFolder.isPending ? (
-          <ActivityIndicator color="#FFFFFF" />
+          <ActivityIndicator color={theme.colors.onPrimary} />
         ) : (
           <Text style={styles.submitButtonText}>Kaydet</Text>
         )}
@@ -179,45 +184,70 @@ export default function CreateFolderScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flexGrow: 1,
-    backgroundColor: "#FFFFFF",
-    padding: 24,
-    paddingTop: 64,
-    gap: 16,
-  },
-  title: { fontSize: 24, fontWeight: "700", color: "#101828", marginBottom: 8 },
-  field: { gap: 6 },
-  label: { fontSize: 13, fontWeight: "500", color: "#344054" },
-  input: {
-    borderWidth: 1,
-    borderColor: "#D0D5DD",
-    borderRadius: 10,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    fontSize: 15,
-    color: "#101828",
-  },
-  textArea: { minHeight: 80, textAlignVertical: "top" },
-  errorText: { color: "#B42318", fontSize: 12 },
-  chipRow: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
-  chip: {
-    borderWidth: 1,
-    borderColor: "#D0D5DD",
-    borderRadius: 999,
-    paddingHorizontal: 12,
-    paddingVertical: 7,
-  },
-  chipSelected: { backgroundColor: "#175CD3", borderColor: "#175CD3" },
-  chipText: { fontSize: 13, color: "#344054" },
-  chipTextSelected: { color: "#FFFFFF", fontWeight: "600" },
-  submitButton: {
-    backgroundColor: "#175CD3",
-    borderRadius: 12,
-    paddingVertical: 15,
-    alignItems: "center",
-    marginTop: 8,
-  },
-  submitButtonText: { color: "#FFFFFF", fontWeight: "700", fontSize: 15 },
-});
+function createStyles(theme: Theme) {
+  return StyleSheet.create({
+    container: { flex: 1, backgroundColor: theme.colors.background },
+    content: {
+      flexGrow: 1,
+      padding: theme.spacing.containerPadding,
+      paddingTop: 56,
+      paddingBottom: 40,
+      gap: theme.spacing.stackGapMd,
+    },
+    headerRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
+    backButton: {
+      width: 36,
+      height: 36,
+      borderRadius: theme.radii.full,
+      backgroundColor: theme.colors.surfaceContainer,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    backButtonSpacer: { width: 36 },
+    title: {
+      fontFamily: theme.typography.headlineMd.fontFamily,
+      fontSize: 20,
+      fontWeight: "700",
+      color: theme.colors.onBackground,
+    },
+    field: { gap: 6 },
+    label: {
+      fontFamily: theme.typography.labelMd.fontFamily,
+      fontSize: 11,
+      letterSpacing: 0.5,
+      color: theme.colors.onSurfaceVariant,
+      textTransform: "uppercase",
+    },
+    input: {
+      backgroundColor: theme.colors.surfaceContainerLowest,
+      borderWidth: 1,
+      borderColor: theme.colors.outlineVariant,
+      borderRadius: theme.radii.xl,
+      paddingHorizontal: 16,
+      paddingVertical: 12,
+      fontFamily: theme.typography.bodyMd.fontFamily,
+      fontSize: 14,
+      color: theme.colors.onSurface,
+    },
+    textArea: { minHeight: 80, textAlignVertical: "top" },
+    errorText: {
+      color: theme.colors.error,
+      fontSize: 12,
+      fontFamily: theme.typography.bodyMd.fontFamily,
+    },
+    chipRow: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
+    submitButton: {
+      backgroundColor: theme.colors.primary,
+      borderRadius: theme.radii.full,
+      paddingVertical: 15,
+      alignItems: "center",
+      marginTop: 4,
+    },
+    submitButtonText: {
+      color: theme.colors.onPrimary,
+      fontFamily: theme.typography.headlineSm.fontFamily,
+      fontWeight: "700",
+      fontSize: 15,
+    },
+  });
+}
