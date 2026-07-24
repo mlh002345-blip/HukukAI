@@ -51,6 +51,92 @@ const ANALYZABLE_STATUSES = new Set<DocumentStatus>([
 ]);
 const PROCESSING_STATUSES = new Set<DocumentStatus>(["OCR_PROCESSING", "AI_PROCESSING"]);
 
+const PROCESSING_STEPS = [
+  { key: "upload", label: "Yükleme", icon: "upload_file" },
+  { key: "scan", label: "Tarama", icon: "document_scanner" },
+  { key: "analyze", label: "Analiz", icon: "analytics" },
+  { key: "result", label: "Sonuç", icon: "task_alt" },
+] as const;
+
+function activeStepIndex(status: DocumentStatus): number {
+  if (status === "OCR_PROCESSING") return 1;
+  if (status === "AI_PROCESSING") return 2;
+  return 0;
+}
+
+function ProcessingSteps({
+  status,
+  styles,
+  theme,
+}: {
+  status: DocumentStatus;
+  styles: ReturnType<typeof createStyles>;
+  theme: Theme;
+}) {
+  const activeIndex = activeStepIndex(status);
+
+  return (
+    <View style={styles.processingBox}>
+      <Text style={styles.processingTitle}>
+        {status === "OCR_PROCESSING" ? "Belge taranıyor…" : "Yapay zeka analiz ediyor…"}
+      </Text>
+      <Text style={styles.processingSubtitle}>
+        {status === "OCR_PROCESSING"
+          ? "OCR teknolojisi ile metin katmanları ayrıştırılıyor."
+          : "Çıkarılan veriler hukuki bağlama göre yorumlanıyor."}
+      </Text>
+
+      <View style={styles.progressTrack}>
+        <View
+          style={[
+            styles.progressFill,
+            { width: `${((activeIndex + 1) / PROCESSING_STEPS.length) * 100}%` },
+          ]}
+        />
+      </View>
+
+      <View style={styles.stepRow}>
+        {PROCESSING_STEPS.map((step, index) => {
+          const isDone = index < activeIndex;
+          const isActive = index === activeIndex;
+          return (
+            <View key={step.key} style={styles.stepItem}>
+              <View
+                style={[
+                  styles.stepCircle,
+                  isDone && styles.stepCircleDone,
+                  isActive && styles.stepCircleActive,
+                ]}
+              >
+                <Icon
+                  name={step.icon}
+                  size={16}
+                  color={
+                    isDone || isActive ? theme.colors.onSecondary : theme.colors.onSurfaceVariant
+                  }
+                />
+              </View>
+              <Text style={[styles.stepLabel, isActive && styles.stepLabelActive]}>
+                {step.label}
+              </Text>
+            </View>
+          );
+        })}
+      </View>
+
+      <View style={styles.insightBanner}>
+        <View style={styles.insightIconWrap}>
+          <Icon name="auto_awesome" size={18} color={theme.colors.onSecondary} />
+        </View>
+        <Text style={styles.insightText}>
+          Lexi-Trust Motoru aktif — belgenizdeki süre ve sorumluluk maddeleri öncelikli olarak
+          analiz ediliyor.
+        </Text>
+      </View>
+    </View>
+  );
+}
+
 function ExtractedDataForm({
   initialData,
   onSave,
@@ -175,10 +261,7 @@ export default function DocumentDetailScreen() {
       ) : null}
 
       {status && PROCESSING_STATUSES.has(status) ? (
-        <View style={styles.processingBox}>
-          <ActivityIndicator color={theme.colors.primary} />
-          <Text style={styles.mutedText}>Belge işleniyor, lütfen bekleyin…</Text>
-        </View>
+        <ProcessingSteps status={status} styles={styles} theme={theme} />
       ) : null}
 
       {status === "FAILED" && documentQuery.data ? (
@@ -356,7 +439,100 @@ function createStyles(theme: Theme) {
       fontWeight: "700",
       fontSize: 14,
     },
-    processingBox: { alignItems: "center", gap: 8, paddingVertical: 16 },
+    processingBox: {
+      alignItems: "center",
+      gap: 12,
+      paddingVertical: 20,
+      paddingHorizontal: 16,
+      backgroundColor: theme.colors.surfaceContainerLowest,
+      borderRadius: theme.radii.xl,
+      borderWidth: 1,
+      borderColor: theme.colors.outlineVariant,
+    },
+    processingTitle: {
+      fontFamily: theme.typography.headlineSm.fontFamily,
+      fontSize: 16,
+      fontWeight: "700",
+      color: theme.colors.onSurface,
+      textAlign: "center",
+    },
+    processingSubtitle: {
+      fontFamily: theme.typography.bodyMd.fontFamily,
+      fontSize: 13,
+      color: theme.colors.onSurfaceVariant,
+      textAlign: "center",
+      marginTop: -6,
+    },
+    progressTrack: {
+      width: "100%",
+      height: 6,
+      borderRadius: theme.radii.full,
+      backgroundColor: theme.colors.surfaceContainerHigh,
+      overflow: "hidden",
+    },
+    progressFill: {
+      height: "100%",
+      borderRadius: theme.radii.full,
+      backgroundColor: theme.colors.secondary,
+    },
+    stepRow: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      width: "100%",
+    },
+    stepItem: { alignItems: "center", gap: 6, flex: 1 },
+    stepCircle: {
+      width: 32,
+      height: 32,
+      borderRadius: theme.radii.full,
+      backgroundColor: theme.colors.surfaceContainerHigh,
+      borderWidth: 1,
+      borderColor: theme.colors.outlineVariant,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    stepCircleDone: {
+      backgroundColor: theme.colors.secondary,
+      borderColor: theme.colors.secondary,
+    },
+    stepCircleActive: {
+      backgroundColor: theme.colors.secondary,
+      borderColor: theme.colors.secondary,
+    },
+    stepLabel: {
+      fontFamily: theme.typography.labelMd.fontFamily,
+      fontSize: 10,
+      color: theme.colors.onSurfaceVariant,
+      textAlign: "center",
+    },
+    stepLabelActive: {
+      color: theme.colors.onSurface,
+      fontWeight: "700",
+    },
+    insightBanner: {
+      flexDirection: "row",
+      gap: 10,
+      alignItems: "flex-start",
+      backgroundColor: theme.colors.surfaceContainer,
+      borderRadius: theme.radii.lg,
+      padding: 12,
+      width: "100%",
+    },
+    insightIconWrap: {
+      width: 30,
+      height: 30,
+      borderRadius: theme.radii.lg,
+      backgroundColor: theme.colors.secondary,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    insightText: {
+      flex: 1,
+      fontFamily: theme.typography.bodyMd.fontFamily,
+      fontSize: 12,
+      color: theme.colors.onSurfaceVariant,
+      lineHeight: 17,
+    },
     mutedText: {
       fontFamily: theme.typography.bodyMd.fontFamily,
       fontSize: 13,

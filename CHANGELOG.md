@@ -2,6 +2,17 @@
 
 Bu proje [Keep a Changelog](https://keepachangelog.com/) formatını takip eder.
 
+## [Görsel Tasarım — Stitch Entegrasyonu, 8. Parça — Belge İşleniyor göstergesi]
+
+### Eklendi
+
+- Stitch tasarım paketindeki **Belge İşleniyor** görünümü belge
+  detayına (`app/document/[id].tsx`) entegre edildi: düz
+  `ActivityIndicator` yerine 4 adımlı (Yükleme/Tarama/Analiz/Sonuç)
+  ilerleme göstergesi, ilerleme çubuğu ve "Lexi-Trust Motoru aktif" AI
+  bilgi bannerı
+- **Kapsam notu:** geri kalan ~19 yeni ekran henüz eklenmedi
+
 ## [Görsel Tasarım — Stitch Entegrasyonu, 7. Parça — ilk yeni ekran: Belge Yükle]
 
 ### Eklendi

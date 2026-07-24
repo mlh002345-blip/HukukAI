@@ -254,12 +254,18 @@ o dokümana göre kodlanıyor. Yeni bir şey yapmadan önce bu dokümanı oku.
   `requestMediaLibraryPermissionsAsync`); PDF seçimi mevcut
   `expo-document-picker` akışını kullanır. `folder/[id].tsx`'teki
   "Belge Yükle" düğmesi artık doğrudan `DocumentPicker` çağırmak
-  yerine bu yeni ekrana yönlendiriyor. **Kapsam notu:** Stitch
-  paketindeki geri kalan ~20 yeni ekran (işleniyor animasyonu, analiz
-  sonucu/risk analizi detay ekranları, bildirim yönetimi, destek
-  merkezi, avukat dashboard'u vb.) henüz eklenmedi; bu, birden fazla
-  oturuma yayılacak devam eden bir iştir. Bu ortamda Expo web/Metro
-  pnpm monorepo'da bir bundling sorunu yüzünden canlı ekran görüntüsü
+  yerine bu yeni ekrana yönlendiriyor. Ardından **Belge İşleniyor**
+  tasarımı (`belge_i_leniyor_1`) belge detayına entegre edildi:
+  `document/[id].tsx`teki düz `ActivityIndicator` yerine 4 adımlı
+  (`Yükleme`/`Tarama`/`Analiz`/`Sonuç`) ilerleme göstergesi, ilerleme
+  çubuğu ve "Lexi-Trust Motoru aktif" AI bilgi bannerı eklendi —
+  `OCR_PROCESSING`/`AI_PROCESSING` durumlarına göre aktif adım
+  hesaplanır (`activeStepIndex`). **Kapsam notu:** Stitch paketindeki
+  geri kalan ~19 yeni ekran (analiz sonucu/risk analizi detay
+  ekranları, bildirim yönetimi, destek merkezi, avukat dashboard'u
+  vb.) henüz eklenmedi; bu, birden fazla oturuma yayılacak devam eden
+  bir iştir. Bu ortamda Expo web/Metro pnpm monorepo'da bir bundling
+  sorunu yüzünden canlı ekran görüntüsü
   alınamadı; doğrulama yalnızca typecheck/lint/test ile yapıldı.
 
 Tüm bunlar test edildi: `pnpm typecheck`, `pnpm lint`, `pnpm test` — hepsi
