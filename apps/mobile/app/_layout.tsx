@@ -5,8 +5,9 @@ import { StatusBar } from "expo-status-bar";
 import { queryClient } from "../src/lib/query-client";
 import { useAuthStore } from "../src/stores/auth-store";
 import { usePushNotificationRegistration } from "../src/hooks/usePushNotifications";
+import { Sentry } from "../src/lib/sentry";
 
-export default function RootLayout() {
+function RootLayout() {
   const hydrate = useAuthStore((state) => state.hydrate);
 
   useEffect(() => {
@@ -27,3 +28,5 @@ export default function RootLayout() {
     </QueryClientProvider>
   );
 }
+
+export default Sentry.wrap(RootLayout);

@@ -40,7 +40,8 @@
           "icon": "./assets/notification-icon.png",
           "color": "#175CD3"
         }
-      ]
+      ],
+      "@sentry/react-native/expo"
     ],
     "extra": {
       "router": {

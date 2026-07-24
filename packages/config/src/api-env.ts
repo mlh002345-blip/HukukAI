@@ -46,6 +46,10 @@ export const apiEnvSchema = z.object({
 
   CORS_ORIGINS: z.string().default("*"),
 
+  // Hata izleme (Sentry) — belirtilmezse Sentry SDK'sı no-op çalışır,
+  // hiçbir hata raporlanmaz (geliştirme/test ortamları için güvenlidir).
+  SENTRY_DSN: z.string().optional(),
+
   LOG_LEVEL: z
     .enum(["fatal", "error", "warn", "info", "debug", "trace"])
     .default("info"),

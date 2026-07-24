@@ -169,6 +169,19 @@ o dokümana göre kodlanıyor. Yeni bir şey yapmadan önce bu dokümanı oku.
   yapılandırılmalıdır — bu ortamda henüz yok, hook kimlik yoksa sessizce
   hiçbir şey yapmaz; gerçek cihazda/EAS ortamında uçtan uca test
   edilmedi.
+- **Sentry entegrasyonu** — hem API'de (`@sentry/node`) hem mobilde
+  (`@sentry/react-native`) eklendi. API'de `main.ts` framework
+  yüklenmeden önce `Sentry.init` çağırır (açılış hataları da
+  yakalansın diye), yeni `SentryExceptionsFilter` (global `APP_FILTER`)
+  yalnızca beklenmeyen (5xx) hataları raporlar — 4xx istemci hataları
+  (doğrulama, yetkilendirme vb.) uygulama akışının normal parçası
+  olduğundan raporlanmaz. Mobilde `src/lib/sentry.ts` başlatmayı yapar,
+  kök bileşen `Sentry.wrap` ile sarmalandı, `app.json`'a
+  `@sentry/react-native/expo` eklentisi eklendi. **Her iki tarafta da
+  DSN ortam değişkeni (`SENTRY_DSN`/`EXPO_PUBLIC_SENTRY_DSN`) boş
+  bırakılırsa SDK no-op çalışır** — gerçek bir DSN olmadan bu ortamda
+  hiçbir olay gönderilmez/test edilemez; üretime alınmadan önce gerçek
+  bir Sentry projesi oluşturulup DSN'ler ayarlanmalıdır.
 
 Tüm bunlar test edildi: `pnpm typecheck`, `pnpm lint`, `pnpm test` — hepsi
 yeşil. Devam ederken bu üç komutu bozmadan ilerle.

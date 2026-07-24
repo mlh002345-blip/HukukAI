@@ -2,6 +2,24 @@
 
 Bu proje [Keep a Changelog](https://keepachangelog.com/) formatını takip eder.
 
+## [Sentry Entegrasyonu]
+
+### Eklendi
+
+- API: `@sentry/node` eklendi, `main.ts` framework yüklenmeden önce
+  `Sentry.init` çağırır (açılış hataları da yakalansın diye). Yeni
+  global `SentryExceptionsFilter` (`APP_FILTER`) yalnızca beklenmeyen
+  (5xx) hataları raporlar; 4xx istemci hataları (doğrulama,
+  yetkilendirme) raporlanmaz
+- Mobil: `@sentry/react-native` eklendi, `src/lib/sentry.ts` başlatmayı
+  yapar, kök bileşen `Sentry.wrap` ile sarmalandı,
+  `@sentry/react-native/expo` config eklentisi `app.json`'a eklendi
+- Yeni ortam değişkenleri: `SENTRY_DSN` (API), `EXPO_PUBLIC_SENTRY_DSN`
+  (mobil) — ikisi de opsiyonel
+- **Kapsam notu:** DSN boş bırakılırsa her iki SDK de no-op çalışır;
+  gerçek bir Sentry projesi/DSN olmadan bu ortamda olay gönderimi test
+  edilemedi
+
 ## [CI Pipeline]
 
 ### Eklendi
