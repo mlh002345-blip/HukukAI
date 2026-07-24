@@ -2,6 +2,24 @@
 
 Bu proje [Keep a Changelog](https://keepachangelog.com/) formatını takip eder.
 
+## [Görsel Tasarım — Stitch Entegrasyonu, 2. Parça]
+
+### Eklendi
+
+- Alt navigasyondaki kalan 4 sekme yeni tema/ikon sistemine taşındı:
+  - `app/(tabs)/tools.tsx` (Araçlar) — paylaşılan tema-duyarlı
+    bileşenler üzerinden, mevcut kategori filtreleme/hesap makinesi
+    eşleme mantığı değişmeden
+  - `app/(tabs)/folders.tsx` (Dosyalarım) — `FOLDER_TYPE_ICONS`
+    eşlemesi ile klasör türüne göre ikonlu renkli daire + tür rozeti
+  - `app/(tabs)/calendar.tsx` (Takvim) — 3 gün ve altı kalan süreler
+    için amber sol-kenarlıklı acil kart stili
+  - `app/(tabs)/profile.tsx` (Profil) — ikonlu menü satırları, avatar
+    dairesi, rol rozeti
+- **Kapsam notu:** geri kalan ~35 ekran hâlâ taşınmadı (devam eden,
+  çok oturumlu bir iş); doğrulama yalnızca typecheck/lint/test ile
+  yapıldı
+
 ## [Görsel Tasarım — Stitch Entegrasyonu, 1. Parça]
 
 ### Eklendi
