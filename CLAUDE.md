@@ -300,8 +300,14 @@ o dokümana göre kodlanıyor. Yeni bir şey yapmadan önce bu dokümanı oku.
   satır eklendi. **Kullanıcı talebiyle kapsam dışı bırakıldı:** risk
   skorlama/analiz sonucu ekranları — güvenilir bir risk puanlama
   modeli olmadan yanıltıcı olabileceği değerlendirilerek bu iterasyona
-  dahil edilmedi. **Kapsam notu:** geri kalan yeni ekranlar (gelişmiş
-  arama/filtreleme, avukat dashboard'u vb.) henüz eklenmedi; bu,
+  dahil edilmedi. Ardından **Gelişmiş Filtreleme** Tüm Belgeler
+  ekranına entegre edildi (ayrı bir ekran yerine aynı listeye açılan
+  bir panel olarak — tasarımdaki "Öncelik/Risk Seviyesi" filtre
+  bölümü, yukarıdaki risk skorlama kapsam dışı bırakma kararıyla
+  tutarlı olarak eklenmedi): Belge Türü çoklu seçim çipleri (9 gerçek
+  `DocumentType` değeri) ve Tarih Aralığı (GG.AA.YYYY) filtresi,
+  filtre düğmesinde aktif filtre sayısı rozeti. **Kapsam notu:** geri
+  kalan yeni ekranlar (avukat dashboard'u vb.) henüz eklenmedi; bu,
   birden fazla oturuma yayılacak devam eden bir iştir. Bu ortamda Expo
   web/Metro pnpm monorepo'da bir bundling sorunu yüzünden canlı ekran
   görüntüsü alınamadı; doğrulama yalnızca typecheck/lint/test ile

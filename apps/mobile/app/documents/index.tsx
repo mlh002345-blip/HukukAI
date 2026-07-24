@@ -2,8 +2,9 @@ import { useMemo, useState } from "react";
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 import { router } from "expo-router";
 import { CategoryChip, EmptyState, Icon, useTheme, type Theme } from "@hukukai/ui";
-import type { DocumentStatus, DocumentSummary } from "@hukukai/types";
+import { DOCUMENT_TYPES, type DocumentStatus, type DocumentSummary, type DocumentType } from "@hukukai/types";
 import { useDocuments } from "../../src/hooks/useDocuments";
+import { parseTurkishDate } from "../../src/lib/turkish-date";
 
 const STATUS_FILTERS: Array<{ key: "ALL" | DocumentStatus; label: string }> = [
   { key: "ALL", label: "Tümü" },
@@ -115,9 +116,28 @@ export default function AllDocumentsScreen() {
   const documentsQuery = useDocuments(undefined);
   const [query, setQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<"ALL" | DocumentStatus>("ALL");
+  const [filterPanelOpen, setFilterPanelOpen] = useState(false);
+  const [selectedTypes, setSelectedTypes] = useState<Set<DocumentType>>(new Set());
+  const [dateFromText, setDateFromText] = useState("");
+  const [dateToText, setDateToText] = useState("");
 
   const documents = documentsQuery.data ?? [];
   const normalizedQuery = query.trim().toLocaleLowerCase("tr-TR");
+  const dateFromIso = parseTurkishDate(dateFromText);
+  const dateToIso = parseTurkishDate(dateToText);
+  const activeFilterCount = selectedTypes.size + (dateFromIso ? 1 : 0) + (dateToIso ? 1 : 0);
+
+  const toggleType = (type: DocumentType) => {
+    setSelectedTypes((prev) => {
+      const next = new Set(prev);
+      if (next.has(type)) {
+        next.delete(type);
+      } else {
+        next.add(type);
+      }
+      return next;
+    });
+  };
 
   const filtered = documents.filter((document) => {
     const matchesQuery =
@@ -128,7 +148,11 @@ export default function AllDocumentsScreen() {
       (statusFilter === "OCR_PROCESSING"
         ? document.status === "OCR_PROCESSING" || document.status === "AI_PROCESSING"
         : document.status === statusFilter);
-    return matchesQuery && matchesStatus;
+    const matchesType =
+      selectedTypes.size === 0 || (document.documentType !== null && selectedTypes.has(document.documentType));
+    const matchesDateFrom = !dateFromIso || document.createdAt.slice(0, 10) >= dateFromIso;
+    const matchesDateTo = !dateToIso || document.createdAt.slice(0, 10) <= dateToIso;
+    return matchesQuery && matchesStatus && matchesType && matchesDateFrom && matchesDateTo;
   });
 
   return (
@@ -140,15 +164,32 @@ export default function AllDocumentsScreen() {
         <Text style={styles.title}>Tüm Belgeler</Text>
       </View>
 
-      <View style={styles.searchWrap}>
-        <Icon name="search" size={20} color={theme.colors.outline} style={styles.searchIcon} />
-        <TextInput
-          value={query}
-          onChangeText={setQuery}
-          style={styles.searchInput}
-          placeholder="Dosyalarınızda arayın…"
-          placeholderTextColor={theme.colors.outline}
-        />
+      <View style={styles.searchRow}>
+        <View style={styles.searchWrap}>
+          <Icon name="search" size={20} color={theme.colors.outline} style={styles.searchIcon} />
+          <TextInput
+            value={query}
+            onChangeText={setQuery}
+            style={styles.searchInput}
+            placeholder="Dosyalarınızda arayın…"
+            placeholderTextColor={theme.colors.outline}
+          />
+        </View>
+        <Pressable
+          style={[styles.filterButton, filterPanelOpen && styles.filterButtonActive]}
+          onPress={() => setFilterPanelOpen((open) => !open)}
+        >
+          <Icon
+            name="tune"
+            size={20}
+            color={filterPanelOpen ? theme.colors.onPrimary : theme.colors.onSurface}
+          />
+          {activeFilterCount > 0 ? (
+            <View style={styles.filterBadge}>
+              <Text style={styles.filterBadgeText}>{activeFilterCount}</Text>
+            </View>
+          ) : null}
+        </Pressable>
       </View>
 
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chipRow}>
@@ -164,6 +205,73 @@ export default function AllDocumentsScreen() {
           />
         ))}
       </ScrollView>
+
+      {filterPanelOpen ? (
+        <View style={styles.filterPanel}>
+          <View style={styles.filterSectionHeaderRow}>
+            <Icon name="description" size={16} color={theme.colors.primary} />
+            <Text style={styles.filterSectionTitle}>Belge Türü</Text>
+          </View>
+          <View style={styles.typeGrid}>
+            {DOCUMENT_TYPES.map((type) => {
+              const selected = selectedTypes.has(type);
+              return (
+                <Pressable
+                  key={type}
+                  style={[styles.typeChip, selected && styles.typeChipSelected]}
+                  onPress={() => toggleType(type)}
+                >
+                  <Text style={[styles.typeChipText, selected && styles.typeChipTextSelected]} numberOfLines={1}>
+                    {DOCUMENT_TYPE_LABELS[type]}
+                  </Text>
+                  <Icon
+                    name={selected ? "check_circle" : "circle"}
+                    filled={selected}
+                    size={16}
+                    color={selected ? theme.colors.onPrimary : theme.colors.outline}
+                  />
+                </Pressable>
+              );
+            })}
+          </View>
+
+          <View style={styles.filterSectionHeaderRow}>
+            <Icon name="calendar_today" size={16} color={theme.colors.primary} />
+            <Text style={styles.filterSectionTitle}>Tarih Aralığı</Text>
+          </View>
+          <View style={styles.dateRow}>
+            <TextInput
+              value={dateFromText}
+              onChangeText={setDateFromText}
+              style={styles.dateInput}
+              placeholder="Başlangıç GG.AA.YYYY"
+              placeholderTextColor={theme.colors.outline}
+              keyboardType="numbers-and-punctuation"
+            />
+            <TextInput
+              value={dateToText}
+              onChangeText={setDateToText}
+              style={styles.dateInput}
+              placeholder="Bitiş GG.AA.YYYY"
+              placeholderTextColor={theme.colors.outline}
+              keyboardType="numbers-and-punctuation"
+            />
+          </View>
+
+          {activeFilterCount > 0 ? (
+            <Pressable
+              style={styles.clearFiltersButton}
+              onPress={() => {
+                setSelectedTypes(new Set());
+                setDateFromText("");
+                setDateToText("");
+              }}
+            >
+              <Text style={styles.clearFiltersText}>Filtreleri Temizle</Text>
+            </Pressable>
+          ) : null}
+        </View>
+      ) : null}
 
       <ScrollView contentContainerStyle={styles.content}>
         {documentsQuery.isLoading ? (
@@ -210,11 +318,17 @@ function createStyles(theme: Theme) {
       fontWeight: "700",
       color: theme.colors.onBackground,
     },
-    searchWrap: {
-      position: "relative",
-      justifyContent: "center",
+    searchRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 10,
       marginHorizontal: theme.spacing.containerPadding,
       marginBottom: 12,
+    },
+    searchWrap: {
+      flex: 1,
+      position: "relative",
+      justifyContent: "center",
     },
     searchIcon: { position: "absolute", left: 16, zIndex: 1 },
     searchInput: {
@@ -227,10 +341,95 @@ function createStyles(theme: Theme) {
       fontSize: 14,
       color: theme.colors.onSurface,
     },
+    filterButton: {
+      position: "relative",
+      width: 48,
+      height: 48,
+      borderRadius: theme.radii.full,
+      backgroundColor: theme.colors.surfaceContainerLow,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    filterButtonActive: { backgroundColor: theme.colors.primary },
+    filterBadge: {
+      position: "absolute",
+      top: -2,
+      right: -2,
+      minWidth: 18,
+      height: 18,
+      borderRadius: 9,
+      backgroundColor: theme.colors.error,
+      alignItems: "center",
+      justifyContent: "center",
+      paddingHorizontal: 4,
+    },
+    filterBadgeText: {
+      fontSize: 10,
+      fontWeight: "700",
+      color: theme.colors.onError,
+    },
     chipRow: {
       paddingHorizontal: theme.spacing.containerPadding,
       gap: 8,
       paddingBottom: 12,
+    },
+    filterPanel: {
+      marginHorizontal: theme.spacing.containerPadding,
+      marginBottom: 12,
+      backgroundColor: theme.colors.surfaceContainerLowest,
+      borderWidth: 1,
+      borderColor: theme.colors.outlineVariant,
+      borderRadius: theme.radii.xl,
+      padding: 16,
+      gap: 10,
+    },
+    filterSectionHeaderRow: { flexDirection: "row", alignItems: "center", gap: 6, marginTop: 4 },
+    filterSectionTitle: {
+      fontFamily: theme.typography.bodySmMedium.fontFamily,
+      fontSize: 13,
+      fontWeight: "700",
+      color: theme.colors.onSurface,
+    },
+    typeGrid: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
+    typeChip: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      gap: 6,
+      flexBasis: "47%",
+      flexGrow: 1,
+      borderWidth: 1,
+      borderColor: theme.colors.outlineVariant,
+      backgroundColor: theme.colors.surfaceContainerLow,
+      borderRadius: theme.radii.lg,
+      paddingHorizontal: 12,
+      paddingVertical: 10,
+    },
+    typeChipSelected: { backgroundColor: theme.colors.primary, borderColor: theme.colors.primary },
+    typeChipText: {
+      flex: 1,
+      fontFamily: theme.typography.bodySmMedium.fontFamily,
+      fontSize: 12,
+      color: theme.colors.onSurfaceVariant,
+    },
+    typeChipTextSelected: { color: theme.colors.onPrimary, fontWeight: "700" },
+    dateRow: { flexDirection: "row", gap: 8 },
+    dateInput: {
+      flex: 1,
+      backgroundColor: theme.colors.surfaceContainerLow,
+      borderRadius: theme.radii.lg,
+      paddingHorizontal: 12,
+      paddingVertical: 10,
+      fontFamily: theme.typography.bodyMd.fontFamily,
+      fontSize: 13,
+      color: theme.colors.onSurface,
+    },
+    clearFiltersButton: { alignItems: "center", marginTop: 4 },
+    clearFiltersText: {
+      fontFamily: theme.typography.bodySmMedium.fontFamily,
+      fontSize: 13,
+      fontWeight: "600",
+      color: theme.colors.error,
     },
     content: {
       padding: theme.spacing.containerPadding,
