@@ -2,6 +2,25 @@
 
 Bu proje [Keep a Changelog](https://keepachangelog.com/) formatını takip eder.
 
+## [Prisma Migration Seti]
+
+### Eklendi
+
+- İlk Prisma migration'ı eklendi (`apps/api/prisma/migrations/
+  20260724070730_init/`) — şimdiye kadar hiç migration dosyası
+  üretilmemişti, yalnızca `schema.prisma` vardı. `prisma migrate diff
+  --from-empty --to-schema-datamodel` ile canlı bir veritabanına
+  bağlanmadan, doğrudan şemadan üretildi
+- `prisma:migrate:deploy` script'i eklendi (`prisma migrate deploy`)
+- CI'ye gerçek bir Postgres servis konteyneri eklendi;
+  `prisma migrate deploy` adımı migration setinin gerçek bir
+  veritabanına karşı sorunsuz uygulandığını doğrular — bu sandbox
+  ortamında canlı bir Postgres olmadığından yerel olarak
+  doğrulanamamıştı
+- **Kapsam notu:** bundan sonraki şema değişiklikleri
+  `prisma migrate dev` ile yeni migration dosyaları üretmeli;
+  `prisma db push` bir daha kullanılmamalı
+
 ## [Sentry Entegrasyonu]
 
 ### Eklendi

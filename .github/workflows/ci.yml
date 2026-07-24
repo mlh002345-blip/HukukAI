@@ -20,6 +20,21 @@ jobs:
       # (bkz. CLAUDE.md "Bilinen ortam kısıtı"); CI'de zararsızdır.
       PRISMA_ENGINES_CHECKSUM_IGNORE_MISSING: "1"
 
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: hukukai
+          POSTGRES_PASSWORD: hukukai_ci_password
+          POSTGRES_DB: hukukai
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -38,6 +53,11 @@ jobs:
 
       - name: Generate Prisma client
         run: pnpm --filter @hukukai/api prisma:generate
+
+      - name: Apply Prisma migrations to a real database
+        run: pnpm --filter @hukukai/api prisma:migrate:deploy
+        env:
+          DATABASE_URL: postgresql://hukukai:hukukai_ci_password@localhost:5432/hukukai?schema=public
 
       - name: Typecheck
         run: pnpm typecheck
