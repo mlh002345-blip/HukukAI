@@ -201,13 +201,22 @@ o dokümana göre kodlanıyor. Yeni bir şey yapmadan önce bu dokümanı oku.
   yüklendi. Paylaşılan bileşenler (`GlobalSearchBar`, `ToolCard`,
   `CategoryChip`, `Feedback`) ve Ana Sayfa sekmesi + alt navigasyon
   (Material Symbols ikonlarıyla) bu sisteme taşındı; `app.json`
-  `userInterfaceStyle: "automatic"` oldu. **Kapsam notu:** geri kalan
-  ~35 ekran (Araçlar, Dosyalarım, Takvim, Profil, auth/onboarding,
-  belge yükleme/analiz akışları, admin dashboard vb.) henüz taşınmadı —
-  bu, birden fazla oturuma yayılacak devam eden bir iş. Bu ortamda
-  Expo web/Metro pnpm monorepo'da bir bundling sorunu yüzünden canlı
-  ekran görüntüsü alınamadı; doğrulama yalnızca typecheck/lint/test ile
-  yapıldı.
+  `userInterfaceStyle: "automatic"` oldu. Devamında alt navigasyondaki
+  kalan 4 sekme de aynı sisteme taşındı: **Araçlar** (`tools.tsx` —
+  paylaşılan `GlobalSearchBar`/`CategoryChip`/`ToolCard`/`EmptyState`
+  üzerinden tema-duyarlı, mevcut kategori filtreleme/hesap makinesi
+  eşleme mantığı değişmedi), **Dosyalarım** (`folders.tsx` —
+  `FOLDER_TYPE_ICONS` eşlemesi ile klasör türüne göre ikon+renkli
+  daire, sağda tür rozeti), **Takvim** (`calendar.tsx` — 3 gün ve altı
+  kalan süreler için amber sol-kenarlıklı acil kart stili,
+  `priority_high`/`event`/`warning` ikonları) ve **Profil**
+  (`profile.tsx` — `MENU_ITEMS` dizisi ile ikonlu menü satırları,
+  avatar dairesi, rol rozeti). **Kapsam notu:** geri kalan ~35 ekran
+  (auth/onboarding, belge yükleme/analiz akışları, hesaplama/rapor
+  detay ekranları, admin dashboard vb.) henüz taşınmadı — bu, birden
+  fazla oturuma yayılacak devam eden bir iş. Bu ortamda Expo web/Metro
+  pnpm monorepo'da bir bundling sorunu yüzünden canlı ekran görüntüsü
+  alınamadı; doğrulama yalnızca typecheck/lint/test ile yapıldı.
 
 Tüm bunlar test edildi: `pnpm typecheck`, `pnpm lint`, `pnpm test` — hepsi
 yeşil. Devam ederken bu üç komutu bozmadan ilerle.

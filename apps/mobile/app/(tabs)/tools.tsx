@@ -1,25 +1,17 @@
 import { useMemo, useState } from "react";
-import {
-  Alert,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
+import { Alert, ScrollView, StyleSheet, Text, View } from "react-native";
 import { router } from "expo-router";
 import {
   CategoryChip,
   EmptyState,
   GlobalSearchBar,
   ToolCard,
+  useTheme,
+  type Theme,
 } from "@hukukai/ui";
 import type { ToolDefinition } from "@hukukai/types";
 import { useActiveRole } from "../../src/stores/auth-store";
-import {
-  useToolCategories,
-  useToolSearch,
-  useTools,
-} from "../../src/hooks/useTools";
+import { useToolCategories, useToolSearch, useTools } from "../../src/hooks/useTools";
 import { CALCULATOR_CONFIGS } from "../../src/lib/calculator-config";
 
 /**
@@ -37,6 +29,8 @@ export default function ToolsScreen() {
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState<string | null>(null);
   const role = useActiveRole();
+  const theme = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
 
   const toolsQuery = useTools(role);
   const categoriesQuery = useToolCategories();
@@ -84,11 +78,7 @@ export default function ToolsScreen() {
     >
       <Text style={styles.title}>Araçlar</Text>
 
-      <GlobalSearchBar
-        value={query}
-        onChangeText={setQuery}
-        placeholder="Araç ara…"
-      />
+      <GlobalSearchBar value={query} onChangeText={setQuery} placeholder="Araç ara…" />
 
       {!isSearching ? (
         <ScrollView
@@ -117,9 +107,7 @@ export default function ToolsScreen() {
           <Text style={styles.mutedText}>Yükleniyor…</Text>
         ) : null}
 
-        {displayedTools.length === 0 &&
-        !toolsQuery.isLoading &&
-        !searchQuery.isLoading ? (
+        {displayedTools.length === 0 && !toolsQuery.isLoading && !searchQuery.isLoading ? (
           <EmptyState
             title="Araç bulunamadı"
             description="Farklı bir kategori veya arama terimi deneyin."
@@ -127,42 +115,33 @@ export default function ToolsScreen() {
         ) : null}
 
         {displayedTools.map((tool) => (
-          <ToolCard
-            key={tool.id}
-            tool={tool}
-            onPress={() => onToolPress(tool)}
-          />
+          <ToolCard key={tool.id} tool={tool} onPress={() => onToolPress(tool)} />
         ))}
       </View>
     </ScrollView>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#FFFFFF",
-  },
-  content: {
-    padding: 20,
-    paddingTop: 60,
-    gap: 16,
-    paddingBottom: 40,
-  },
-  title: {
-    fontSize: 22,
-    fontWeight: "700",
-    color: "#101828",
-  },
-  categoryRow: {
-    gap: 8,
-    paddingVertical: 4,
-  },
-  cardList: {
-    gap: 10,
-  },
-  mutedText: {
-    fontSize: 13,
-    color: "#667085",
-  },
-});
+function createStyles(theme: Theme) {
+  return StyleSheet.create({
+    container: { flex: 1, backgroundColor: theme.colors.background },
+    content: {
+      padding: theme.spacing.containerPadding,
+      paddingTop: 60,
+      gap: theme.spacing.stackGapMd,
+      paddingBottom: 40,
+    },
+    title: {
+      fontFamily: theme.typography.headlineMd.fontFamily,
+      fontSize: 22,
+      color: theme.colors.onBackground,
+    },
+    categoryRow: { gap: 8, paddingVertical: 4 },
+    cardList: { gap: 10 },
+    mutedText: {
+      fontFamily: theme.typography.bodyMd.fontFamily,
+      fontSize: 13,
+      color: theme.colors.onSurfaceVariant,
+    },
+  });
+}
