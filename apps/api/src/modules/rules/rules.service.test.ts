@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { NotFoundException } from "@nestjs/common";
 import { RulesService } from "./rules.service";
+import { RuleUnderReviewException } from "./rule-under-review.exception";
 
 function createPrismaMock() {
   return {
@@ -15,6 +16,8 @@ function ruleRow(overrides: Partial<Record<string, unknown>> = {}) {
     version: "1.0.0",
     validFrom: new Date("2020-01-01T00:00:00.000Z"),
     validTo: null,
+    isPublished: true,
+    status: "ACTIVE",
     ruleData: {
       conditions: [
         { field: "documentType", operator: "EQUALS", value: "TRAFFIC_ADMINISTRATIVE_FINE" },
@@ -60,6 +63,44 @@ describe("RulesService.getRuleValidOn", () => {
       service.getRuleValidOn("TR_TRAFFIC_FINE_OBJECTION", "2024-01-01"),
     ).rejects.toThrow(NotFoundException);
   });
+
+  it("yayınlanmamış (isPublished:false) bir sürümü asla döndürmez", async () => {
+    const prisma = createPrismaMock();
+    prisma.ruleSet.findMany.mockResolvedValue([ruleRow({ isPublished: false })]);
+    const service = new RulesService(prisma as never);
+
+    await expect(
+      service.getRuleValidOn("TR_TRAFFIC_FINE_OBJECTION", "2026-06-20"),
+    ).rejects.toThrow(NotFoundException);
+  });
+
+  it("fail-closed: yayınlanmış sürüm yok ama TEMPORARILY_RESTRICTED bir sürüm o tarihte geçerli olacaksa RuleUnderReviewException fırlatır (NotFoundException değil)", async () => {
+    const prisma = createPrismaMock();
+    prisma.ruleSet.findMany.mockResolvedValue([
+      ruleRow({ isPublished: false, status: "TEMPORARILY_RESTRICTED" }),
+    ]);
+    const service = new RulesService(prisma as never);
+
+    await expect(
+      service.getRuleValidOn("TR_TRAFFIC_FINE_OBJECTION", "2026-06-20"),
+    ).rejects.toThrow(RuleUnderReviewException);
+  });
+
+  it("TEMPORARILY_RESTRICTED sürüm o tarihte zaten geçerli değilse (validFrom sonraki bir tarihte) normal NotFoundException fırlatır", async () => {
+    const prisma = createPrismaMock();
+    prisma.ruleSet.findMany.mockResolvedValue([
+      ruleRow({
+        isPublished: false,
+        status: "TEMPORARILY_RESTRICTED",
+        validFrom: new Date("2030-01-01T00:00:00.000Z"),
+      }),
+    ]);
+    const service = new RulesService(prisma as never);
+
+    await expect(
+      service.getRuleValidOn("TR_TRAFFIC_FINE_OBJECTION", "2026-06-20"),
+    ).rejects.toThrow(NotFoundException);
+  });
 });
 
 describe("RulesService.findApplicableRule", () => {
@@ -84,6 +125,22 @@ describe("RulesService.findApplicableRule", () => {
     await expect(
       service.findApplicableRule("DEADLINE", { documentType: "TAX_NOTICE" }, "2026-06-20"),
     ).rejects.toThrow(NotFoundException);
+  });
+
+  it("fail-closed: olgulara uyan yayınlanmış kural yok ama TEMPORARILY_RESTRICTED bir sürüm uyuyorsa RuleUnderReviewException fırlatır", async () => {
+    const prisma = createPrismaMock();
+    prisma.ruleSet.findMany.mockResolvedValue([
+      ruleRow({ isPublished: false, status: "TEMPORARILY_RESTRICTED" }),
+    ]);
+    const service = new RulesService(prisma as never);
+
+    await expect(
+      service.findApplicableRule(
+        "DEADLINE",
+        { documentType: "TRAFFIC_ADMINISTRATIVE_FINE" },
+        "2026-06-20",
+      ),
+    ).rejects.toThrow(RuleUnderReviewException);
   });
 });
 

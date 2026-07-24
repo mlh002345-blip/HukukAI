@@ -12,6 +12,7 @@ import type { DeadlineRuleCalculation, HolidayInput } from "@hukukai/deadline-en
 // düşürüp servis çözümlemesini bozar.
 // eslint-disable-next-line @typescript-eslint/consistent-type-imports
 import { PrismaService } from "../../prisma/prisma.service";
+import { RuleUnderReviewException } from "./rule-under-review.exception";
 
 interface DeadlineRuleData {
   conditions?: RuleCondition[];
@@ -27,6 +28,8 @@ type RuleSetRow = {
   ruleData: unknown;
   legalBasis: unknown;
 };
+
+type RuleSetStatusRow = RuleSetRow & { status: string };
 
 function toIsoDate(date: Date): string {
   return date.toISOString().slice(0, 10);
@@ -61,16 +64,15 @@ export class RulesService {
     ruleKey: string,
     onDate: string,
   ): Promise<VersionedRule<DeadlineRuleCalculation>> {
-    const rows = await this.prisma.ruleSet.findMany({
-      where: { ruleKey, isPublished: true },
-    });
-    const rule = selectRuleVersion(rows.map(toVersionedRule), onDate);
-    if (!rule) {
-      throw new NotFoundException(
-        `"${ruleKey}" için ${onDate} tarihinde geçerli bir kural bulunamadı.`,
-      );
-    }
-    return rule;
+    const rows = await this.prisma.ruleSet.findMany({ where: { ruleKey } });
+    const published = rows.filter((row) => row.isPublished);
+    const rule = selectRuleVersion(published.map(toVersionedRule), onDate);
+    if (rule) return rule;
+
+    this.assertNotUnderReview(rows, onDate, ruleKey);
+    throw new NotFoundException(
+      `"${ruleKey}" için ${onDate} tarihinde geçerli bir kural bulunamadı.`,
+    );
   }
 
   async findApplicableRule(
@@ -78,16 +80,41 @@ export class RulesService {
     facts: Record<string, unknown>,
     onDate: string,
   ): Promise<VersionedRule<DeadlineRuleCalculation>> {
-    const rows = await this.prisma.ruleSet.findMany({
-      where: { module: ruleModule, isPublished: true },
-    });
-    const rule = findApplicableRule(rows.map(toVersionedRule), facts, onDate);
-    if (!rule) {
-      throw new NotFoundException(
-        "Bu belge/olgular için geçerli bir kural bulunamadı.",
-      );
+    const rows = await this.prisma.ruleSet.findMany({ where: { module: ruleModule } });
+    const published = rows.filter((row) => row.isPublished);
+    const rule = findApplicableRule(published.map(toVersionedRule), facts, onDate);
+    if (rule) return rule;
+
+    const restricted = rows.filter((row) => row.status === "TEMPORARILY_RESTRICTED");
+    const restrictedMatch = findApplicableRule(restricted.map(toVersionedRule), facts, onDate);
+    if (restrictedMatch) {
+      throw new RuleUnderReviewException(restrictedMatch.ruleKey);
     }
-    return rule;
+
+    throw new NotFoundException(
+      "Bu belge/olgular için geçerli bir kural bulunamadı.",
+    );
+  }
+
+  /**
+   * Fail-closed denetimi (`getRuleValidOn` için): yayınlanmış bir sürüm
+   * arasında `onDate`e uyan yoksa, bu tarihte normalde geçerli olacak
+   * ama mevzuat değişikliği tespit edilip henüz bağımsız doğrulanmamış
+   * (`status: TEMPORARILY_RESTRICTED`) bir sürüm olup olmadığına bakar.
+   * Varsa, eski kuralla sessizce devam etmek yerine
+   * `RuleUnderReviewException` fırlatır — "kesin ama potansiyel olarak
+   * yanlış" bir sonuç asla dönmez.
+   */
+  private assertNotUnderReview(
+    rows: RuleSetStatusRow[],
+    onDate: string,
+    ruleKey: string,
+  ): void {
+    const restricted = rows.filter((row) => row.status === "TEMPORARILY_RESTRICTED");
+    const restrictedMatch = selectRuleVersion(restricted.map(toVersionedRule), onDate);
+    if (restrictedMatch) {
+      throw new RuleUnderReviewException(ruleKey);
+    }
   }
 
   async getHolidays(): Promise<HolidayInput[]> {

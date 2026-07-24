@@ -24,6 +24,7 @@
     "@hukukai/calculation-engine": "workspace:*",
     "@hukukai/config": "workspace:*",
     "@hukukai/deadline-engine": "workspace:*",
+    "@hukukai/legislation-agents": "workspace:*",
     "@hukukai/rule-engine": "workspace:*",
     "@hukukai/search-engine": "workspace:*",
     "@hukukai/types": "workspace:*",
