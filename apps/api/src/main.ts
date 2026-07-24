@@ -1,4 +1,5 @@
 import "reflect-metadata";
+import * as Sentry from "@sentry/node";
 import { NestFactory } from "@nestjs/core";
 import { ConfigService } from "@nestjs/config";
 import { ValidationPipe } from "@nestjs/common";
@@ -7,6 +8,14 @@ import helmet from "helmet";
 import type { ApiEnv } from "@hukukai/config";
 import { API_PREFIX } from "@hukukai/config";
 import { AppModule } from "./app.module";
+
+// Framework yüklenmeden önce başlatılır ki açılış hataları da
+// yakalansın. `SENTRY_DSN` ayarlanmadıysa SDK no-op çalışır.
+Sentry.init({
+  dsn: process.env.SENTRY_DSN,
+  environment: process.env.NODE_ENV ?? "development",
+  tracesSampleRate: 0,
+});
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
