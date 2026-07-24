@@ -402,6 +402,33 @@ uca çalışır şekilde kurulacak.
   eklendi (yeni sütun `DEFAULT 'DRAFT'` ile geldiği için). **Kapsam
   notu:** bu parça yalnızca şema; servis katmanı (ajanlar, fail-closed
   sorgu değişikliği, admin/mobil ekranlar) sonraki parçalarda gelecek.
+- **2. Parça — `packages/legislation-agents`**: diğer motor
+  paketleriyle (`rule-engine`, `deadline-engine`) aynı üsluptaki saf
+  fonksiyon + tip koleksiyonu dolduruldu: `compareLegislationTexts`
+  (Legal Diff Agent çekirdeği — iki metnin SHA-256 hash'ini
+  karşılaştırır, fark varsa anahtar kelime/desen eşleştirmesiyle
+  `changeType` ve etkilenen madde referanslarını tahmin eder — bu bir
+  MVP sezgiseldir, kesin NLP sınıflandırıcısı değildir),
+  `validateRuleSchema` (Doğrulama katmanı D — çakışan/boşluklu
+  geçerlilik aralığı, geçersiz decimal/tarih formatı, boş `legalBasis`
+  denetimi), `runGoldenTests`/`runRegressionCheck` (hangi motoru
+  çalıştıracağını bilmeyen, çağıran tarafça enjekte edilen bir
+  `evaluate` kapanışı üzerinden golden test/regresyon karşılaştırması
+  yapan jenerik çalıştırıcılar), `decideReleaseRisk` (kullanıcının
+  verdiği otomatik-yayın/asla-otomatik-değil `changeType` listelerini
+  ve %99,5 güven eşiğini birebir kodlayan saf risk kararı). Kaynak
+  tarama (`SourceWatcherProvider`) ve çoklu-model mutabakatı
+  (`MultiModelConsensusProvider`) için `AIProvider`/`PaymentProvider`
+  ile birebir aynı değiştirilebilir arayüz + `factory.ts` deseni
+  kuruldu — şu an yalnızca deterministik `Mock` sağlayıcılar var (Mock
+  kaynak tarayıcı, fixture verilmezse boş dizi döner — hiçbir hayali
+  mevzuat değişikliği üretmez). 30 birim testi (`vitest`, diğer motor
+  paketleriyle aynı desen). **Kapsam notu:** gerçek kaynak tarama
+  (Resmî Gazete/GİB/SGK/Adalet Bakanlığı/AYM'ye HTTP isteği, siteye özel
+  parser + ToS incelemesi gerektirir) ve gerçek ikinci LLM sağlayıcısıyla
+  çoklu-model mutabakatı (kullanıcının sağlayıcı/API anahtarı kararını
+  bekler) bilinçli olarak bu pakete dahil edilmedi — yalnızca arayüz +
+  Mock var; bu paket henüz `apps/api`'ye bağlanmadı (sonraki parça).
 
 ## CI
 
