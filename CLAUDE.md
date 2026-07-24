@@ -216,12 +216,28 @@ seti vb.) — bkz. bu dosyadaki ilgili "Kapsam notu" uyarıları.
 ## CI
 
 `.github/workflows/ci.yml` — her push/PR'da `pnpm install --frozen-lockfile`,
-Prisma client üretimi, `pnpm typecheck && pnpm lint && pnpm test` çalışır.
-`format:check` bilinçli olarak dahil edilmedi: mevcut kod tabanında
-(bu CI kurulmadan önce yazılmış ~112 dosyada) Prettier'ın hiç
+Prisma client üretimi, gerçek bir Postgres servis konteynerine
+`prisma migrate deploy` (Prisma migration setinin gerçekten uygulandığını
+doğrular — bu sandbox ortamında canlı bir Postgres olmadığından yerel
+olarak doğrulanamamıştı), `pnpm typecheck && pnpm lint && pnpm test`
+çalışır. `format:check` bilinçli olarak dahil edilmedi: mevcut kod
+tabanında (bu CI kurulmadan önce yazılmış ~112 dosyada) Prettier'ın hiç
 uygulanmamış olduğu formatlama farkları var; bunları toplu olarak
 düzeltmek ayrı, ilgisiz bir değişiklik olacağından bu işe dahil
 edilmedi.
+
+## Prisma migration seti
+
+`apps/api/prisma/migrations/20260724070730_init/` — şema o zamana kadar
+hiç migration dosyası üretmeden yalnızca `schema.prisma` üzerinden
+kullanılıyordu (`prisma db push` mantığıyla). İlk migration, canlı bir
+veritabanına bağlanmadan `prisma migrate diff --from-empty
+--to-schema-datamodel` ile bizzat şemadan üretildi (bu yüzden şemadan
+sapma riski yoktur) ve CI'deki `prisma migrate deploy` adımıyla gerçek
+bir Postgres'e karşı doğrulanır. Bundan sonraki şema değişiklikleri
+`pnpm --filter @hukukai/api prisma:migrate` (yerel `prisma migrate dev`)
+ile yeni migration dosyaları üretmelidir — artık asla `db push`
+kullanılmamalı, migration geçmişi bozulur.
 
 ## Geliştirme komutları
 
