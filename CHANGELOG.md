@@ -2,6 +2,23 @@
 
 Bu proje [Keep a Changelog](https://keepachangelog.com/) formatını takip eder.
 
+## [Görsel Tasarım — Stitch Entegrasyonu, 9. Parça — Yardım Merkezi]
+
+### Eklendi
+
+- Stitch tasarım paketindeki **Yardım Merkezi** ekranları ilk kez
+  uygulamaya eklendi:
+  - `src/content/help.ts` — statik kategori/makale içeriği (belge
+    analizi, hesaplama motoru, ödemeler, hesap güvenliği)
+  - `app/help/index.tsx` — arama, kategori bento grid'i, popüler
+    sorular, destek ekibiyle iletişim kartı
+  - `app/help/[slug].tsx` — breadcrumb, makale içeriği, "yararlı oldu
+    mu" geri bildirimi (yalnızca ekran içi durumda tutulur, kalıcı
+    değil), ilgili makaleler
+  - Profil menüsüne "Yardım Merkezi" satırı eklendi
+- **Kapsam notu:** geri kalan ~18 yeni ekran (analiz sonucu/risk
+  analizi, bildirim yönetimi, avukat dashboard'u vb.) henüz eklenmedi
+
 ## [Görsel Tasarım — Stitch Entegrasyonu, 8. Parça — Belge İşleniyor göstergesi]
 
 ### Eklendi
