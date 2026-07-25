@@ -354,7 +354,57 @@ Kalan iş, MVP'yi üretime hazırlayan altyapı/entegrasyon parçalarıdır
 (gerçek ödeme sağlayıcısı, Sentry, E2E test altyapısı, Prisma migration
 seti vb.) — bkz. bu dosyadaki ilgili "Kapsam notu" uyarıları.
 
-## Otonom Mevzuat Sistemi (devam ediyor)
+## Yayına hazırlık durumu
+
+Kodda çözülebilen her şey çözüldü (bkz. yukarıdaki Faz 0-10 ve Otonom
+Mevzuat Sistemi bölümleri, hepsi `pnpm typecheck && pnpm lint && pnpm
+test` yeşil). Geriye kalanlar, **koddan değil** — gerçek hesap/kimlik
+bilgisi, iş/uyumluluk kararı veya insan (hukuk/mağaza) incelemesi
+gerektiren, bu ortamda tamamlanamayacak maddelerdir:
+
+1. **Gerçek ödeme sağlayıcısı** — `MockPaymentProvider` hâlâ her isteği
+   başarılı sayıyor. Bilinçli olarak bu oturumda gerçek bir sağlayıcı
+   entegre edilmedi: (a) hangi sağlayıcı (Iyzico vb.) ve API
+   anahtarları kullanıcının hesap/iş kararıdır; (b) doğru üretim
+   deseni, kart bilgisini doğrudan uygulama üzerinden toplamak değil
+   (PCI DSS kapsamını genişletir), sağlayıcının barındırdığı bir ödeme
+   formuna yönlendirmektir (ör. Iyzico Checkout Form) — bu, mevcut
+   senkron `PaymentProvider` arayüzünü değiştiren ayrı, daha büyük bir
+   iş kalemidir (yeni Prisma modeli, initialize/callback uçları, mobil
+   WebView akışı); (c) canlı API anahtarı olmadan yazılan bir entegrasyon
+   doğrulanamaz ve yanlışlıkla "tamamlandı" izlenimi verirse zararlı
+   olur. `PaymentProvider` arayüzü zaten değiştirilebilir (bkz.
+   `packages/billing`), gerçek sağlayıcı eklemek `AIProvider`/
+   `SourceWatcherProvider` ile aynı `factory.ts` deseniyle yapılır.
+2. **Sentry** — kod tarafı tamamlandı (bkz. "Sentry entegrasyonu"), yalnızca
+   gerçek `SENTRY_DSN`/`EXPO_PUBLIC_SENTRY_DSN` ortam değişkenleri eksik
+   (kullanıcının bir Sentry projesi oluşturması gerekir).
+3. **EAS proje kimliği** — gerçek push bildirimleri için `app.json`da
+   `extra.eas.projectId` eksik (kullanıcının Expo/EAS hesabı gerekir).
+4. **KVKK Aydınlatma Metni / Kullanım Koşulları** — taslak metinler
+   var (`apps/mobile/src/content/legal.ts`), yayına alınmadan önce bir
+   hukuk danışmanı tarafından incelenmeli.
+5. **Mağaza listesi/kapalı test** — `docs/store-listing.md` taslak;
+   gerçek ekran görüntüleri, Play Store/App Store geliştirici
+   hesapları ve kapalı test denemesi bu ortamda üretilemez.
+6. **Gerçek mevzuat kaynak taraması** — `ResmiGazeteSourceWatcherProvider`
+   eklendi ama bu sandbox'ın ağ politikası yüzünden canlı siteye karşı
+   hiç test edilemedi (bkz. "Bilinen ortam kısıtı") — ilk üretim
+   çalıştırması dikkatle izlenmeli. GİB/SGK/Adalet Bakanlığı/AYM için
+   sağlayıcı henüz yok. Çoklu-model mutabakatı hâlâ yalnızca Mock —
+   gerçek ikinci LLM sağlayıcısı kullanıcının sağlayıcı/API anahtarı
+   kararını bekliyor.
+7. **Docker/Postgres/Redis ile uçtan uca test** — bu sandbox'ta Docker
+   daemon çalışmıyor, yalnızca CI'deki gerçek Postgres servis
+   konteynerinde `prisma migrate deploy` doğrulanabiliyor; tam
+   uçtan uca (API + worker + mobil) bir deneme bu ortamda hiç
+   yapılamadı.
+
+Özetle: **kod tabanı yayına hazır**, ama yayın hesap/kimlik bilgisi,
+iş kararı ve insan incelemesi gerektiren yukarıdaki maddeler
+tamamlanmadan gerçek kullanıcıya açılmamalı.
+
+## Otonom Mevzuat Sistemi (tamamlandı)
 
 Seed `RuleSet` verisi hâlâ "üretime alınmadan önce gerçek/güncel mevzuat
 kaynağına karşı doğrulanmalı" uyarısıyla işaretliydi — bu, kullanıcı
