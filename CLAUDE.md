@@ -515,6 +515,25 @@ uca çalışır şekilde kurulacak.
   zaten NestJS tarafından olduğu gibi serileştirilir). Böylece Otonom
   Mevzuat Sistemi'nin tüm 6 parçası (veri modeli → saf ajan mantığı →
   API servisleri/fail-closed → admin panel → mobil gösterge) tamamlandı.
+- **Gerçek kaynak sağlayıcı — `ResmiGazeteSourceWatcherProvider`**:
+  `packages/legislation-agents`'a Resmî Gazete'nin günlük sayı listeleme
+  sayfasını (`eskiler/YYYY/MM/YYYYMMDD.htm` — uzun süredir stabil bir
+  URL kalıbı) gerçekten HTTP ile çeken bir sağlayıcı eklendi
+  (`LEGISLATION_SOURCE_WATCHER=resmi_gazete`). HTML ayrıştırması
+  bilinçli olarak site-özel class/id adlarına değil genel
+  `<a href="*.htm">` desenine dayanır; belge bağlantıları yalnızca aynı
+  host'taysa takip edilir (SSRF sertleştirmesi — günlük sayfa içinde
+  beklenmeyen bir dış bağlantı olması ihtimaline karşı). 9 yeni birim
+  testi (mock `fetch` enjeksiyonu ile, gerçek ağ isteği atmadan).
+  **Kapsam notu — kritik:** bu sağlayıcı **bu sandbox ortamında canlı
+  `resmigazete.gov.tr`'ye karşı hiç test edilemedi** (ağ politikası bu
+  host'a çıkışı engelliyor, bkz. "Bilinen ortam kısıtı"). HTML
+  ayrıştırması gerçek sitenin güncel markup'ına karşı doğrulanmadı;
+  `documentType`/`gazetteNumber` çıkarımı sezgiseldir. **Üretime
+  alınmadan önce gerçek siteye karşı mutlaka doğrulanmalı** — varsayılan
+  hâlâ `mock`, bu sağlayıcı yalnızca env değişkeni ile bilinçli olarak
+  etkinleştirilir. GİB/SGK/Adalet Bakanlığı/AYM için gerçek sağlayıcılar
+  hâlâ yok (her biri siteye özel bir parser gerektirir).
 
 ## CI
 
@@ -572,6 +591,21 @@ Prisma query engine binary'si bazı sandbox ağlarında (`binaries.prisma.sh`)
 indirilemeyebilir. Gerçek geliştirme makinenizde bu sorun olmamalı; sorun
 yaşarsanız `PRISMA_ENGINES_CHECKSUM_IGNORE_MISSING=1` ortam değişkeniyle
 deneyin.
+
+Bu geliştirme oturumunun çalıştığı sandbox'ın ağ politikası (izin
+listesi tabanlı) yalnızca paket kayıt defterleri gibi bilinen geliştirme
+araçlarına çıkışa izin verir; `resmigazete.gov.tr` gibi genel internet
+hostlarına giden istekler `403`/bağlantı reddi ile engellenir (doğrudan
+`curl` ile doğrulandı). Bu yüzden `ResmiGazeteSourceWatcherProvider` gibi
+gerçek HTTP tabanlı sağlayıcılar bu ortamda **yalnızca birim testleriyle**
+(mock `fetch` enjeksiyonu) doğrulanabildi, canlı siteye karşı hiç
+çalıştırılamadı — gerçek bir sunucuda (açık egress ile) devreye
+alınmadan önce ilk çalıştırma dikkatle izlenmelidir. Aynı kısıt Docker
+daemon için de geçerli — bu sandbox'ta `docker` CLI var ama daemon
+çalışmıyor, yani `docker compose` ile yerel Postgres/Redis/API'yi ayağa
+kaldırıp uçtan uca test etmek bu ortamda mümkün değil; doğrulama yalnızca
+`pnpm typecheck && pnpm lint && pnpm test` ve CI'deki gerçek Postgres
+servis konteynerine dayanıyor.
 
 ## Nasıl devam edilir
 

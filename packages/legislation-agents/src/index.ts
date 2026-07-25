@@ -11,3 +11,4 @@ export * from "./decide-release-risk";
 export * from "./factory";
 export * from "./providers/mock-source-watcher-provider";
 export * from "./providers/mock-multi-model-consensus-provider";
+export * from "./providers/resmi-gazete-source-watcher-provider";

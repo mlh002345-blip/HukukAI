@@ -2,6 +2,19 @@
 
 Bu proje [Keep a Changelog](https://keepachangelog.com/) formatını takip eder.
 
+## [Gerçek kaynak sağlayıcı — ResmiGazeteSourceWatcherProvider]
+
+### Eklendi
+
+- `packages/legislation-agents/src/providers/resmi-gazete-source-watcher-provider.ts`
+  — Resmî Gazete günlük listeleme sayfasını gerçekten HTTP ile çeken
+  `SourceWatcherProvider` implementasyonu (`LEGISLATION_SOURCE_WATCHER=resmi_gazete`)
+- Belge bağlantıları yalnızca aynı host'taysa takip edilir (SSRF sertleştirmesi)
+- 9 yeni birim testi (mock `fetch` enjeksiyonu)
+- **Kritik kapsam notu:** bu ortamda canlı siteye karşı test edilemedi
+  (ağ politikası engelliyor) — üretime alınmadan önce doğrulanmalı;
+  varsayılan sağlayıcı hâlâ `mock`
+
 ## [Otonom Mevzuat Sistemi — 6. Parça: mobil "doğrulanıyor" bannerı + "mevzuat güncel" göstergesi (tamamlandı)]
 
 ### Eklendi
