@@ -648,6 +648,37 @@ uca çalışır şekilde kurulacak.
   ayrımı belge modelinde yok, otomatik öneri ceza davasında yanlış süre
   gösterme riski taşırdı; her iki aracın açıklamasında bu sınırlama
   açıkça yazıyor. 3 yeni birim testi.
+- **Ceza yargılamasında istinaf/temyiz — WebSearch ile doğrulanmış
+  mevzuat değişikliği**: "HMK ile CMK'nın istinaf/temyiz süresi yapısal
+  olarak farklı" iddiası bu oturumda `WebSearch` ile araştırıldı (bu
+  ortamda `WebFetch` çoğu `.av.tr` sitesine 403 döndürdü, yalnızca
+  arama API'si erişilebildi; doğrudan `resmigazete.gov.tr`/
+  `mevzuat.gov.tr` yine erişilemedi — bkz. "Bilinen ortam kısıtı").
+  Birden fazla kaynaktan (barandogan.av.tr, nazaligundem.com, ilme.av.tr)
+  çapraz doğrulanan bulgu: **7499 sayılı Kanun** (RG 12.03.2024, sayı
+  32487), CMK m.273 (istinaf) ve m.291 (temyiz)'i değiştirdi — bu
+  değişiklikler **1 Haziran 2024**'ten itibaren verilen kararlara
+  uygulanıyor. Bu tarihten SONRA verilen ceza kararlarında süre artık
+  HMK ile birebir aynı: gerekçeli kararın **tebliğinden** itibaren
+  **2 hafta** (eskiden m.273 için hükmün açıklanmasından 7 gün, m.291
+  için 15 gün idi). Bu, `TR_COURT_APPEAL`/`TR_COURT_CASSATION`'ın
+  (yalnızca HUKUK için) "ceza yargılamasında süre her zaman farklıdır"
+  uyarısını **kısmen yanlışlıyor** — artık yalnızca 1 Haziran 2024'ten
+  ÖNCEki ceza kararları için doğru. **Eklenenler**: iki yeni ruleKey,
+  her biri 2 sürümle (eski/yeni rejim, `validTo`/`validFrom` ile
+  otomatik seçilir — bu, `RuleSeed`/seed.ts'te `validTo` alanının hiç
+  kullanılmadığı bir başka önceden var olan boşluğu da ortaya çıkardı,
+  düzeltildi): `TR_CRIMINAL_COURT_APPEAL` (v1.0.0: 7 gün/açıklamadan,
+  `validTo: 2024-05-31`; v2.0.0: 2 hafta/tebliğden, `validFrom:
+  2024-06-01`) ve `TR_CRIMINAL_COURT_CASSATION` (v1.0.0: 15 gün/
+  açıklamadan; v2.0.0: 2 hafta/tebliğden) — iki yeni araç kartı
+  (`ceza-istinaf-suresi`, `ceza-temyiz-suresi`) ile erişilebilir,
+  `RULE_IMPACT_MAP`e de eklendi. **Kapsam notu — kritik:** bu bilgi
+  ikincil kaynaklardan (avukat blogları) derlendi, resmî metin
+  (Resmî Gazete/mevzuat.gov.tr) üzerinden ayrıca doğrulanmadı; hâlâ
+  `COURT_REASONED_DECISION`'ın otomatik önerisine eklenmedi (hukuk/ceza
+  ayrımı belge modelinde hâlâ yok — kullanıcı doğru aracı (hukuk/ceza)
+  kendi bilerek seçmeli). 1 yeni birim testi.
 
 ## CI
 

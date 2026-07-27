@@ -41,6 +41,14 @@ export const RULE_IMPACT_MAP: RuleImpactMapEntry[] = [
     ruleIds: ["TR_SGK_OBJECTION"],
   },
   {
+    // Ceza Muhakemesi Kanunu'na özgü bir değişiklik hem istinaf hem temyiz
+    // kurallarını etkileyebileceğinden ikisi birden kısıtlanır — bu, genel
+    // "istinaf"/"temyiz" (HUKUK) girdilerinden ÖNCE kontrol edilir.
+    keywords: ["ceza muhakemesi kanunu", "5271 sayılı", "7499 sayılı"],
+    module: "DEADLINE",
+    ruleIds: ["TR_CRIMINAL_COURT_APPEAL", "TR_CRIMINAL_COURT_CASSATION"],
+  },
+  {
     keywords: ["istinaf"],
     module: "DEADLINE",
     ruleIds: ["TR_COURT_APPEAL"],

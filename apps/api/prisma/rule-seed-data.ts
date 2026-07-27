@@ -28,6 +28,7 @@ export interface RuleSeed {
   ruleKey: string;
   version: string;
   validFrom: string;
+  validTo?: string;
   conditions: Array<{ field: string; operator: string; value: unknown }>;
   calculation: {
     duration: number;
@@ -116,7 +117,16 @@ export const DEADLINE_RULE_SEED: RuleSeed[] = [
       extendIfHoliday: true,
     },
     legalBasis: [{ law: "Hukuk Muhakemeleri Kanunu", article: "345" }],
-    warnings: [UNVERIFIED_WARNING],
+    warnings: [
+      UNVERIFIED_WARNING,
+      "Bu kural yalnızca HUKUK yargılaması içindir. Ceza yargılamasında " +
+        "istinaf süresi 1 Haziran 2024'ten önce verilen kararlarda farklıydı " +
+        "(CMK m.273 eski hâli — 7 gün, hükmün açıklanmasından itibaren); " +
+        "7499 sayılı Kanun'la (RG 12.03.2024/32487) 1 Haziran 2024'ten " +
+        "itibaren verilen ceza kararlarında süre bu kuralla aynı hâle geldi " +
+        "(2 hafta, tebliğden). Ceza yargılaması için TR_CRIMINAL_COURT_APPEAL " +
+        "kuralı kullanılmalıdır.",
+    ],
   },
   {
     id: "rule_court_cassation",
@@ -133,7 +143,16 @@ export const DEADLINE_RULE_SEED: RuleSeed[] = [
       extendIfHoliday: true,
     },
     legalBasis: [{ law: "Hukuk Muhakemeleri Kanunu", article: "361" }],
-    warnings: [UNVERIFIED_WARNING],
+    warnings: [
+      UNVERIFIED_WARNING,
+      "Bu kural yalnızca HUKUK yargılaması içindir. Ceza yargılamasında " +
+        "temyiz süresi 1 Haziran 2024'ten önce verilen kararlarda farklıydı " +
+        "(CMK m.291 eski hâli — 15 gün, hükmün açıklanmasından itibaren); " +
+        "7499 sayılı Kanun'la (RG 12.03.2024/32487) 1 Haziran 2024'ten " +
+        "itibaren verilen ceza kararlarında süre bu kuralla aynı hâle geldi " +
+        "(2 hafta, tebliğden). Ceza yargılaması için TR_CRIMINAL_COURT_CASSATION " +
+        "kuralı kullanılmalıdır.",
+    ],
   },
   {
     id: "rule_tax_court_action",
@@ -224,6 +243,118 @@ export const DEADLINE_RULE_SEED: RuleSeed[] = [
         "uzlaşma başvurusu süresidir; ikisi birbirinin alternatifi/ardışığıdır, aynı anda " +
         "her ikisi de 'geçerli' gösterilmemelidir — kullanıcıya hangi yolun seçildiği " +
         "ayrıca sorulmalıdır.",
+    ],
+  },
+  // Ceza yargılamasında istinaf/temyiz — 7499 sayılı Kanun'la (RG 12.03.2024/32487,
+  // 1 Haziran 2024'ten itibaren verilen kararlara uygulanır) CMK m.273/291
+  // "hükmün açıklanmasından itibaren X gün" yerine "gerekçeli kararın tebliğinden
+  // itibaren iki hafta" hâline getirildi — artık HMK m.345/361 ile aynı mekanizma
+  // ve süre. Bu, WebSearch ile (barandogan.av.tr, ferhatkule.av.tr, nazaligundem.com
+  // gibi kaynaklardan çapraz doğrulanarak) bu oturumda araştırılıp teyit edildi —
+  // yine de RESMÎ metin (Resmî Gazete/mevzuat.gov.tr) üzerinden ayrıca doğrulanmalı,
+  // bu kaynaklar ikincil (avukat blogu) niteliğindedir.
+  {
+    id: "rule_criminal_court_appeal_pre_2024",
+    module: "DEADLINE",
+    ruleKey: "TR_CRIMINAL_COURT_APPEAL",
+    version: "1.0.0",
+    validFrom: "2020-01-01",
+    validTo: "2024-05-31",
+    conditions: [],
+    calculation: {
+      duration: 7,
+      durationUnit: "DAY",
+      dayType: "CALENDAR_DAY",
+      includeStartDate: false,
+      extendIfHoliday: true,
+    },
+    legalBasis: [
+      { law: "5271 sayılı Ceza Muhakemesi Kanunu (7499 s.K. öncesi hâli)", article: "273" },
+    ],
+    warnings: [
+      UNVERIFIED_WARNING,
+      "Yalnızca 1 Haziran 2024'ten ÖNCE verilen ceza kararları için geçerlidir; " +
+        "süre hükmün AÇIKLANMASINDAN itibaren işler (tebliğden değil). " +
+        "1 Haziran 2024'ten sonraki kararlar için TR_CRIMINAL_COURT_APPEAL'ın " +
+        "yeni sürümü (2 hafta, tebliğden) geçerlidir.",
+    ],
+  },
+  {
+    id: "rule_criminal_court_appeal_post_2024",
+    module: "DEADLINE",
+    ruleKey: "TR_CRIMINAL_COURT_APPEAL",
+    version: "2.0.0",
+    validFrom: "2024-06-01",
+    conditions: [],
+    calculation: {
+      duration: 2,
+      durationUnit: "WEEK",
+      dayType: "CALENDAR_DAY",
+      includeStartDate: false,
+      extendIfHoliday: true,
+    },
+    legalBasis: [
+      { law: "5271 sayılı Ceza Muhakemesi Kanunu (7499 sayılı Kanun'la değişik)", article: "273" },
+    ],
+    warnings: [
+      UNVERIFIED_WARNING,
+      "7499 sayılı Kanun'la (RG 12.03.2024/32487) değişen, 1 Haziran 2024'ten " +
+        "itibaren verilen ceza kararlarına uygulanan süre: gerekçeli kararın " +
+        "tebliğinden itibaren iki hafta. Bu tarihten önceki kararlarda " +
+        "TR_CRIMINAL_COURT_APPEAL'ın eski sürümü (7 gün, hükmün açıklanmasından) " +
+        "geçerlidir.",
+    ],
+  },
+  {
+    id: "rule_criminal_court_cassation_pre_2024",
+    module: "DEADLINE",
+    ruleKey: "TR_CRIMINAL_COURT_CASSATION",
+    version: "1.0.0",
+    validFrom: "2020-01-01",
+    validTo: "2024-05-31",
+    conditions: [],
+    calculation: {
+      duration: 15,
+      durationUnit: "DAY",
+      dayType: "CALENDAR_DAY",
+      includeStartDate: false,
+      extendIfHoliday: true,
+    },
+    legalBasis: [
+      { law: "5271 sayılı Ceza Muhakemesi Kanunu (7499 s.K. öncesi hâli)", article: "291" },
+    ],
+    warnings: [
+      UNVERIFIED_WARNING,
+      "Yalnızca 1 Haziran 2024'ten ÖNCE verilen ceza kararları için geçerlidir; " +
+        "süre hükmün AÇIKLANMASINDAN itibaren işler (tebliğden değil). " +
+        "1 Haziran 2024'ten sonraki kararlar için TR_CRIMINAL_COURT_CASSATION'ın " +
+        "yeni sürümü (2 hafta, tebliğden) geçerlidir.",
+    ],
+  },
+  {
+    id: "rule_criminal_court_cassation_post_2024",
+    module: "DEADLINE",
+    ruleKey: "TR_CRIMINAL_COURT_CASSATION",
+    version: "2.0.0",
+    validFrom: "2024-06-01",
+    conditions: [],
+    calculation: {
+      duration: 2,
+      durationUnit: "WEEK",
+      dayType: "CALENDAR_DAY",
+      includeStartDate: false,
+      extendIfHoliday: true,
+    },
+    legalBasis: [
+      { law: "5271 sayılı Ceza Muhakemesi Kanunu (7499 sayılı Kanun'la değişik)", article: "291" },
+    ],
+    warnings: [
+      UNVERIFIED_WARNING,
+      "7499 sayılı Kanun'la (RG 12.03.2024/32487) değişen, 1 Haziran 2024'ten " +
+        "itibaren verilen ceza kararlarına uygulanan süre: gerekçeli kararın " +
+        "tebliğinden itibaren iki hafta. Bu tarihten önceki kararlarda " +
+        "TR_CRIMINAL_COURT_CASSATION'ın eski sürümü (15 gün, hükmün " +
+        "açıklanmasından) geçerlidir.",
     ],
   },
 ];

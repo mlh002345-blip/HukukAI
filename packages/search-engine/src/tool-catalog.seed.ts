@@ -377,7 +377,8 @@ export const TOOL_CATALOG_SEED: ToolDefinition[] = [
     name: "İstinaf Süresi",
     shortDescription:
       "Hukuk yargılamasında gerekçeli karara karşı istinaf başvuru süresini hesaplar " +
-      "(yalnızca hukuk davaları — ceza yargılamasında süre farklıdır).",
+      "(yalnızca hukuk davaları — ceza yargılaması için 'Ceza Yargılamasında " +
+      "İstinaf Süresi' aracını kullanın).",
     categories: ["Mahkeme Süreleri"],
     audiences: ["Avukat", "Vatandaş"],
     keywords: ["istinaf", "istinaf suresi", "gerekceli karar", "bam"],
@@ -395,7 +396,8 @@ export const TOOL_CATALOG_SEED: ToolDefinition[] = [
     name: "Temyiz Süresi",
     shortDescription:
       "Hukuk yargılamasında bölge adliye mahkemesi kararına karşı temyiz süresini " +
-      "hesaplar (yalnızca hukuk davaları — ceza yargılamasında süre farklıdır).",
+      "hesaplar (yalnızca hukuk davaları — ceza yargılaması için 'Ceza " +
+      "Yargılamasında Temyiz Süresi' aracını kullanın).",
     categories: ["Mahkeme Süreleri"],
     audiences: ["Avukat", "Vatandaş"],
     keywords: ["temyiz", "yargitay", "temyiz suresi"],
@@ -406,5 +408,48 @@ export const TOOL_CATALOG_SEED: ToolDefinition[] = [
     isBeta: false,
     requiresSubscription: false,
     sortPriorityByRole: { citizen: 16, lawyer: 8, accountant: 46 },
+  },
+  {
+    id: "tool_criminal_court_appeal_deadline",
+    slug: "ceza-istinaf-suresi",
+    name: "Ceza Yargılamasında İstinaf Süresi",
+    shortDescription:
+      "Ceza yargılamasında gerekçeli hükme karşı istinaf başvuru süresini hesaplar. " +
+      "1 Haziran 2024'ten önce/sonra verilen kararlar için farklı kurallar otomatik " +
+      "uygulanır (7499 sayılı Kanun).",
+    categories: ["Mahkeme Süreleri"],
+    audiences: ["Avukat", "Vatandaş"],
+    keywords: [
+      "ceza istinaf",
+      "istinaf suresi ceza",
+      "hukmun aciklanmasi",
+      "bam ceza dairesi",
+    ],
+    synonyms: ["ceza dairesi istinaf süresi"],
+    icon: "gavel",
+    route: "/tools/ceza-istinaf-suresi",
+    isActive: true,
+    isBeta: false,
+    requiresSubscription: false,
+    sortPriorityByRole: { citizen: 17, lawyer: 6, accountant: 47 },
+  },
+  {
+    id: "tool_criminal_court_cassation_deadline",
+    slug: "ceza-temyiz-suresi",
+    name: "Ceza Yargılamasında Temyiz Süresi",
+    shortDescription:
+      "Ceza yargılamasında bölge adliye mahkemesi kararına karşı temyiz süresini " +
+      "hesaplar. 1 Haziran 2024'ten önce/sonra verilen kararlar için farklı " +
+      "kurallar otomatik uygulanır (7499 sayılı Kanun).",
+    categories: ["Mahkeme Süreleri"],
+    audiences: ["Avukat", "Vatandaş"],
+    keywords: ["ceza temyiz", "yargitay ceza dairesi", "temyiz suresi ceza"],
+    synonyms: ["ceza dairesi temyiz süresi"],
+    icon: "gavel",
+    route: "/tools/ceza-temyiz-suresi",
+    isActive: true,
+    isBeta: false,
+    requiresSubscription: false,
+    sortPriorityByRole: { citizen: 18, lawyer: 7, accountant: 48 },
   },
 ];
