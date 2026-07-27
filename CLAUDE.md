@@ -584,6 +584,46 @@ uca çalışır şekilde kurulacak.
   hâlâ `mock`, bu sağlayıcı yalnızca env değişkeni ile bilinçli olarak
   etkinleştirilir. GİB/SGK/Adalet Bakanlığı/AYM için gerçek sağlayıcılar
   hâlâ yok (her biri siteye özel bir parser gerektirir).
+- **Mevzuat kapsama araştırması ve iki yeni süre kuralı**: uygulamanın
+  9 `DocumentType`'ı, 14 araç kartı ve mevcut `RuleSet`/
+  `RULE_IMPACT_MAP` tek tek taranarak bir kapsama analizi yapıldı.
+  Bulgular: (1) `ENFORCEMENT_NOTICE` belge türü için hiçbir `RuleSet`
+  kuralı yoktu — `TR_ENFORCEMENT_THIRD_PARTY_NOTICE_OBJECTION` (İİK
+  m.89, 7 gün) eklendi; (2) `TAX_NOTICE` için yalnızca nihai dava açma
+  süresi (İYUK m.7) modellenmişti, ondan önceki isteğe bağlı uzlaşma
+  başvurusu adımı hiç yoktu — `TR_TAX_SETTLEMENT_APPLICATION` (VUK Ek
+  m.3, 30 gün) eklendi. Her iki yeni kural da mevcut `UNVERIFIED_WARNING`
+  desenini taşır ve `RULE_IMPACT_MAP`e eklendi (mevzuat taraması
+  etkinleştirildiğinde bu kurallar da fail-closed zincirine dahil olur).
+  `COURT_REASONED_DECISION` için bilinçli olarak **hiçbir** düzeltme
+  yapılmadı: `TR_COURT_APPEAL`/`TR_COURT_CASSATION` (HMK m.345/361)
+  koşulsuzdur (`conditions: []`) ve bu belge türüne bağlanmamıştır, ama
+  bunu doğrudan bağlamak YANLIŞ olurdu — ceza yargılamasında istinaf/
+  temyiz süresi HMK'dan farklıdır (CMK m.273/291 → 7 gün) ve belge
+  modelinde hukuk/ceza ayrımını taşıyan bir alan (ör. `proceedingType`)
+  hiç yok; bu, ayrı bir veri modeli kararı gerektiren açık bir boşluk
+  olarak bırakıldı. **Kritik altyapı bulgusu**: `RulesService.
+  findApplicableRule` (belge türü/olgulara göre otomatik kural bulma)
+  kod tabanında **hiçbir yerden çağrılmıyor** — bir kural yalnızca
+  mobildeki `tools.tsx`'teki sabit `DEADLINE_TOOL_RULE_KEYS` haritası
+  (3 giriş) üzerinden tetiklenebiliyor; 7 seed kuralından yalnızca 3'ü
+  (İİK m.62, Kabahatler m.27, KTK m.115) gerçekten bir kullanıcı
+  eylemiyle ulaşılabilir — HMK m.345/361, İYUK m.7, 5510 m.102 ve
+  bu turda eklenen 2 yeni kural veritabanında duruyor ama hiçbir
+  ekrandan tetiklenemiyor (Belge Detayı'ndaki "Önerilen Araçlar"
+  kartları da yalnızca bir `Alert` gösteriyor, gerçek yönlendirme
+  yapmıyor). **Bu, ayrı bir sonraki iş kalemi** — bu turun kapsamı
+  yalnızca mevzuat tespiti ve `RuleSet` içeriğiydi, UI/routing
+  bağlama işi değildi. **Sürekli tarama durumu**: `LegislationSourceWatcherService.
+  pollAllSources()` zaten kayıtlı **her** `LegislationSource` satırını
+  (6'sı da) 15 dakikada bir tarıyor — bu yeni bir kod değişikliği
+  gerektirmiyor. Ama yalnızca `resmi_gazete` için gerçek bir sağlayıcı
+  var; GİB/SGK/Adalet Bakanlığı/CTE/AYM kayıtları veritabanında duruyor
+  ama sağlayıcısı olmadığından her taramada sessizce boş sonuç döner.
+  Gerçek "sürekli tarama" için gereken: (a) gerçek egress'i olan bir
+  ortama devreye alma, (b) `LEGISLATION_SOURCE_WATCHER=resmi_gazete`
+  ortam değişkeni, (c) çalışan Redis/BullMQ — bunların hiçbiri bu
+  sandbox'ta yapılamaz (bkz. "Bilinen ortam kısıtı").
 
 ## CI
 

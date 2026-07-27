@@ -2,6 +2,25 @@
 
 Bu proje [Keep a Changelog](https://keepachangelog.com/) formatını takip eder.
 
+## [Mevzuat kapsama araştırması + iki yeni süre kuralı]
+
+### Eklendi
+
+- 9 `DocumentType` × mevcut `RuleSet`/`RULE_IMPACT_MAP` tam kapsama
+  analizi (bkz. CLAUDE.md "Otonom Mevzuat Sistemi")
+- `TR_ENFORCEMENT_THIRD_PARTY_NOTICE_OBJECTION` (İİK m.89, 7 gün) —
+  `ENFORCEMENT_NOTICE` belge türü için önceden hiç kural yoktu
+- `TR_TAX_SETTLEMENT_APPLICATION` (VUK Ek m.3, 30 gün) — `TAX_NOTICE`
+  için dava açma süresinden önceki uzlaşma başvurusu adımı eksikti
+- İki yeni kural `RULE_IMPACT_MAP`e eklendi, 1 yeni birim testi
+
+### Bulundu (kod değişikliği yapılmadı, CLAUDE.md'de belgelendi)
+
+- `RulesService.findApplicableRule` hiçbir yerden çağrılmıyor — 7 seed
+  kuralından yalnızca 3'ü UI'dan gerçekten tetiklenebiliyor
+- `COURT_REASONED_DECISION` için hukuk/ceza istinaf-temyiz süre farkı
+  (HMK vs CMK) modellenmediğinden bilinçli olarak düzeltilmedi
+
 ## [Gerçek kaynak sağlayıcı — ResmiGazeteSourceWatcherProvider]
 
 ### Eklendi
