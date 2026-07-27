@@ -2,6 +2,32 @@
 
 Bu proje [Keep a Changelog](https://keepachangelog.com/) formatını takip eder.
 
+## [Kural setinin tamamının güncellik denetimi]
+
+### Düzeltildi
+
+- **Gerçek bug**: `TR_TRAFFIC_FINE_DISCOUNTED_PAYMENT` 15 gün olarak
+  seed edilmişti; 31 Ocak 2024 tarihli (RG 32446) yönetmelik değişikliği
+  trafik cezalarının indirimli ödeme süresini 1 aya çıkardı ama kural
+  hiç güncellenmemişti. Versiyonlandı (v1.0.0: 15 gün/`validTo:
+  2024-01-30`, v2.0.0: 1 ay/`validFrom: 2024-01-31`)
+- **Gerçek bug**: `TR_TAX_SETTLEMENT_APPLICATION`in `legalBasis`i
+  yanlış madde numarasına ("VUK Ek 3" — uzlaşma komisyonları) atıf
+  yapıyordu; doğrusu Ek Madde 1 + Uzlaşma Yönetmeliği m.9 (süre zaten
+  doğruydu — 30 gün)
+
+### Denetlendi
+
+- Seed'deki 11 kuralın tamamı tek tek WebSearch ile tarandı; kalan 9'u
+  güncel bulunan kaynaklarla tutarlı çıktı, değişiklik gerekmedi
+
+### Kapsam notu
+
+- Bu, ikincil kaynaklardan (avukat blogları, resmî kurum siteleri)
+  yapılan tek seferlik bir denetimdi — düzenli/otomatik bir süreç değil.
+  Gerçek sürekli güncellik kontrolü ancak Otonom Mevzuat Sistemi'nin
+  gerçek kaynak sağlayıcıları üretimde çalıştırıldığında sağlanabilir
+
 ## [Ceza yargılamasında istinaf/temyiz — WebSearch ile doğrulanmış mevzuat değişikliği]
 
 ### Eklendi

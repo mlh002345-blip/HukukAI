@@ -89,6 +89,7 @@ export const DEADLINE_RULE_SEED: RuleSeed[] = [
     ruleKey: "TR_TRAFFIC_FINE_DISCOUNTED_PAYMENT",
     version: "1.0.0",
     validFrom: "2020-01-01",
+    validTo: "2024-01-30",
     conditions: [
       { field: "documentType", operator: "EQUALS", value: "TRAFFIC_ADMINISTRATIVE_FINE" },
     ],
@@ -100,7 +101,45 @@ export const DEADLINE_RULE_SEED: RuleSeed[] = [
       extendIfHoliday: true,
     },
     legalBasis: [{ law: "Karayolları Trafik Kanunu", article: "115" }],
-    warnings: [UNVERIFIED_WARNING],
+    warnings: [
+      UNVERIFIED_WARNING,
+      "Yalnızca 31 Ocak 2024'ten ÖNCE tebliğ edilen cezalar için geçerlidir. " +
+        "31.01.2024 tarihli (RG 32446) yönetmelik değişikliğiyle indirimli ödeme " +
+        "süresi 1 aya çıkarıldı — bkz. bu ruleKey'in 2.0.0 sürümü.",
+    ],
+  },
+  // WebSearch ile doğrulandı (icisleri.gov.tr, aa.com.tr, çok sayıda mali
+  // müşavirlik sirküleri): 31 Ocak 2024 tarihli 32446 sayılı Resmî Gazete'de
+  // yayımlanan yönetmelik değişikliğiyle, trafik idari para cezalarının %25
+  // indirimli ödenebildiği süre 15 günden 1 aya çıkarıldı. Önceki sürümde
+  // (v1.0.0) bu değişiklik hiç yansıtılmamıştı — kural GÜNCEL DEĞİLDİ.
+  {
+    id: "rule_traffic_fine_discount_2024",
+    module: "DEADLINE",
+    ruleKey: "TR_TRAFFIC_FINE_DISCOUNTED_PAYMENT",
+    version: "2.0.0",
+    validFrom: "2024-01-31",
+    conditions: [
+      { field: "documentType", operator: "EQUALS", value: "TRAFFIC_ADMINISTRATIVE_FINE" },
+    ],
+    calculation: {
+      duration: 1,
+      durationUnit: "MONTH",
+      dayType: "CALENDAR_DAY",
+      includeStartDate: false,
+      extendIfHoliday: true,
+    },
+    legalBasis: [
+      { law: "Karayolları Trafik Kanunu (31.01.2024 tarihli RG 32446 sayılı yönetmelik değişikliğiyle)", article: "115" },
+    ],
+    warnings: [
+      UNVERIFIED_WARNING,
+      "31 Ocak 2024'ten (RG 32446) itibaren tebliğ edilen cezalar için geçerlidir: " +
+        "indirimli ödeme süresi 15 günden 1 aya çıkarıldı. Bu bilgi ikincil " +
+        "kaynaklardan (İçişleri Bakanlığı web sitesi, AA, mali müşavirlik " +
+        "sirkülerleri) WebSearch ile derlendi, resmî yönetmelik metni üzerinden " +
+        "ayrıca doğrulanmadı.",
+    ],
   },
   {
     id: "rule_court_appeal",
@@ -236,7 +275,15 @@ export const DEADLINE_RULE_SEED: RuleSeed[] = [
       includeStartDate: false,
       extendIfHoliday: true,
     },
-    legalBasis: [{ law: "213 sayılı Vergi Usul Kanunu", article: "Ek 3" }],
+    // DÜZELTME (WebSearch ile doğrulandı): önceki sürüm yanlışlıkla "Ek 3"
+    // atıfı yapıyordu — VUK Ek Madde 3 uzlaşma KOMİSYONLARININ kuruluşunu
+    // düzenler, süreyi değil. Süreyi düzenleyen madde Ek Madde 1 (uzlaşmanın
+    // şümulü/kapsamı) + Uzlaşma Yönetmeliği m.9'dur. Süre (30 gün) doğruydu,
+    // yalnızca madde numarası hatalıydı.
+    legalBasis: [
+      { law: "213 sayılı Vergi Usul Kanunu", article: "Ek 1" },
+      { law: "Uzlaşma Yönetmeliği", article: "9" },
+    ],
     warnings: [
       UNVERIFIED_WARNING,
       "Bu, dava açma süresinden (TR_TAX_COURT_ACTION — İYUK m.7) önceki isteğe bağlı " +
