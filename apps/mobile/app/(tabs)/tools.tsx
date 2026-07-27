@@ -13,17 +13,7 @@ import type { ToolDefinition } from "@hukukai/types";
 import { useActiveRole } from "../../src/stores/auth-store";
 import { useToolCategories, useToolSearch, useTools } from "../../src/hooks/useTools";
 import { CALCULATOR_CONFIGS } from "../../src/lib/calculator-config";
-
-/**
- * Süre motoru (Faz 5) tarafından desteklenen araçlar; bunlar için
- * "Süreyi Hesapla" ekranına doğrudan yönlendirilir. Diğer araçlar
- * (hesaplama motorları) Faz 6'da bağlanacaktır.
- */
-const DEADLINE_TOOL_RULE_KEYS: Record<string, string> = {
-  "icra-itiraz-suresi": "TR_ENFORCEMENT_PAYMENT_ORDER_OBJECTION",
-  "trafik-cezasi-itiraz-suresi": "TR_TRAFFIC_FINE_OBJECTION",
-  "trafik-cezasi-indirimli-odeme-suresi": "TR_TRAFFIC_FINE_DISCOUNTED_PAYMENT",
-};
+import { DEADLINE_TOOL_RULE_KEYS } from "../../src/lib/deadline-tool-rule-keys";
 
 export default function ToolsScreen() {
   const [query, setQuery] = useState("");

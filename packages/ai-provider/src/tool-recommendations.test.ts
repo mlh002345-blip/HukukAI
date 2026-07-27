@@ -22,6 +22,24 @@ describe("recommendToolSlugsForDocumentType", () => {
     );
   });
 
+  it("haciz ihbarnamesi için doğru itiraz aracını önerir (ödeme emri aracını DEĞİL)", () => {
+    const slugs = recommendToolSlugsForDocumentType("ENFORCEMENT_NOTICE");
+    expect(slugs).toContain("haciz-ihbarnamesi-itiraz-suresi");
+    expect(slugs).not.toContain("icra-itiraz-suresi");
+  });
+
+  it("vergi ihbarnamesi için hem dava hem uzlaşma süresini önerir", () => {
+    const slugs = recommendToolSlugsForDocumentType("TAX_NOTICE");
+    expect(slugs).toContain("vergi-mahkemesi-dava-suresi");
+    expect(slugs).toContain("vergi-uzlasma-basvuru-suresi");
+  });
+
+  it("SGK bildirimi için itiraz süresi aracını önerir", () => {
+    expect(recommendToolSlugsForDocumentType("SGK_NOTICE")).toContain(
+      "sgk-itiraz-suresi",
+    );
+  });
+
   it("bilinmeyen belge türü için öneri yapmaz", () => {
     expect(
       recommendToolSlugsForDocumentType("UNKNOWN_OFFICIAL_DOCUMENT"),

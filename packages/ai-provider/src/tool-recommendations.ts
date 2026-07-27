@@ -14,10 +14,24 @@ export const DOCUMENT_TYPE_TOOL_SLUGS: Record<DocumentType, string[]> = {
     "harc-on-hesabi",
     "vekalet-ucreti",
   ],
-  ENFORCEMENT_NOTICE: ["icra-itiraz-suresi", "icra-borcu"],
+  // DÜZELTME: önceden yanlışlıkla "icra-itiraz-suresi" öneriliyordu — o
+  // araç ENFORCEMENT_PAYMENT_ORDER (İİK m.62 ödeme emri) kuralına bağlı,
+  // bu belge türü (üçüncü şahıs haciz ihbarnamesi) için YANLIŞ süreyi
+  // hesaplardı. Doğru araç "haciz-ihbarnamesi-itiraz-suresi" (İİK m.89).
+  ENFORCEMENT_NOTICE: ["haciz-ihbarnamesi-itiraz-suresi", "icra-borcu"],
   COURT_REASONED_DECISION: ["infaz-on-hesabi", "vekalet-ucreti", "harc-on-hesabi"],
-  TAX_NOTICE: ["kdv-hesapla", "gelir-vergisi", "harc-on-hesabi"],
-  SGK_NOTICE: ["sgk-isveren-maliyeti"],
+  // İstinaf/temyiz süresi (istinaf-suresi/temyiz-suresi) bilinçli olarak
+  // buraya EKLENMEDİ — hukuk/ceza yargılaması ayrımı belge modelinde yok
+  // ve ceza yargılamasında süre farklıdır (bkz. CLAUDE.md); bu iki araç
+  // yalnızca Araçlar sekmesinden manuel seçilebilir.
+  TAX_NOTICE: [
+    "vergi-mahkemesi-dava-suresi",
+    "vergi-uzlasma-basvuru-suresi",
+    "kdv-hesapla",
+    "gelir-vergisi",
+    "harc-on-hesabi",
+  ],
+  SGK_NOTICE: ["sgk-itiraz-suresi", "sgk-isveren-maliyeti"],
   RENT_AGREEMENT: ["kira-artisi"],
   EXECUTION_TIMESHEET: ["infaz-on-hesabi"],
   TRAFFIC_ADMINISTRATIVE_FINE: [
