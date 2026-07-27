@@ -120,6 +120,7 @@ async function main() {
         ruleKey: rule.ruleKey,
         version: rule.version,
         validFrom: new Date(`${rule.validFrom}T00:00:00.000Z`),
+        validTo: rule.validTo ? new Date(`${rule.validTo}T00:00:00.000Z`) : null,
         ruleData: { conditions: rule.conditions, calculation: rule.calculation, warnings: rule.warnings },
         legalBasis: rule.legalBasis,
         isPublished: true,
@@ -130,6 +131,7 @@ async function main() {
         status: "ACTIVE",
       },
       update: {
+        validTo: rule.validTo ? new Date(`${rule.validTo}T00:00:00.000Z`) : null,
         ruleData: { conditions: rule.conditions, calculation: rule.calculation, warnings: rule.warnings },
         legalBasis: rule.legalBasis,
       },

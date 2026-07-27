@@ -2,6 +2,28 @@
 
 Bu proje [Keep a Changelog](https://keepachangelog.com/) formatını takip eder.
 
+## [Ceza yargılamasında istinaf/temyiz — WebSearch ile doğrulanmış mevzuat değişikliği]
+
+### Eklendi
+
+- `TR_CRIMINAL_COURT_APPEAL` ve `TR_CRIMINAL_COURT_CASSATION` — her biri
+  2 sürümle: 1 Haziran 2024 öncesi (CMK m.273/291 eski hâli — 7/15 gün,
+  hükmün açıklanmasından) ve sonrası (7499 sayılı Kanun'la değişik —
+  2 hafta, tebliğden), `validFrom`/`validTo` ile otomatik seçilir
+- 2 yeni araç kartı: `ceza-istinaf-suresi`, `ceza-temyiz-suresi`
+- `RuleSeed`/`seed.ts`'te `validTo` alanı ilk kez wire edildi (önceden
+  hiç kullanılmıyordu — yeni bir boşluk daha kapatıldı)
+- 1 yeni birim testi
+
+### Bulundu (WebSearch ile doğrulandı, kaynaklar CLAUDE.md'de)
+
+- Önceki turdaki "HMK ile CMK'nın istinaf/temyiz süresi yapısal olarak
+  her zaman farklıdır" iddiası kısmen yanlıştı: 7499 sayılı Kanun
+  (RG 12.03.2024/32487), 1 Haziran 2024'ten itibaren verilen ceza
+  kararlarında süreyi HMK ile aynı hâle getirdi (2 hafta, tebliğden)
+- **Kapsam notu:** bu bilgi ikincil kaynaklardan (avukat blogları)
+  derlendi, resmî metin üzerinden ayrıca doğrulanmadı
+
 ## [Mevzuat UI bağlama düzeltmesi]
 
 ### Eklendi

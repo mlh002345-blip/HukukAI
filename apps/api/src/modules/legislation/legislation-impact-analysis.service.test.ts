@@ -62,6 +62,22 @@ describe("LegislationImpactAnalysisService.analyze", () => {
     ]);
   });
 
+  it("Ceza Muhakemesi Kanunu'na özgü bir değişiklik hem ceza istinaf hem ceza temyiz kurallarını kısıtlar (hukuk kurallarını DEĞİL)", async () => {
+    const prisma = createPrismaMock();
+    const service = new LegislationImpactAnalysisService(prisma as never);
+
+    const { affectedRuleIds } = await service.analyze({
+      id: "change-cmk",
+      affectedLegislation: "7499 sayılı Kanun ile Ceza Muhakemesi Kanunu'nda değişiklik",
+      changeType: "DEADLINE_EXTENSION",
+    });
+
+    expect(affectedRuleIds).toEqual([
+      "TR_CRIMINAL_COURT_APPEAL",
+      "TR_CRIMINAL_COURT_CASSATION",
+    ]);
+  });
+
   it("eşleşmeyen bir mevzuat için affectedRuleIds boş döner, requiresMigration true ve riskLevel HIGH olur", async () => {
     const prisma = createPrismaMock();
     const service = new LegislationImpactAnalysisService(prisma as never);
