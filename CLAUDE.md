@@ -624,6 +624,30 @@ uca çalışır şekilde kurulacak.
   ortama devreye alma, (b) `LEGISLATION_SOURCE_WATCHER=resmi_gazete`
   ortam değişkeni, (c) çalışan Redis/BullMQ — bunların hiçbiri bu
   sandbox'ta yapılamaz (bkz. "Bilinen ortam kısıtı").
+- **Mevzuat UI bağlama düzeltmesi**: önceki turda bulunan "7 kuraldan
+  yalnızca 3'ü UI'dan erişilebilir" sorunu çözüldü. `packages/search-engine`e
+  6 yeni araç kartı eklendi (MVP kataloğu artık 20 araç):
+  `haciz-ihbarnamesi-itiraz-suresi` (İİK m.89), `vergi-mahkemesi-dava-suresi`
+  (İYUK m.7), `vergi-uzlasma-basvuru-suresi` (VUK Ek m.3), `sgk-itiraz-suresi`
+  (5510 m.102), `istinaf-suresi` (HMK m.345), `temyiz-suresi` (HMK m.361).
+  `apps/mobile/src/lib/deadline-tool-rule-keys.ts` — `tools.tsx`'teki eski
+  yerel `DEADLINE_TOOL_RULE_KEYS` (3 girdi) buraya taşındı ve 9 girdiye
+  çıkarıldı; hem Araçlar sekmesi hem Belge Detayı bu paylaşılan haritayı
+  kullanıyor. **`document/[id].tsx`teki gerçek bug düzeltildi**: "Önerilen
+  Araçlar" kartına tıklamak önceden yalnızca bir `Alert` gösteriyordu,
+  şimdi `deadline/calculate` veya `calculation/[slug]`e gerçekten
+  yönlendiriyor. **`packages/ai-provider`'daki gerçek bug düzeltildi**:
+  `DOCUMENT_TYPE_TOOL_SLUGS.ENFORCEMENT_NOTICE` önceden yanlışlıkla
+  `icra-itiraz-suresi` (İİK m.62 — ödeme emri kuralı) öneriyordu; bu,
+  üçüncü şahıs haciz ihbarnamesi için **yanlış süreyi** hesaplardı —
+  artık doğru `haciz-ihbarnamesi-itiraz-suresi` (İİK m.89) önerilir.
+  `TAX_NOTICE`/`SGK_NOTICE` önerilerine de yeni deadline araçları eklendi.
+  **Bilinçli olarak eklenmeyen**: `istinaf-suresi`/`temyiz-suresi`,
+  `COURT_REASONED_DECISION`'ın otomatik önerilerine EKLENMEDİ (yalnızca
+  Araçlar sekmesinden manuel seçilebilir) — hukuk/ceza yargılaması
+  ayrımı belge modelinde yok, otomatik öneri ceza davasında yanlış süre
+  gösterme riski taşırdı; her iki aracın açıklamasında bu sınırlama
+  açıkça yazıyor. 3 yeni birim testi.
 
 ## CI
 

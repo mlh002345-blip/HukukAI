@@ -22,6 +22,8 @@ import {
   useUpdateExtractedData,
 } from "../../src/hooks/useDocumentAnalysis";
 import { useGenerateDocumentAnalysisReport } from "../../src/hooks/useReports";
+import { CALCULATOR_CONFIGS } from "../../src/lib/calculator-config";
+import { DEADLINE_TOOL_RULE_KEYS } from "../../src/lib/deadline-tool-rule-keys";
 
 const STATUS_LABELS: Record<DocumentStatus, string> = {
   UPLOADED: "Yüklendi",
@@ -211,6 +213,25 @@ export default function DocumentDetailScreen() {
   const recommendedActionsQuery = useRecommendedActions(id, status === "COMPLETED");
   const generateReport = useGenerateDocumentAnalysisReport();
 
+  const onRecommendedActionPress = (action: { toolSlug: string; toolName: string }) => {
+    const ruleKey = DEADLINE_TOOL_RULE_KEYS[action.toolSlug];
+    if (ruleKey) {
+      router.push({
+        pathname: "/deadline/calculate",
+        params: { ruleKey, title: action.toolName },
+      });
+      return;
+    }
+    if (CALCULATOR_CONFIGS[action.toolSlug]) {
+      router.push({
+        pathname: "/calculation/[slug]",
+        params: { slug: action.toolSlug },
+      });
+      return;
+    }
+    Alert.alert(action.toolName, "Bu araç henüz doğrudan bir ekrana bağlanmadı.");
+  };
+
   if (documentQuery.isLoading || !documentQuery.data) {
     return (
       <View style={styles.centered}>
@@ -357,7 +378,7 @@ export default function DocumentDetailScreen() {
             <Pressable
               key={action.toolSlug}
               style={styles.actionRow}
-              onPress={() => Alert.alert(action.toolName, action.route)}
+              onPress={() => onRecommendedActionPress(action)}
             >
               <Text style={styles.actionText}>{action.toolName}</Text>
               <Icon name="chevron_right" size={20} color={theme.colors.primary} />

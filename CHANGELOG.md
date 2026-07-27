@@ -2,6 +2,34 @@
 
 Bu proje [Keep a Changelog](https://keepachangelog.com/) formatını takip eder.
 
+## [Mevzuat UI bağlama düzeltmesi]
+
+### Eklendi
+
+- 6 yeni araç kartı (`packages/search-engine`): `haciz-ihbarnamesi-itiraz-suresi`,
+  `vergi-mahkemesi-dava-suresi`, `vergi-uzlasma-basvuru-suresi`,
+  `sgk-itiraz-suresi`, `istinaf-suresi`, `temyiz-suresi` — MVP kataloğu
+  artık 20 araç
+- `apps/mobile/src/lib/deadline-tool-rule-keys.ts` — paylaşılan süre
+  aracı → ruleKey haritası (3 girdiden 9 girdiye çıkarıldı)
+- 3 yeni birim testi (`@hukukai/ai-provider`)
+
+### Düzeltildi
+
+- **Gerçek bug**: `document/[id].tsx`teki "Önerilen Araçlar" kartına
+  tıklamak yalnızca bir `Alert` gösteriyordu, artık gerçekten
+  `deadline/calculate`/`calculation/[slug]`e yönlendiriyor
+- **Gerçek bug**: `ENFORCEMENT_NOTICE` belge türü yanlışlıkla
+  `icra-itiraz-suresi` (İİK m.62 — ödeme emri) öneriyordu; üçüncü şahıs
+  haciz ihbarnamesi için bu YANLIŞ süreyi hesaplardı — düzeltildi,
+  artık doğru `haciz-ihbarnamesi-itiraz-suresi` (İİK m.89) önerilir
+
+### Bilinçli olarak yapılmadı
+
+- `istinaf-suresi`/`temyiz-suresi`, `COURT_REASONED_DECISION`'ın otomatik
+  önerilerine eklenmedi (hukuk/ceza yargılaması ayrımı belge modelinde
+  yok) — yalnızca Araçlar sekmesinden manuel seçilebilir
+
 ## [Mevzuat kapsama araştırması + iki yeni süre kuralı]
 
 ### Eklendi
