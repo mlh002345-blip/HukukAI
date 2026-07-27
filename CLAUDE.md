@@ -679,6 +679,34 @@ uca çalışır şekilde kurulacak.
   `COURT_REASONED_DECISION`'ın otomatik önerisine eklenmedi (hukuk/ceza
   ayrımı belge modelinde hâlâ yok — kullanıcı doğru aracı (hukuk/ceza)
   kendi bilerek seçmeli). 1 yeni birim testi.
+- **Kural setinin tamamının güncellik denetimi (WebSearch)**: kullanıcının
+  "yalnızca yakalandığın konuyu değil, kural setindeki HER maddeyi tara"
+  talebi üzerine, seed'deki 11 kuralın **tamamı** tek tek WebSearch ile
+  tarandı (İİK m.62, Kabahatler m.27, KTK m.115, HMK m.345/361, İYUK m.7,
+  5510 m.102, İİK m.89, VUK Ek m.1/3, CMK m.273/291). **İki gerçek, güncel
+  hata bulundu ve düzeltildi:**
+  1. `TR_TRAFFIC_FINE_DISCOUNTED_PAYMENT` 15 gün olarak seed edilmişti,
+     ama **31 Ocak 2024 tarihli (RG 32446) bir yönetmelik değişikliği**
+     trafik cezalarının %25 indirimli ödeme süresini **1 aya** çıkardı —
+     kural bu değişikliği hiç yansıtmıyordu. Versiyonlandı: v1.0.0 (15
+     gün, `validTo: 2024-01-30`) ve v2.0.0 (1 ay, `validFrom: 2024-01-31`).
+  2. `TR_TAX_SETTLEMENT_APPLICATION`in `legalBasis`i yanlışlıkla "VUK
+     Ek 3" atfı yapıyordu — Ek Madde 3 uzlaşma KOMİSYONLARININ kuruluşunu
+     düzenler, süreyi değil; süreyi düzenleyen Ek Madde 1 + Uzlaşma
+     Yönetmeliği m.9'dur (süre — 30 gün — zaten doğruydu, yalnızca madde
+     numarası hatalıydı).
+  Diğer 9 kuralın tamamı (yukarıda listelenenler + önceki turda eklenen
+  CMK kuralları) WebSearch'te bulunan güncel metinlerle **tutarlı**
+  bulundu, değişiklik gerekmedi. **Kapsam notu — kritik:** bu doğrulama
+  ikincil kaynaklardan (avukat bloglari, resmî kurum web siteleri, haber
+  ajansı) yapıldı; `WebFetch` bu ortamda hemen hemen her `.av.tr`/resmî
+  siteye 403 döndürdüğünden yalnızca `WebSearch`in özet sonuçlarına
+  dayanılabildi — resmî tam metin (Resmî Gazete/mevzuat.gov.tr) üzerinden
+  satır satır doğrulama hâlâ yapılamadı ve **düzenli/otomatik bir süreç
+  değil** — bu, tek seferlik bir denetimdi. Gerçek "sürekli güncellik
+  kontrolü" ancak Otonom Mevzuat Sistemi'nin gerçek kaynak sağlayıcıları
+  (şu an yalnızca Resmî Gazete, o da bu sandbox'ta test edilemedi)
+  üretimde çalıştırıldığında sağlanabilir.
 
 ## CI
 
