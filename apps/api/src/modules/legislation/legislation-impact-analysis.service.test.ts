@@ -38,6 +38,30 @@ describe("LegislationImpactAnalysisService.analyze", () => {
     });
   });
 
+  it("haciz ihbarnamesi/uzlaşma anahtar kelimeleriyle yeni eklenen kuralları bulur", async () => {
+    const prisma = createPrismaMock();
+    const service = new LegislationImpactAnalysisService(prisma as never);
+
+    const noticeResult = await service.analyze({
+      id: "change-notice",
+      affectedLegislation: "Üçüncü şahıs haciz ihbarnamesi usulüne dair genel tebliğ",
+      changeType: "DEADLINE_EXTENSION",
+    });
+    expect(noticeResult.affectedRuleIds).toEqual([
+      "TR_ENFORCEMENT_THIRD_PARTY_NOTICE_OBJECTION",
+    ]);
+
+    const taxResult = await service.analyze({
+      id: "change-tax",
+      affectedLegislation: "Vergi uzlaşma başvurusuna ilişkin tebliğ",
+      changeType: "DEADLINE_EXTENSION",
+    });
+    expect(taxResult.affectedRuleIds).toEqual([
+      "TR_TAX_COURT_ACTION",
+      "TR_TAX_SETTLEMENT_APPLICATION",
+    ]);
+  });
+
   it("eşleşmeyen bir mevzuat için affectedRuleIds boş döner, requiresMigration true ve riskLevel HIGH olur", async () => {
     const prisma = createPrismaMock();
     const service = new LegislationImpactAnalysisService(prisma as never);

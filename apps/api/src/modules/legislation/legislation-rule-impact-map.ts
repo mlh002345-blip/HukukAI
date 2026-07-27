@@ -26,9 +26,14 @@ export const RULE_IMPACT_MAP: RuleImpactMapEntry[] = [
     ruleIds: ["TR_ENFORCEMENT_PAYMENT_ORDER_OBJECTION"],
   },
   {
-    keywords: ["vergi"],
+    keywords: ["haciz ihbarname", "üçüncü şahıs"],
     module: "DEADLINE",
-    ruleIds: ["TR_TAX_COURT_ACTION"],
+    ruleIds: ["TR_ENFORCEMENT_THIRD_PARTY_NOTICE_OBJECTION"],
+  },
+  {
+    keywords: ["vergi", "uzlaşma"],
+    module: "DEADLINE",
+    ruleIds: ["TR_TAX_COURT_ACTION", "TR_TAX_SETTLEMENT_APPLICATION"],
   },
   {
     keywords: ["sgk", "sosyal güvenlik"],

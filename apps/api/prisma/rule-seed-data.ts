@@ -176,6 +176,56 @@ export const DEADLINE_RULE_SEED: RuleSeed[] = [
     legalBasis: [{ law: "5510 sayılı Sosyal Sigortalar ve Genel Sağlık Sigortası Kanunu", article: "102" }],
     warnings: [UNVERIFIED_WARNING],
   },
+  {
+    id: "rule_enforcement_third_party_notice_objection",
+    module: "DEADLINE",
+    ruleKey: "TR_ENFORCEMENT_THIRD_PARTY_NOTICE_OBJECTION",
+    version: "1.0.0",
+    validFrom: "2020-01-01",
+    conditions: [
+      { field: "documentType", operator: "EQUALS", value: "ENFORCEMENT_NOTICE" },
+    ],
+    calculation: {
+      duration: 7,
+      durationUnit: "DAY",
+      dayType: "CALENDAR_DAY",
+      includeStartDate: false,
+      extendIfHoliday: true,
+    },
+    legalBasis: [{ law: "İcra ve İflas Kanunu", article: "89" }],
+    warnings: [
+      UNVERIFIED_WARNING,
+      "Bu kural İİK m.89 üçüncü şahıs haciz ihbarnamesine itiraz süresini varsayar; " +
+        "ENFORCEMENT_NOTICE belge türü altında farklı ihbarname alt türleri (ör. " +
+        "muhtelif icra ihbarnameleri) bulunabilir ve süre/usul bunlara göre değişebilir — " +
+        "belge türünün gerçek alt kategorisi mutlaka kontrol edilmelidir.",
+    ],
+  },
+  {
+    id: "rule_tax_settlement_application",
+    module: "DEADLINE",
+    ruleKey: "TR_TAX_SETTLEMENT_APPLICATION",
+    version: "1.0.0",
+    validFrom: "2020-01-01",
+    conditions: [
+      { field: "documentType", operator: "EQUALS", value: "TAX_NOTICE" },
+    ],
+    calculation: {
+      duration: 30,
+      durationUnit: "DAY",
+      dayType: "CALENDAR_DAY",
+      includeStartDate: false,
+      extendIfHoliday: true,
+    },
+    legalBasis: [{ law: "213 sayılı Vergi Usul Kanunu", article: "Ek 3" }],
+    warnings: [
+      UNVERIFIED_WARNING,
+      "Bu, dava açma süresinden (TR_TAX_COURT_ACTION — İYUK m.7) önceki isteğe bağlı " +
+        "uzlaşma başvurusu süresidir; ikisi birbirinin alternatifi/ardışığıdır, aynı anda " +
+        "her ikisi de 'geçerli' gösterilmemelidir — kullanıcıya hangi yolun seçildiği " +
+        "ayrıca sorulmalıdır.",
+    ],
+  },
 ];
 
 function fixedDateHolidays(year: number): Array<{ date: string; name: string }> {
